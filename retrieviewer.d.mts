@@ -48,7 +48,9 @@ export interface LifeReport {
   ball: {x: number; z: number; height: number; carried: boolean} | null;
   treat: {x: number; z: number; height: number} | null;
   /** Tug-of-war state while a tug interaction is active. */
-  tug?: {progress: number; grip: number} | null;
+  tug: {progress: number; grip: number} | null;
+  /** Silent rising sleep cue, normalized cycle progress; no audio process. */
+  snore: number | null;
 }
 export interface PetFrame {
   artProfile: 'original' | 'q5';

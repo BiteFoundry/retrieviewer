@@ -1,6 +1,6 @@
 # Retrieviewer plugin
 
-An autonomous Braille dog, embedded in **your pane**. Only ball and treat need user
+An autonomous Braille dog, embedded in **your pane**. Ball, treat and tug need user
 input. The rest is its own seeded behavior. No screen, stdin or layout takeover.
 No telemetry, keys, account signup or paid APIs in the runtime.
 
@@ -50,6 +50,7 @@ const puppy = await createPetPlugin({
 puppy.start();
 ballButton.on('click', () => puppy.interact('ball'));
 treatButton.on('click', () => puppy.interact('treat'));
+tugButton.on('click', () => puppy.interact('tug'));
 // pane unmount / host shutdown:
 puppy.dispose();
 ```
@@ -107,6 +108,6 @@ with lifecycle scripts disabled, exercises exports, default art, interactions,
 start/pause/dispose, all JS examples and JSONL. Evidence is retained in
 `dist/package-check.json`. It does not publish. Art originals/references/workers
 are excluded. Q5 art is about18.7 MB gzip; the current unpublished candidate tarball
-is about18.8 MB. Installed production files total about19.4 MB in the local consumer
+is about18.9 MB. Installed production files total about19.5 MB in the local consumer
 check, including dependencies. This is still a substantial pet, not a kilobyte icon;
 see measurements and release distinctions in [PUPPY-MEMORY.md](./PUPPY-MEMORY.md).

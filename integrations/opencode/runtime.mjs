@@ -11,7 +11,7 @@ export const HEARTBEAT_MS=5000;
 // Bounded so the host prompt stays usable: at most 64x12 cells, hidden when the
 // terminal is too small for a legible pet.
 export const LIMITS=Object.freeze({maxColumns:64,maxRows:12,minColumns:20,minRows:5,sideMargin:4,reservedRows:14});
-export const COMMANDS=Object.freeze(['enable','disable','ball','treat','status']);
+export const COMMANDS=Object.freeze(['enable','disable','ball','treat','tug','status']);
 
 const fn=(value,name)=>{if(typeof value!=='function')throw TypeError(`${name} must be a function`);};
 const defaultScheduler=()=>({now:()=>performance.now(),schedule:(callback,delayMs)=>setTimeout(callback,delayMs),cancel:handle=>clearTimeout(handle)});
@@ -133,7 +133,7 @@ export function createOpenCodePetController({hostVersion='unknown',scheduler,fps
   enabled=value;reconcile();
  }
  function interact(kind){
-  if(kind!=='ball'&&kind!=='treat')throw TypeError("kind must be 'ball' or 'treat'");
+  if(!['ball','treat','tug'].includes(kind))throw TypeError("kind must be 'ball', 'treat' or 'tug'");
   return plugin?plugin.interact(kind):false;
  }
  function status(){
@@ -168,11 +168,11 @@ export function createOpenCodePetController({hostVersion='unknown',scheduler,fps
   setEnabled,
   interact,
   status,
-  // Slash handler: '/retrieviewer <enable|disable|ball|treat|status>'.
+  // Slash handler: '/retrieviewer <enable|disable|ball|treat|tug|status>'.
   async command(argument){
    const word=String(argument??'').trim().toLowerCase()||'status';
    if(word==='enable'||word==='disable'){await setEnabled(word==='enable');return word==='enable'?'Retrieviewer enabled':'Retrieviewer disabled';}
-   if(word==='ball'||word==='treat'){
+   if(word==='ball'||word==='treat'||word==='tug'){
     if(!plugin)return enabled?'Retrieviewer is still loading':'Retrieviewer is disabled; run /retrieviewer enable';
     return interact(word)?`Retrieviewer: ${word} accepted`:`Retrieviewer is busy; ${word} not accepted`;
    }

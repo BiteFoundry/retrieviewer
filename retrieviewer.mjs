@@ -1,4 +1,4 @@
-import {createPaperActor,createPaperRenderer} from './puppy-paper.mjs';
+import {createPaperActor,createPaperRenderer,createPaperComfortTimings} from './puppy-paper.mjs';
 import {createPaperProjection,createPaperBody} from './puppy-paper-world.mjs';
 import {rgbaToBraille} from './braille.mjs';
 import {createSnappyTrickTimings} from './puppy-paper-trick-timing.mjs';
@@ -10,7 +10,7 @@ import {readPackedFrames} from './puppy-frame-store.mjs';
 // or listener side effects: the host owns the loop and calls step() then frame().
 export const STEP_SECONDS=1/60;
 export const MAX_CATCH_UP_SECONDS=.1;
-export const INTERACTIONS=Object.freeze(['ball','treat']);
+export const INTERACTIONS=Object.freeze(['ball','treat','tug']);
 // Approved 32-level art ships by default; preserved original art is optional.
 export const DEFAULT_ART_PROFILE='q5';
 export const ART_PROFILES=Object.freeze(['original','q5']);
@@ -20,9 +20,9 @@ export const PET_ASSETS=Object.freeze({
  animal:'locomotion-puppy.animal',
  stride:'puppy-stride-tweens-q5.bin.gz',strideInfo:'puppy-stride-meta.json',stableInfo:'puppy-stable-meta.json',
  rear:'puppy-paper-rear-gallop',approach:'puppy-paper-approach',seat:'puppy-paper-seat',arrivalSeat:'puppy-paper-arrival-seat',
- behaviors:'puppy-paper-behaviors',actions:'puppy-paper-actions-v9',interactions:'puppy-companion-interactions-v3',
+ behaviors:'puppy-paper-behaviors',actions:'puppy-paper-actions-v9',interactions:'puppy-companion-interactions-v3',comfort:'puppy-companion-comfort',
 });
-const BUNDLES=['rear','approach','seat','arrivalSeat','behaviors','actions','interactions'];
+const BUNDLES=['rear','approach','seat','arrivalSeat','behaviors','actions','interactions','comfort'];
 const frameFile=(base,profile)=>base+(profile==='q5'?'-q5.bin.gz':'-compact.bin.gz');
 /** Exact files a host/bundler must copy, including metadata. Never loads assets. */
 export function getPetAssetFiles(artProfile=DEFAULT_ART_PROFILE){
@@ -62,12 +62,19 @@ const sharedAssets=new Map();
 async function loadPetAssets(loadAsset,artProfile){
  const load=async name=>bytesOf(name,await loadAsset(name));
  const json=async name=>JSON.parse(new TextDecoder().decode(await load(name)));
- const frames=async name=>readPackedFrames(await gunzip(await load(name)));
+ const frames=async (name,options)=>readPackedFrames(await gunzip(await load(name)),options);
  // One family at a time: never inflate all eight legacy-sized buffers together.
  const data={assets:{}};
  data.info=await json(PET_ASSETS.strideInfo);data.meta=await json(PET_ASSETS.stableInfo);
  data.cache=await frames(frameFile('puppy-stride-tweens',artProfile));
- for(const key of BUNDLES){const base=PET_ASSETS[key];data.assets[key]={info:await json(base+'.json'),bytes:await frames(frameFile(base,artProfile))};}
+ for(const key of BUNDLES){
+  const base=PET_ASSETS[key],info=await json(base+'.json');
+  // Old interaction sheets include preparation frames no runtime clip can reach.
+  // Keep exact active samples only, leaving room for small new gestures without
+  // keeping another multi-megabyte art family resident. Original RVF1 unchanged.
+  const options=key==='interactions'&&artProfile==='q5'?{frameIndices:[...new Set(Object.values(info.clips).flatMap(list=>list.flatMap(p=>Array.from({length:info.samples},(_,s)=>p*info.samples+s))))]}:undefined;
+  data.assets[key]={info,bytes:await frames(frameFile(base,artProfile),options)};
+ }
  return data;
 }
 async function acquireAssets(loadAsset,artProfile){
@@ -94,7 +101,7 @@ export async function createPet({loadAsset=defaultLoadAsset,seed,energy,pawTrans
  try{
   if(!assets.actions.info.clips?.['lie-down']||!assets.actions.info.clips?.['lie-up'])throw Error('v9 action cache lacks lie-down/lie-up clips');
   animal=createPaperBody();
-  actor=createPaperActor(animal,info,{manualTricks:true,trickTimings:createSnappyTrickTimings(assets.actions.info),walkTransitions:true});
+  actor=createPaperActor(animal,info,{manualTricks:true,trickTimings:createSnappyTrickTimings(assets.actions.info),comfortTimings:createPaperComfortTimings(assets.actions.info),walkTransitions:true});
   life=createCompanionLife(actor,{seed,...energy===undefined?{}:{energy}});
  }catch(e){animal?.dispose?.();release();throw e;}
  let paint=null,paintKey='',time=0,acc=0,disposed=false;
@@ -126,7 +133,7 @@ export async function createPet({loadAsset=defaultLoadAsset,seed,energy,pawTrans
    const {text}=rgbaToBraille(pixels,width,height,{method:'stable',brightness:1.18,contrast:1.1});
    return {text,columns,rows,pixels,state,report,placement,projection,artProfile,mouth:paint.lastMouth,contacts:paint.report()};
   },
-  // 'ball' | 'treat'. False when busy or cooling down; unknown kinds throw.
+  // 'ball' | 'treat' | 'tug'. False when busy or cooling down; unknown kinds throw.
   interact(kind){alive();if(!INTERACTIONS.includes(kind))throw TypeError(`Unknown interaction: ${kind}`);return life.interact(kind);},
   get disposed(){return disposed;},
   dispose(){

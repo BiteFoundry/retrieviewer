@@ -47,7 +47,12 @@ change description if you modify it, in a manner reasonable to the medium.
 
 AI-generated pose sheets were extracted, aligned, interpolated, contact-corrected
 and encoded as 32-level Q5 frame stores. These are modifications, not unaltered
-photographs or motion capture. The package contains eight generated-art archives.
+photographs or motion capture. The package contains nine generated-art archives.
+The comfort extension reuses the existing roll/rest poses and adds eight
+AI-generated tug keys, registered at one scale with the existing seat as its
+animation endpoint. No additional photographic or video inputs were used for
+this extension. Its source hash and preparation are recorded in COMFORT-ART.md
+and puppy-companion-comfort.json; the same artwork license applies.
 Reference photo collections, YouTube footage, experimental Meshy models,
 noncommercial motion research/datasets, interpolation tools/model weights and
 worker logs are not distributed in this package. No exclusive copyright in

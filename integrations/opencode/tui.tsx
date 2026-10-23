@@ -43,7 +43,7 @@ export default Plugin.define({
    commands:[{
     id:'retrieviewer.pet',
     title:'Retrieviewer pet',
-    description:'enable | disable | ball | treat | status',
+    description:'enable | disable | ball | treat | tug | status',
     group:'Retrieviewer',
     palette:true,
     slash:{name:'retrieviewer',arguments:true},

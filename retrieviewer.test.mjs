@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {execFileSync} from 'node:child_process';
 import {tmpdir} from 'node:os';
-import {createPet,PET_ASSETS,STEP_SECONDS} from './retrieviewer.mjs';
+import {createPet,PET_ASSETS,STEP_SECONDS,getPetAssetFiles} from './retrieviewer.mjs';
 
 const moduleUrl=new URL('./retrieviewer.mjs',import.meta.url).href;
 const plain=(text,columns,rows)=>{
@@ -40,7 +40,7 @@ test('concurrent default pets share art, survive another disposal and release th
  b.dispose();const c=await createPet({seed:3});const reloaded=reads;c.dispose();
  console.log(JSON.stringify({loaded,reloaded,visible}));`;
  const out=JSON.parse(execFileSync(process.execPath,['--input-type=module','-e',probe],{encoding:'utf8',timeout:20000}).trim());
- assert.equal(out.loaded,17,'only one load across concurrent pets, no invisible 3D bake');assert.equal(out.reloaded,34,'last disposal releases cached assets');assert.equal(out.visible,true);
+ assert.equal(out.loaded,getPetAssetFiles().length,'only one load across concurrent pets, no invisible 3D bake');assert.equal(out.reloaded,2*getPetAssetFiles().length,'last disposal releases cached assets');assert.equal(out.visible,true);
 });
 
 test('embedded pet: loading, frames, resize, stepping, interaction, independence and disposal',async t=>{

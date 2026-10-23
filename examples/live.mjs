@@ -13,7 +13,7 @@ if(!out.isTTY||!input.isTTY){
  const data=bytes=>{for(const c of bytes.toString()){
   if(c==='q'||c==='\x03')stop();
   if(c===' ')paused=!paused;
-  if(c==='b'||c==='t'){if(pet.interact(c==='b'?'ball':'treat'))paused=false;}
+  if(c==='b'||c==='t'||c==='g'){if(pet.interact(c==='b'?'ball':c==='t'?'treat':'tug'))paused=false;}
  }};
  process.on('SIGINT',stop);process.on('SIGTERM',stop);
  input.setRawMode(true);input.resume();input.on('data',data);
@@ -28,7 +28,7 @@ if(!out.isTTY||!input.isTTY){
    const frame=pet.frame({columns,rows}),lines=frame.text.split('\n');let batch='';
    for(let y=0;y<rows;y++)if(lines[y]!==previous[y])batch+=`\x1b[${y+1};1H${lines[y]}`;
    previous=lines;
-   const status=`${paused?'Paused':frame.report.intent} | B ball  T treat  Space pause  Q quit`.slice(0,columns);
+   const status=`${paused?'Paused':frame.report.intent} | B ball  T treat  G tug  Space pause  Q quit`.slice(0,columns);
    batch+=`\x1b[${rows+1};1H\x1b[2K${status}`;
    if(!out.write(batch))await once(out,'drain');
    await new Promise(resolve=>setTimeout(resolve,Math.max(1,1000/30-(performance.now()-start))));

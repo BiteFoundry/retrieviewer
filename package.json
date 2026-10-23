@@ -88,6 +88,7 @@
     "EMBEDDING.md",
     "PUPPY-MEMORY.md",
     "PUPPY-Q5-COMPARISON.md",
+    "COMFORT-ART.md",
     "examples/embed.mjs",
     "examples/live.mjs",
     "examples/plugin.mjs",
@@ -109,6 +110,7 @@
     "puppy-companion-life.mjs",
     "puppy-companion-objects.mjs",
     "puppy-companion-sprites.mjs",
+    "puppy-comfort-sprites.mjs",
     "puppy-mouth-anchor.mjs",
     "puppy-mouth-anchor.json",
     "puppy-clean.mjs",
@@ -134,6 +136,8 @@
     "puppy-paper-actions-v9.json",
     "puppy-companion-interactions-v3-q5.bin.gz",
     "puppy-companion-interactions-v3.json",
+    "puppy-companion-comfort-q5.bin.gz",
+    "puppy-companion-comfort.json",
     "vendor/procedural-animals/LICENSE"
   ],
   "scripts": {

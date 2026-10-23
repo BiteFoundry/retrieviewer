@@ -103,8 +103,9 @@ test('real core: mounted+enabled renders bounded Braille, receipts, interactions
   // Resize derives the pane from the host viewport.
   view.viewport={width:60,height:30};handle.refresh();plain(lastText(view),56,8);
   assert.match(await controller.command('ball'),/ball accepted|busy/);
+  assert.match(await controller.command('tug'),/tug accepted|busy/);
   assert.match(await controller.command('status'),/enabled, rendering 56x8/);
-  assert.match(await controller.command('nonsense'),/^Usage: \/retrieviewer enable\|disable\|ball\|treat\|status$/);
+  assert.match(await controller.command('nonsense'),/^Usage: \/retrieviewer enable\|disable\|ball\|treat\|tug\|status$/);
   assert.equal(await controller.command('disable'),'Retrieviewer disabled');
   assert.deepEqual(settings.writes,[false]);
   assert.equal(lastText(view),'');assert.equal(controller.status().running,false);

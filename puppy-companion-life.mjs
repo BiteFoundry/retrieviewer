@@ -11,17 +11,18 @@ const BALL_TARGET={x:0,z:-4};
 const OFFER={x:0,z:.3};
 // Hand-fed treat marker, relative to the puppy's current root (no travel for treats).
 const TREAT_OFFSET={z:.08,height:.25};
-const COOLDOWN={ball:6,treat:15};
+const COOLDOWN={ball:6,treat:15,tug:20};
 const FLIGHT=.65,BALL_PEAK=.75,CARRY_HEIGHT=.19,SETTLE_FALLBACK=.6,MAX_DT=.25,ARRIVE=.05;
 const LABEL={
  start:'기다리는 중',pause:'잠시 느긋하게 둘러보는 중',lie:'엎드리는 중',rest:'엎드려 쉬는 중',recover:'앉아서 기운 차리는 중',
  sit:'앉는 중',watch:'앉아서 지켜보는 중',look:'고개를 돌려 살피는 중',observe:'가만히 주변 관찰 중',
  stroll:'옆으로 살짝 걸어가는 중',sniff:'잠깐 멈춰 주변을 살피는 중',dash:'저 멀리 달려가는 중',far:'멀리서 둘러보는 중',home:'제자리로 돌아오는 중',
  patrol:'주변을 왕복 산책하는 중',scan:'양쪽을 번갈아 살피는 중',roll:'느긋하게 뒹구는 중',play:'신나서 한 바퀴 도는 중',checkin:'가까이 와서 함께 쉬는 중',
+ belly:'배를 보이고 발라당 쉬는 중',sleep:'새근새근 잠자는 중',tug:'장난감을 물고 당기는 중',
  fetch:'공을 쫓아가는 중',pickup:'공을 무는 중',carry:'공을 물고 돌아오는 중',drop:'공을 내려놓는 중',offer:'공을 내려놓고 기다리는 중',
  treatSit:'간식 앞에 앉는 중',chew:'간식 먹는 중'
 };
-const PENDING_LABEL={treat:'곧 간식'};
+const PENDING_LABEL={treat:'곧 간식',tug:'곧 터그놀이'};
 // Baked interaction clips, played only while holding at the shared seated endpoint.
 const GESTURE={'ball-pickup':1.4,'ball-drop':1.2,'treat-eat':2.4};
 const clamp=(v,a,b)=>Math.min(b,Math.max(a,v));
@@ -39,8 +40,8 @@ export function createCompanionLife(actor,{seed=731,energy=.8}={}){
 
  const rand=mulberry32(seed),range=(a,b)=>a+(b-a)*rand(),side=()=>rand()<.5?'left':'right';
  const needs={energy,social:.5,curiosity:.5};
- const cooldowns={ball:0,treat:0};
- const episodeCooldowns={roll:0,play:0};
+ const cooldowns={ball:0,treat:0,tug:0};
+ const episodeCooldowns={roll:0,play:0,belly:0,sleep:0};
  let clock=0,decisions=0,lastEpisode=null;
  let queue=[],hold=0,holdIntent=null,waiting=null,gesture=null;
  let intent='start',label=LABEL.start,pending=null,active=null,ball=null,treat=null;
@@ -70,13 +71,17 @@ export function createCompanionLife(actor,{seed=731,energy=.8}={}){
   roll:()=>[lie(),wait(range(.7,1.5),'rest'),cmd('roll',[],'roll'),wait(range(2,5),'watch'),fx(()=>{needs.energy-=.08;needs.curiosity-=.15;})],
   checkin:()=>[home(),sit('sit'),cmd('look',[side()],'look'),wait(range(5,10),'checkin'),fx(()=>{needs.social-=.4;})],
   play:()=>[cmd('spin',[],'play'),wait(range(1,2),'pause'),sit('sit'),wait(range(2,4),'watch'),fx(()=>{needs.energy-=.12;needs.curiosity-=.2;})],
+  belly:()=>[cmd('belly',[range(5,9)],'belly'),wait(range(2,4),'watch'),fx(()=>{needs.energy+=.08;needs.curiosity-=.15;})],
+  sleep:()=>[cmd('sleep',[range(22,38)],'sleep'),wait(range(2,4),'recover'),fx(()=>{needs.energy+=.3;})],
  };
  const weights=()=>{
   const {energy:e,social:s,curiosity:c}=needs;
   return {rest:e<.35?6:(1-e)*1.2,watch:.8+s,observe:.6+c*.6,stroll:1.2*c*e,dash:e>.55?1.2*e*c:0,
    scan:.35+c*.4,patrol:e>.25?.7*c*e:0,checkin:.25+s*.7,
    roll:episodeCooldowns.roll===0&&e>.45?.35*e:0,
-   play:episodeCooldowns.play===0&&e>.6&&typeof actor.spin==='function'?.25*e*c:0};
+   play:episodeCooldowns.play===0&&e>.6&&typeof actor.spin==='function'?.25*e*c:0,
+   belly:episodeCooldowns.belly===0&&typeof actor.belly==='function'?.35:0,
+   sleep:episodeCooldowns.sleep===0&&typeof actor.sleep==='function'?(e<.4?3:.2):0};
  };
  function decide(){
   const w=weights();if(lastEpisode)w[lastEpisode]=0;
@@ -85,6 +90,8 @@ export function createCompanionLife(actor,{seed=731,energy=.8}={}){
   lastEpisode=kind;decisions++;
   if(kind==='roll')episodeCooldowns.roll=90;
   if(kind==='play')episodeCooldowns.play=120;
+  if(kind==='belly')episodeCooldowns.belly=80;
+  if(kind==='sleep')episodeCooldowns.sleep=100;
   queue=[wait(range(3,9),'pause'),...EPISODES[kind]()];
  }
 
@@ -103,15 +110,18 @@ export function createCompanionLife(actor,{seed=731,energy=.8}={}){
   fx(()=>{treat=true;}),cmd('sit',[],'treatSit',()=>!seatedAnyVariant()),
   play('treat-eat','chew'),fx(()=>{treat=null;needs.energy+=.25;needs.social-=.3;})
  ];
+ const TUG_STEPS=()=>[
+  cmd('sit',[],'tug',unseated),cmd('tug',[6],'tug'),wait(.5,'watch'),fx(()=>{needs.energy-=.12;needs.social-=.4;})
+ ];
 
  function startInteraction(){
   active=pending;pending=null;decisions++;hold=0;
-  queue=active==='ball'?BALL_STEPS():TREAT_STEPS();
+  queue=active==='ball'?BALL_STEPS():active==='tug'?TUG_STEPS():TREAT_STEPS();
  }
  function finishInteraction(){cooldowns[active]=COOLDOWN[active];active=null;}
 
  function drift(dt){
-  const resting=holdIntent==='rest'||holdIntent==='recover';
+  const resting=holdIntent==='rest'||holdIntent==='recover'||actor.state==='sleep'||intent==='belly';
   needs.energy+=resting?.04*dt:-.004*dt;
   if(!active){needs.curiosity+=.01*dt;needs.social+=.008*dt;}
   for(const k in needs)needs[k]=clamp(needs[k],0,1);
@@ -155,9 +165,15 @@ export function createCompanionLife(actor,{seed=731,energy=.8}={}){
  }
 
  function interact(kind){
-  if(kind!=='ball'&&kind!=='treat')return false;
+  if(!['ball','treat','tug'].includes(kind))return false;
+  if(kind==='tug'&&typeof actor.tug!=='function')return false;
   if(pending||active||cooldowns[kind]>0)return false;
-  if(kind==='treat'){pending=kind;return true;}
+  if(kind==='treat'||kind==='tug'){
+   pending=kind;
+   // The pet wakes through its authored recovery, not after a long sleep timer.
+   if(['sleep','belly'].includes(actor.sample(clock).state))actor.sit();
+   return true;
+  }
   // Ball: launch now and drop obsolete controller plans; the actor's own state is left to chase.
   active='ball';decisions++;ball={mode:'flight',start:clock};
   queue=BALL_STEPS();hold=0;holdIntent=null;gesture=null;waiting=null;
@@ -189,7 +205,8 @@ export function createCompanionLife(actor,{seed=731,energy=.8}={}){
    const interaction=active??pending;
    return {
     intent,label:pending?`${label} · ${PENDING_LABEL[pending]}`:label,episode:lastEpisode,interaction,busy:interaction!==null,
-    ball:ballReport(),treat:treatReport(),energy:needs.energy,decisions,cooldowns:{...cooldowns},
+    ball:ballReport(),treat:treatReport(),tug:actor.state==='tug'?{progress:actor.sample(clock).comfortPose?.progress??0,grip:1}:null,
+    snore:actor.state==='sleep'?((clock%3.6)/3.6):null,energy:needs.energy,decisions,cooldowns:{...cooldowns},
     // Local hold clock only: progress freezes between updates; null outside the stationary hold.
     gesture:gesture&&SAFE.has(actor.state)?{clip:gesture.clip,progress:clamp(gesture.elapsed/gesture.duration,0,1)}:null
    };

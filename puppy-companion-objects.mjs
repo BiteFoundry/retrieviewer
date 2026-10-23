@@ -7,6 +7,18 @@ export function paintCompanionObjects(pixels,width,height,projection,report,stat
  // Interaction drawings already include the toy/food. Never paint a second
  // floating ball over the baked mouth, or a biscuit through the puppy's chest.
  if(report.gesture)return pixels;
+ // A quiet, tiny rising "z" suggests snoring. The sleeping dog itself remains
+ // the original eyes-closed source pose: no chest/body zoom or squashing.
+ if(Number.isFinite(report.snore)&&state.state==='sleep'){
+  const placement=projection.placement(state.x,state.z),side=height*placement.size,sideX=side/placement.pixelAspect;
+  const left=width*placement.x-sideX/2,top=height*placement.y-300/320*side;
+  const cycle=report.snore,tone=Math.round(140*Math.sin(Math.PI*cycle)),unit=Math.max(1,Math.round(side/160));
+  const cx=Math.round(left+220/320*sideX),cy=Math.round(top+(210-16*cycle)/320*side);
+  if(tone>12)for(const [gx,gy] of [[0,0],[1,0],[2,0],[1,1],[0,2],[1,2],[2,2]])for(let dy=0;dy<unit;dy++)for(let dx=0;dx<unit;dx++){
+   const x=cx+gx*unit+dx,y=cy+gy*unit+dy;if(x<0||x>=width||y<0||y>=height)continue;
+   const j=(y*width+x)*4;pixels[j]=pixels[j+1]=pixels[j+2]=Math.max(pixels[j],tone);
+  }
+ }
  if(report.ball?.carried){if(mouth&&[mouth.x,mouth.y,mouth.rx,mouth.ry].every(Number.isFinite)&&mouth.rx>0&&mouth.ry>0)objects.push({kind:'ball',screen:mouth});}
  else if(report.ball)objects.push({...report.ball,radius:.035,kind:'ball'});
  if(report.treat)objects.push({...report.treat,height:report.treat.height??.018,radius:.022,kind:'treat'});

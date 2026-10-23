@@ -14,7 +14,7 @@ function make(seed,energy){
 }
 
 test('five new autonomous episodes use existing real action/behavior clips',()=>{
- const cases=[['scan',2],['checkin',4],['roll',36],['play',43],['patrol',69]];
+ const cases=[['scan',1],['checkin',20],['roll',30],['play',256],['patrol',2]];
  for(const [episode,seed] of cases){
   const puppy=make(seed),seen=new Set();let final=null;
   for(let i=0;i<3600;i++){
@@ -40,17 +40,17 @@ test('five new autonomous episodes use existing real action/behavior clips',()=>
 });
 
 test('autonomy is deterministic, repeats no adjacent episode, and spaces tricks out',()=>{
- const a=make(4),b=make(4),seen=new Set(),lastTrick={roll:-Infinity,play:-Infinity};
+ const a=make(4),b=make(4),seen=new Set(),lastTrick={roll:-Infinity,play:-Infinity,belly:-Infinity,sleep:-Infinity};
  let previous=null,decisions=0;
  for(let i=0;i<72000;i++){
   const x=a.step(),y=b.step();
   if(i%30===0)assert.deepEqual(x,y);
   if(x.report.decisions!==decisions){
    const kind=x.report.episode;assert.notEqual(kind,previous);seen.add(kind);previous=kind;decisions=x.report.decisions;
-   if(kind in lastTrick){assert.ok(i/60-lastTrick[kind]>=(kind==='roll'?90:120)-.001);lastTrick[kind]=i/60;}
+   if(kind in lastTrick){assert.ok(i/60-lastTrick[kind]>=({roll:90,play:120,belly:80,sleep:100}[kind])-.001);lastTrick[kind]=i/60;}
   }
  }
- for(const kind of ['rest','watch','observe','stroll','dash','scan','patrol','roll','checkin','play'])assert.ok(seen.has(kind),kind);
+ for(const kind of ['rest','watch','observe','stroll','dash','scan','patrol','roll','checkin','play','belly','sleep'])assert.ok(seen.has(kind),kind);
 });
 
 test('ball interrupts an autonomous roll plan and completes a safe fetch/return',()=>{

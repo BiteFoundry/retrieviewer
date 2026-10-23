@@ -35,6 +35,12 @@ must be checked again for the final release bytes.
 
 ## Remaining limits
 
+Later source candidate: belly/sleep reuse existing licensed roll/rest frames.
+Tug adds eight built-in imagegen keys referenced only from the existing generated
+puppy sheet, not new photographs. COMFORT-ART.md records the prompt, source hash
+and fixed-scale preparation. The ninth archive is covered explicitly by
+ASSETS-LICENSE.md and ATTRIBUTION.md. Original sheet PNGs remain outside npm.
+
 Copyrightability of AI-generated expression, the precise derivative-work analysis,
 and worldwide name clearance are not conclusively determined here. Existing
 domestic trademark research records possible similar marks; owning an npm scope

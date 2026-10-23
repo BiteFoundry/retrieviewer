@@ -17,7 +17,7 @@ const output=mkdtempSync(join(dist,'package-check-'));
 const runNpm=(args,cwd)=>execFileSync(process.execPath,[npm,...args],{cwd,encoding:'utf8',timeout:120000,maxBuffer:2e6});
 const [packed]=JSON.parse(runNpm(['pack','--ignore-scripts','--json','--pack-destination',output],root));
 const paths=packed.files.map(f=>f.path);
-assert.equal(paths.filter(p=>p.endsWith('-q5.bin.gz')).length,8);
+assert.equal(paths.filter(p=>p.endsWith('-q5.bin.gz')).length,9);
 assert.equal(paths.some(p=>p.endsWith('-compact.bin.gz')),false);
 assert.equal(paths.some(p=>/^(references|worker-packets|dist)\//.test(p)),false);
 const archive=resolve(output,packed.filename),consumer=mkdtempSync(join(tmpdir(),'retrieviewer-consumer-'));
@@ -27,7 +27,7 @@ const probe=`
 import assert from 'node:assert/strict';
 import {createPet,getPetAssetFiles,DEFAULT_ART_PROFILE} from '@bitefoundry/retrieviewer';
 import {createPetPlugin} from '@bitefoundry/retrieviewer/plugin';
-assert.equal(DEFAULT_ART_PROFILE,'q5');assert.equal(getPetAssetFiles().length,17);
+assert.equal(DEFAULT_ART_PROFILE,'q5');assert.equal(getPetAssetFiles().length,19);
 const a=await createPet({seed:731});let count=0,clears=0,frame;
 const plugin=await createPetPlugin({host:{getSize:()=>({columns:40,rows:12}),render:f=>{frame=f;count++;},clear:()=>clears++},petOptions:{seed:731}});
 try {
@@ -87,6 +87,6 @@ if(python==='available'){
  python='passed installed example';
 }
 const sha256=createHash('sha256').update(readFileSync(archive)).digest('hex');
-const report={version:JSON.parse(readFileSync(join(installed,'package.json'))).version,archive,sha256,size:packed.size,unpackedSize:packed.unpackedSize,consumer,offlineInstall:true,exactInstalledFiles:true,defaultAssets:8,originalAssetsBundled:false,result,examples:['embed','plugin','live'],bridge:true,python,installerLifecycle:true};
+const report={version:JSON.parse(readFileSync(join(installed,'package.json'))).version,archive,sha256,size:packed.size,unpackedSize:packed.unpackedSize,consumer,offlineInstall:true,exactInstalledFiles:true,defaultAssets:9,originalAssetsBundled:false,result,examples:['embed','plugin','live'],bridge:true,python,installerLifecycle:true};
 writeFileSync(join(output,'package-check.json'),JSON.stringify(report,null,2)+'\n');
 console.log(JSON.stringify(report,null,2));

@@ -15,7 +15,7 @@ photographers retain their rights under their original licenses.
 
 ## Covered assets
 
-These eight artwork archives and their associated pose/registration metadata,
+These nine artwork archives and their associated pose/registration metadata,
 decoded images and alternative encodings are covered:
 
 - `puppy-stride-tweens-q5.bin.gz`
@@ -26,6 +26,7 @@ decoded images and alternative encodings are covered:
 - `puppy-paper-behaviors-q5.bin.gz`
 - `puppy-paper-actions-v9-q5.bin.gz`
 - `puppy-companion-interactions-v3-q5.bin.gz`
+- `puppy-companion-comfort-q5.bin.gz`
 
 ## Practical summary
 

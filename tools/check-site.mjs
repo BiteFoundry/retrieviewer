@@ -65,9 +65,7 @@ try {
   await page
     .locator(".hero")
     .screenshot({
-      path: fileURLToPath(
-        new URL("../docs/assets/preview.png", import.meta.url),
-      ),
+      path: out + "hero.png",
     });
   await page.locator(".copy").first().click();
   assert.equal(
@@ -92,10 +90,14 @@ try {
     {},
     { timeout: 30000 },
   );
-  assert.equal(requests.filter((u) => u.includes(".bin.gz")).length, 8);
-  checks.push("same public Q5 core loads eight archives");
+  assert.equal(requests.filter((u) => u.includes(".bin.gz")).length, 9);
+  checks.push("same current Q5 core loads nine archives including tiny tug keys");
   assert.equal(await page.locator("#play").isVisible(), false);
   checks.push("Play trigger hides after successful load");
+  await page.getByRole("button", { name: "Play tug", exact: true }).click();
+  assert.match(await page.locator("#demo-status").textContent(), /Tug of war started/);
+  await page.waitForFunction(() => !document.querySelector('#ball').disabled, {}, {timeout: 15000});
+  checks.push("tug reaches actual browser engine, completes and unlocks ball");
   await page.getByRole("button", { name: "Toss a ball", exact: true }).click();
   assert.match(await page.locator("#demo-status").textContent(), /Ball tossed/);
   checks.push("ball reaches actual engine");

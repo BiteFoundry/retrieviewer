@@ -1,0 +1,77 @@
+{
+  "version": 1,
+  "width": 320,
+  "height": 320,
+  "frames": 9,
+  "clips": [
+    "tug"
+  ],
+  "gzipBytes": 103549,
+  "residentPixelBytes": 291337,
+  "sourceSheetSha256": "10fde9dacca5cb45acd68f387e7ed3bcf88cd72cf0f9c4220d31d819db91731e",
+  "neutralSha256": "19f89a8bcb5a937e528593a8f36db846a0d45a5ee398f1b0873c056e5be2fa0a",
+  "encodedSha256": "e046e214da585ffda65e8d2c1a86c589af589325b792634f128ab8b71f6dbf3a",
+  "method": "Built-in imagegen authored tug keys. One fixed scale, ground/center translation only. Exact existing Q5 seat first/last. No expanded tween film or live body deformation.",
+  "registration": {
+    "sheetSize": [
+      1774,
+      887
+    ],
+    "targetBounds": [
+      41,
+      92,
+      231,
+      301
+    ],
+    "registration": [
+      {
+        "cell": 0,
+        "scale": 0.5663956639566395,
+        "dx": 32,
+        "dy": 69
+      },
+      {
+        "cell": 1,
+        "scale": 0.5663956639566395,
+        "dx": 39,
+        "dy": 69
+      },
+      {
+        "cell": 2,
+        "scale": 0.5663956639566395,
+        "dx": 39,
+        "dy": 69
+      },
+      {
+        "cell": 3,
+        "scale": 0.5663956639566395,
+        "dx": 35,
+        "dy": 68
+      },
+      {
+        "cell": 4,
+        "scale": 0.5663956639566395,
+        "dx": 33,
+        "dy": 74
+      },
+      {
+        "cell": 5,
+        "scale": 0.5663956639566395,
+        "dx": 39,
+        "dy": 74
+      },
+      {
+        "cell": 6,
+        "scale": 0.5663956639566395,
+        "dx": 39,
+        "dy": 74
+      },
+      {
+        "cell": 7,
+        "scale": 0.5663956639566395,
+        "dx": 36,
+        "dy": 74
+      }
+    ]
+  }
+}

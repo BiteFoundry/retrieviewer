@@ -8,6 +8,7 @@ import {createPaperAreaSampler} from './puppy-paper-area.mjs';
 import {PAPER_ACTION_DURATIONS,createPaperActionSampler,paperActionPose} from './puppy-paper-actions.mjs';
 import {createPawTransport} from './puppy-paper-paw-transport.mjs';
 import {createCompanionSpriteSampler} from './puppy-companion-sprites.mjs';
+import {createComfortSpriteSampler} from './puppy-comfort-sprites.mjs';
 import {mouthSourceFrame,mouthAnchor,projectMouth} from './puppy-mouth-anchor.mjs';
 import {trickClipEdges} from './puppy-paper-trick-timing.mjs';
 
@@ -246,7 +247,7 @@ export function createPaperActor(animal,info,{manualTricks=false,trickTimings=nu
  };
 }
 
-export function createPaperRenderer(cache,info,meta,width,height,{rear,approach,seat,arrivalSeat,behaviors,actions,interactions,contacts=true,pawTransport=false}={}){
+export function createPaperRenderer(cache,info,meta,width,height,{rear,approach,seat,arrivalSeat,behaviors,actions,interactions,comfort,contacts=true,pawTransport=false}={}){
  if(![width,height].every(Number.isInteger)||width<2||height<2||width*height>1_000_000)throw Error('Invalid paper grid');
  const tween=createCachedTween(cache,info),renderMeta={...meta,pairs:info.pair_map,run_sequence:info.run_sequence};
  const out=new Uint8ClampedArray(width*height*4),area=createPaperAreaSampler();
@@ -256,6 +257,7 @@ export function createPaperRenderer(cache,info,meta,width,height,{rear,approach,
  const arrivalSeatSample=arrivalSeat?createPaperSeatSampler(arrivalSeat.bytes,arrivalSeat.info):null;
  const behaviorSample=behaviors?createPaperBehaviorSampler(behaviors.bytes,behaviors.info):null;
  const interactionSample=interactions?createCompanionSpriteSampler(interactions.bytes,interactions.info):null;
+ const comfortSample=comfort?createComfortSpriteSampler(comfort.bytes,comfort.info):null;
  const actionSample=actions?createPaperActionSampler(actions.bytes,actions.info):null,actionArea=actions?createPaperAreaSampler(actions.info.width):null;
  const walkEpisodes=actions?createPaperSupportEpisodes(actions.info.feet,actions.info.clips.walk,9):null;
  const sourceEpisodes=rear?{
@@ -270,10 +272,11 @@ export function createPaperRenderer(cache,info,meta,width,height,{rear,approach,
   const isApproach=state.approachPair!==null&&state.approachPair!==undefined&&approachSample;
   const isSeat=state.seatProgress!==null&&state.seatProgress!==undefined&&seatSample;
   if(!Number.isFinite(pixelAspect)||pixelAspect<.1||pixelAspect>10)throw Error('Invalid dot pixel aspect');
-  const isInteraction=state.interactionPose&&interactionSample;
+  const isComfort=state.comfortPose&&comfortSample;
+  const isInteraction=isComfort||state.interactionPose&&interactionSample;
   const isBehavior=!isInteraction&&state.behavior&&behaviorSample;
   const isAction=!isInteraction&&state.actionName&&actionSample,sourceN=isAction?actions.info.width:320,originX=(sourceN-320)/2,originY=(sourceN/320-1)*300;
-  const image=isInteraction?interactionSample(state.interactionPose):isAction?actionSample(state):isBehavior?behaviorSample(state):isSeat?(state.seatVariant==='arrival'&&arrivalSeatSample?arrivalSeatSample:seatSample)(state.seatProgress):isApproach?approachSample(state.approachPair,state.blend):isRear?rearSample(state.rearPair,state.blend):tween(state),side=height*size,sideX=side/pixelAspect;
+  const image=isComfort?comfortSample(state.comfortPose):isInteraction?interactionSample(state.interactionPose):isAction?actionSample(state):isBehavior?behaviorSample(state):isSeat?(state.seatVariant==='arrival'&&arrivalSeatSample?arrivalSeatSample:seatSample)(state.seatProgress):isApproach?approachSample(state.approachPair,state.blend):isRear?rearSample(state.rearPair,state.blend):tween(state),side=height*size,sideX=side/pixelAspect;
   // Quantize source lookup only, never the projected rectangle. Rounding side,
   // left and top first introduced whole-body scale/position jumps at thresholds.
   const left=width*x-sideX/2,floor=isInteraction||isAction||isBehavior||isSeat||isRear||isApproach?0:cleanGroundOffset(state,renderMeta),top=height*y-(300-floor)/320*side;

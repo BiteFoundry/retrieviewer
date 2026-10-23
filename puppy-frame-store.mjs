@@ -52,9 +52,9 @@ function checkShape(width,height,frameCount){
 // resident (crops only) and reconstructs at most two full frames at a time.
 // A returned frame is valid until two other unique frames have been requested.
 // An 'RVQ5' store (lossy 32-level comparison codec) is delegated and branded.
-export function readPackedFrames(bytes){
+export function readPackedFrames(bytes,options){
  if(!(bytes instanceof Uint8Array))throw Error('Invalid packed frames: bytes');
- if(isPredictiveFrames(bytes)){const store=readPredictiveFrames(bytes);stores.add(store);return store;}
+ if(isPredictiveFrames(bytes)){const store=readPredictiveFrames(bytes,options);stores.add(store);return store;}
  if(bytes.length<HEADER||MAGIC.some((v,i)=>bytes[i]!==v))throw Error('Invalid packed frames: magic');
  const view=new DataView(bytes.buffer,bytes.byteOffset,bytes.byteLength),u32=at=>view.getUint32(at,true);
  const width=u32(4),height=u32(8),frameCount=u32(12),unique=u32(16);

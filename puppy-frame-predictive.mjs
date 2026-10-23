@@ -80,7 +80,7 @@ function unfilterRow(type,src,at,cur,prev,w){
 
 // Validate and unfilter. Only the returned typed arrays survive; `bytes` is
 // not referenced by the store built from them.
-function decode(bytes){
+function decode(bytes,{frameIndices}={}){
  if(!(bytes instanceof Uint8Array))fail('bytes');
  if(!isPredictiveFrames(bytes)||bytes.length<HEADER)fail('magic');
  const view=new DataView(bytes.buffer,bytes.byteOffset,bytes.byteLength),u32=at=>view.getUint32(at,true);
@@ -89,8 +89,13 @@ function decode(bytes){
  if(unique<1||unique>frameCount)fail('unique count');
  const data=HEADER+4*frameCount+RECORD*unique;
  if(bytes.length<data)fail('truncated');
- const map=new Uint32Array(frameCount),used=new Uint8Array(unique);
- for(let f=0;f<frameCount;f++){const u=u32(HEADER+4*f);if(u>=unique)fail('map');map[f]=u;used[u]=1;}
+ const retained=frameIndices===undefined?null:new Uint8Array(frameCount);
+ if(retained){
+  if(!Array.isArray(frameIndices)||!frameIndices.length)fail('retained frames');
+  for(const f of frameIndices){if(!Number.isInteger(f)||f<0||f>=frameCount)fail('retained frame index');retained[f]=1;}
+ }
+ const map=new Uint32Array(frameCount),used=new Uint8Array(unique),needed=retained?new Uint8Array(unique):null;
+ for(let f=0;f<frameCount;f++){const u=u32(HEADER+4*f);if(u>=unique)fail('map');map[f]=u;used[u]=1;if(retained?.[f])needed[u]=1;}
  if(used.includes(0))fail('unreferenced frame');
  // x,y,w,h,first pixel index in the packed stream
  const rects=new Float64Array(unique*5);let total=0,pixels=0;
@@ -98,7 +103,7 @@ function decode(bytes){
   const at=HEADER+4*frameCount+RECORD*u,x=u32(at),y=u32(at+4),w=u32(at+8),h=u32(at+12),offset=u32(at+16),length=u32(at+20);
   if((w===0)!==(h===0)||(w===0&&(x||y))||x+w>width||y+h>height)fail('rectangle');
   if(length!==h*(w+1)||offset!==total)fail('offset');
-  rects.set([x,y,w,h,pixels],u*5);total+=length;pixels+=w*h;
+  rects.set([x,y,w,h,pixels],u*5);total+=length;if(!needed||needed[u])pixels+=w*h;
  }
  if(bytes.length!==data+total)fail('pixel length');
  if(pixels*BITS>0xffffffff)fail('pixel count');
@@ -109,23 +114,24 @@ function decode(bytes){
   for(let y=0;y<h;y++){
    unfilterRow(bytes[at],bytes,at+1,cur,prev,w);at+=w+1;
    for(let x=0;x<w;x++){
-    const q=cur[x];if(q>31)fail('quantized value');
+    const q=cur[x];if(q>31)fail('quantized value');if(needed&&!needed[u])continue;
     const i=pos>>>3,s=pos&7;packed[i]|=(q<<s)&255;if(s>3)packed[i+1]|=q>>(8-s);pos+=BITS;
    }
    const t=prev;prev=cur;cur=t;
   }
  }
- return{width,height,frameCount,unique,map,rects,packed};
+ return{width,height,frameCount,unique,map,rects,packed,retained};
 }
 
-function createStore({width,height,frameCount,unique,map,rects,packed}){
+function createStore({width,height,frameCount,unique,map,rects,packed,retained}){
  const n=width*height,slots=[{unique:-1,frame:null},{unique:-1,frame:null}];let decodes=0,hits=0;
  return Object.freeze({
   width,height,frameCount,uniqueCount:unique,byteLength:n*frameCount,residentPixelBytes:packed.byteLength,
-  get residentBytes(){return packed.byteLength+map.byteLength+rects.byteLength+slots.reduce((s,e)=>s+(e.frame?.byteLength??0),0);},
+  get residentBytes(){return packed.byteLength+map.byteLength+rects.byteLength+(retained?.byteLength??0)+slots.reduce((s,e)=>s+(e.frame?.byteLength??0),0);},
   stats(){return{decodes,hits,cachedFrames:slots.filter(e=>e.frame).length};},
   getFrame(index){
    if(!Number.isInteger(index)||index<0||index>=frameCount)fail('frame index');
+   if(retained&&!retained[index])fail('frame was not retained');
    const u=map[index];
    if(slots[0].unique===u){hits++;return slots[0].frame;}
    if(slots[1].unique===u){hits++;slots.reverse();return slots[0].frame;}
@@ -144,4 +150,4 @@ function createStore({width,height,frameCount,unique,map,rects,packed}){
 
 // Parse, validate and unpack an RVQ5 store. A returned frame is valid until two
 // other unique frames have been requested.
-export function readPredictiveFrames(bytes){return createStore(decode(bytes));}
+export function readPredictiveFrames(bytes,options){return createStore(decode(bytes,options));}

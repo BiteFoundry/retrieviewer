@@ -1,6 +1,46 @@
 # Runtime weight and performance
 
-## Current source optimization (unpublished candidate)
+## Comfort behaviors (current unpublished candidate)
+
+Belly-up flopping and eyes-closed sleeping reuse the existing action/rest art.
+Tug adds eight authored keys and the exact existing seat endpoint, not a dense
+tween film:103,549 compressed bytes and291,337 resident Q5 pixel bytes. The sampler
+allocates its single RGBA output only on first use; source reconstruction remains
+a two-frame LRU. No new runtime dependency, background process or timer is added.
+
+The legacy interaction sheet contains101 unique frames that no active clip can
+reach. The Q5 loader now retains only the23 unique frames used by treat/pickup/drop.
+All active samples compare byte-for-byte against the full store. Normal codec
+loading still retains every frame unless explicitly supplied a validated index
+list; requesting an excluded frame fails rather than displaying a substitute.
+
+| Resident cropped pixel payload | Bytes |
+| --- | ---: |
+| Before comfort extension | 66,515,834 |
+| Remove unreachable interaction pixels | −4,444,163 |
+| Add tug keys | +291,337 |
+| Current total | 62,363,008 |
+
+Thus new poses use about4.15 MB less resident art than the previous source version.
+This is an art-payload measurement, not a guarantee that OS-reported RSS falls by
+the same amount. In three fresh Windows benchmark samples, mean frame time median
+was3.22 ms versus3.29 ms previously; peak process RSS median was262.3 versus263.3
+MiB (small differences, not a meaningful promised performance improvement).
+The same450-frame ball hash still matches exactly. Source measurements live in
+`dist/performance/comfort-{1,2,3}.json` locally.
+
+`puppy-comfort-runtime.test.mjs` checks repeated load/render/tug/dispose, allowing
+native gzip callbacks and GC to finish before checking retained arrays. No pet
+buffers or timer handles remain after this bounded test. RSS reclamation remains
+allocator/GC-dependent; dispose is not advertised as an immediate RSS reduction.
+
+`node tools/check-comfort.mjs` produces deterministic off-screen dot snapshots
+for all three behaviors under `dist/comfort-qa/`. Snoring is a silent rising dot
+cue, not audio playback. Ball/treat/tug wake a sleeping pet through the existing
+recovery instead of waiting out the long sleep hold. Belly also shortens its hold
+on interaction and finishes the authored roll safely.
+
+## Earlier runtime optimization (unpublished npm candidate)
 
 The dot-art actor already integrates its own travel, stride and perspective. Its
 former Three.js animal only supplied a position copied from that actor's target;
