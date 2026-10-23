@@ -25,7 +25,7 @@ const ko = {
   tug: "터그 놀이",
   pause: "잠깐 쉬기",
   resume: "다시 놀기",
-  demoNote: "같은 그림, 같은 움직임 엔진. 놀기를 누르면 약21MB를 불러와요.",
+  demoNote: "같은 그림, 같은 움직임 엔진. 놀기를 누르면 약19MB를 불러와요.",
   previewNote: "브라우저 미리보기 · 설치한 강아지는 실제 앱 창을 따라다녀요.",
   retry: "다시 불러오기",
   dogLabel: "점자 도트 리트리버 실시간 미리보기",
@@ -67,7 +67,7 @@ const ko = {
   wayland:
     "네이티브 Wayland·화면 없는 서버는 미지원이에요. 원격 X11/VNC는 그 원격 화면에서 동작하며 로컬 IDE와는 별개예요.",
   resource:
-    "Linux는 저사양 기본값인 16px 셀·15fps, Windows는 8px 셀·30fps라 점이 더 거칠게 보일 수 있어요. 그림 원본은 같아요. 패키지는 약21MB, 작은 Alma8 테스트의 Node RSS는 약180MiB이고 헬퍼 메모리는 별도예요. 무부하 도구는 아닙니다.",
+    "Linux는 16px 셀·15fps, Windows는 8px 셀·30fps라 점 크기가 달라요. 패키지는 약19MB예요. 이전0.0.3 Alma8 테스트의 Node RSS는 약180MiB였고 헬퍼는 별도예요. 이 값은0.0.4 메모리 상한은 아니에요.",
   supportLink: "필요 조건과 실제 검증 범위 보기 ↗",
   goodbyeTitle: "헤어질 때도, 간단하게.",
   goodbyeBody:
@@ -82,7 +82,7 @@ const ko = {
   fonts: "글꼴 라이선스",
   webAnalytics:
     '홈페이지 방문은 쿠키 없는 <a href="https://developers.cloudflare.com/web-analytics/about/">Cloudflare Web Analytics</a>로 집계해요. 설치한 강아지는 사용 통계를 전송하지 않아요.',
-  loading: "강아지를 불러오고 있어요… 약21MB를 내려받아요.",
+  loading: "강아지를 불러오고 있어요… 약19MB를 내려받아요.",
   running: "공을 던져주거나 간식을 줘 보세요. 아니면 그냥 지켜봐도 좋아요.",
   paused: "잠깐 쉬고 있어요. 다시 놀기를 누르면 이어집니다.",
   failed: "강아지를 불러오지 못했어요. 연결을 확인한 뒤 다시 시도해 주세요.",
@@ -97,7 +97,7 @@ const enExtra = {
   resume: "Resume",
   copied: "Command copied.",
   copyFailed: "Could not copy. Select and copy the command above.",
-  loading: "Loading your retriever… downloading about 21 MB.",
+  loading: "Loading your retriever… downloading about 19 MB.",
   running: "Toss a ball, offer a treat, or just let it do its thing.",
   paused: "Taking a breather. Resume whenever you like.",
   failed: "Could not load the puppy. Check your connection and try again.",

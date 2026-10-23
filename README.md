@@ -12,7 +12,8 @@
 </p>
 
 A fluffy, autonomous Braille-art retriever that hangs out above an app window.
-It wanders, runs, sits and rests. Toss a ball. Offer a treat. Get back to your thing.
+It wanders, runs, flops belly-up and naps. Toss a ball, offer a treat or play tug.
+Get back to your thing.
 
 Made by [BiteFoundry](https://github.com/BiteFoundry). No model API, account or
 telemetry is needed by the runtime.
@@ -71,8 +72,9 @@ Do not use `sudo npm install -g` as a blanket workaround.
 
 Linux currently favors lower load: 16px cells / 15fps versus the Windows default
 8px cells / 30fps, so its dots look coarser. The Q5 artwork is identical.
-This is not a zero-resource widget: the npm tarball is about 21 MB; one small
-AlmaLinux test used roughly 180 MiB of Node RSS, plus the Python helper.
+This is not a zero-resource widget: the npm tarball is about 19 MB. An earlier
+0.0.3 AlmaLinux test used roughly 180 MiB of Node RSS, plus the Python helper;
+that is not a memory budget or a new Linux GUI check for 0.0.4.
 See [platform details and verification boundaries](./DESKTOP-PLATFORMS.md).
 
 ## Easy to leave, too
@@ -105,7 +107,7 @@ const puppy = await createPetPlugin({
   },
 });
 puppy.start();
-// puppy.interact('ball') / puppy.interact('treat')
+// puppy.interact('ball') / puppy.interact('treat') / puppy.interact('tug')
 // On unmount: puppy.dispose()
 ```
 

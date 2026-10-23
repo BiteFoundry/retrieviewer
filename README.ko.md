@@ -4,7 +4,8 @@
 <p align="center"><a href="https://bitefoundry.github.io/retrieviewer/?lang=ko">직접 만나 보기</a> · <a href="README.md">English</a> · <a href="https://www.npmjs.com/package/@bitefoundry/retrieviewer">npm</a> · <a href="https://github.com/BiteFoundry/retrieviewer/issues">피드백</a></p>
 
 앱 창 위에서 혼자 걷고, 뛰고, 앉아서 쉬는 보송한 점자 도트 리트리버예요.
-가끔 공을 던져주고 간식을 주세요. 나머지 시간에는 각자의 일을 하면 돼요.
+발라당 누워 쉬거나 눈을 감고 잠들기도 해요. 가끔 공·간식·터그로 놀아주세요.
+나머지 시간에는 각자의 일을 하면 돼요.
 [BiteFoundry](https://github.com/BiteFoundry)가 만듭니다.
 런타임에는 계정, 모델 API, 텔레메트리가 필요하지 않아요.
 
@@ -72,8 +73,9 @@ PATH에 넣어야 해요. [bash·csh/tcsh·Windows별 안내](PREREQUISITES.md#c
 
 Linux는 저사양 기본값인 16px 셀·15fps, Windows는 8px 셀·30fps여서 Linux의
 점이 더 거칠게 보일 수 있어요. 그림 원본은 같은 Q5 자산입니다.
-무부하·초경량 도구는 아니에요. npm 압축본은 약21MB, 작은 Alma8 테스트의 Node
-RSS는 약180MiB였고 Python 헬퍼 메모리는 별도예요.
+무부하·초경량 도구는 아니에요. npm 압축본은 약19MB예요. 이전0.0.3의 작은
+Alma8 테스트에서는 Node RSS가 약180MiB였고 Python 헬퍼는 별도였어요.
+이 값은 메모리 상한이나0.0.4의 새 Linux GUI 검증 결과는 아니에요.
 [지원 범위와 검증 내용](DESKTOP-PLATFORMS.md).
 
 ## 쉽게 종료하고 제거하기

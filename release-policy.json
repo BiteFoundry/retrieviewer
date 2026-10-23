@@ -8,6 +8,6 @@
   "artLicense": "CC-BY-SA-4.0",
   "approvalDate": "2026-10-23",
   "rightsReview": "ASSET-PROVENANCE.md",
-  "approvedRelease": "0.0.3",
-  "releaseScope": "Cross-platform desktop companion: Windows and AlmaLinux8 GLIBC2.28 X11 verified; macOS explicitly experimental and not runtime verified; native Wayland unsupported. Existing Q5 artwork and licenses unchanged. User explicitly authorized publishing these changes in this conversation."
+  "approvedRelease": "0.0.4",
+  "releaseScope": "User explicitly authorized GitHub push and npm publication of the reviewed comfort extension and runtime optimizations in this conversation. Belly/sleep reuse existing art; tiny tug keys retain CC BY-SA 4.0 terms and attribution. Windows live checks, installed-consumer lifecycle, low-memory retention and browser UI verified. Linux adapter keeps the earlier AlmaLinux8 GLIBC2.28 baseline; new controls grammar/protocol checked but no new Linux GUI test. macOS remains experimental; native Wayland unsupported."
 }

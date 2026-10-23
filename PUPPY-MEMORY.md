@@ -1,6 +1,6 @@
 # Runtime weight and performance
 
-## Comfort behaviors (current unpublished candidate)
+## Comfort behaviors (0.0.4)
 
 Belly-up flopping and eyes-closed sleeping reuse the existing action/rest art.
 Tug adds eight authored keys and the exact existing seat endpoint, not a dense
@@ -40,7 +40,7 @@ cue, not audio playback. Ball/treat/tug wake a sleeping pet through the existing
 recovery instead of waiting out the long sleep hold. Belly also shortens its hold
 on interaction and finishes the authored roll safely.
 
-## Earlier runtime optimization (unpublished npm candidate)
+## Earlier runtime optimization (also included in0.0.4)
 
 The dot-art actor already integrates its own travel, stride and perspective. Its
 former Three.js animal only supplied a position copied from that actor's target;
@@ -81,7 +81,7 @@ These are local test-process samples, not desktop memory budgets or guarantees.
 RSS includes loading transients, two sequential pet instances and allocator/GC
 behavior. Browser, macOS and Linux performance were not measured in this pass.
 The decoded Q5 art still occupies about66.5 MB; this change does not reduce that
-resident art. The public npm release has not been updated with this candidate.
+resident art in that earlier pass; the comfort pass above reduces it further.
 
 Reproduce from the development checkout:
 

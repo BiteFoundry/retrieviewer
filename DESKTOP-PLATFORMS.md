@@ -1,9 +1,14 @@
-# Native desktop adapters — 0.0.3
+# Native desktop adapters — 0.0.4
 
 Version0.0.3 includes Windows, Linux X11 and experimental macOS adapters. Windows
 and the AlmaLinux8 X11 baseline have live verification; macOS has no runtime verification.
 Installation takes two steps: `npm install -g @bitefoundry/retrieviewer`,
 then `retrieviewer desktop`. No app patch, wrapper, shell profile or auto-start entry.
+
+Version0.0.4 adds compact comfort behaviors and the tug control. Windows native
+checks were repeated. New Linux/macOS control changes have grammar/protocol
+checks, not new live GUI verification; the Linux live evidence below is the
+earlier0.0.3 baseline. macOS remains experimental.
 
 ## Design and status
 

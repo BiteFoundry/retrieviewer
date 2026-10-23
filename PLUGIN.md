@@ -107,7 +107,7 @@ The package check creates a tarball, installs it into a fresh temp consumer offl
 with lifecycle scripts disabled, exercises exports, default art, interactions,
 start/pause/dispose, all JS examples and JSONL. Evidence is retained in
 `dist/package-check.json`. It does not publish. Art originals/references/workers
-are excluded. Q5 art is about18.7 MB gzip; the current unpublished candidate tarball
+are excluded. Q5 art is about18.8 MB gzip; the0.0.4 tarball
 is about18.9 MB. Installed production files total about19.5 MB in the local consumer
 check, including dependencies. This is still a substantial pet, not a kilobyte icon;
 see measurements and release distinctions in [PUPPY-MEMORY.md](./PUPPY-MEMORY.md).

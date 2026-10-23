@@ -1,6 +1,6 @@
-# Retrieviewer 0.0.3 release process
+# Retrieviewer 0.0.4 release process
 
-Target: `@bitefoundry/retrieviewer@0.0.3`, public npm registry, `latest` tag.
+Target: `@bitefoundry/retrieviewer@0.0.4`, public npm registry, `latest` tag.
 The npm organization `bitefoundry` uses the free public-packages plan; account
 `shinick` owns the organization.
 
@@ -12,11 +12,15 @@ artwork draft is superseded. ATTRIBUTION.md retains the photographic references
 and original license links. ASSET-PROVENANCE.md records the bounded review and
 remaining limits; this is not comprehensive legal clearance.
 
-The owner explicitly authorized publishing0.0.3 with the cross-platform companion
-and the two-step npm install/desktop launch guide. Windows and the AlmaLinux8
-GLIBC2.28 X11 baseline have live test evidence; macOS ships as experimental and
-not runtime verified. Native Wayland is unsupported. No new art license or Codex
-modification is part of this release. Preserve all earlier registry artifacts.
+The owner explicitly authorized GitHub push and npm publication of the reviewed
+comfort extension and runtime optimizations on2026-10-23. Version0.0.4 removes
+unused Three.js runtime work, retains only reachable interaction samples, and
+adds belly-up/sleep behavior plus a tiny tug sprite family. Code/art licenses stay
+MIT/CC BY-SA4.0, including the new covered archive. No Codex modification is made.
+Windows live, installed-consumer and browser checks cover this release. Linux
+retains the earlier AlmaLinux8/GLIBC2.28 X11 adapter baseline; new controls have
+grammar/protocol checks, not a new Linux GUI test. macOS remains experimental.
+Native Wayland is unsupported. Preserve all earlier registry artifacts.
 
 `release-policy.json` has four independent approval gates and the CC artwork
 license identifier. The guard still refuses false/missing approvals, private
@@ -45,10 +49,9 @@ original photos, source image sheets, workers, QA receipts, credentials and loca
 settings remain local. See SOURCE-SCOPE.md. There is no npm trusted publisher or
 automatic npm release workflow; the site workflow deploys the site only.
 
-Immutable npm0.0.3 was already published and verified. This public tree adds
-repository links, docs and developer/site tooling after that publication. Do not
-republish different bytes as0.0.3. A future npm version needs fresh authorization,
-version/lock/test/policy updates, checks and registry-install verification.
+Immutable npm0.0.3 was already published and verified. Do not republish different
+bytes as0.0.3. This release uses0.0.4 with fresh authorization, version/lock/test/
+policy updates, exact-tarball checks and registry-install verification.
 
 ## Publish the tested tarball
 
@@ -65,7 +68,8 @@ https://docs.npmjs.com/trusted-publishers/
 
 ## Support boundaries
 
-The default Q5 art and runtime are unchanged by this release. The OpenCode
+The approved existing Q5 frames are unchanged; the new tiny tug family uses the
+same32-level pipeline. Belly/sleep reuse existing source frames. The OpenCode
 2.1.2 Windows directory-based adapter has local host proof; npm `./tui`
 discovery alone is not live-host certification. Other agent-native renderers
 remain unimplemented. MCP alone cannot inject a pet into arbitrary agent UIs.
