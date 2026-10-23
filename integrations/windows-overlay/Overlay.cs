@@ -111,10 +111,10 @@ sealed class Companion : ApplicationContext {
     TargetItem target;Form pickerWindow;QuietWindow testTarget;readonly bool testMode;Rectangle canvas;int revision=0,cell=8;bool visible=false,paused=false,loaded=false,quitting=false,picking=false,announced=false;
     Label status=new Label();Mutex mutex;
     internal Companion(Mutex single,bool diagnostic){
-        mutex=single;testMode=diagnostic;bar.Text="Retrieviewer controls";bar.Size=new Size(354,40);bar.BackColor=Color.FromArgb(28,30,34);bar.ForeColor=Color.White;
+        mutex=single;testMode=diagnostic;bar.Text="Retrieviewer controls";bar.Size=new Size(404,40);bar.BackColor=Color.FromArgb(28,30,34);bar.ForeColor=Color.White;
         bar.Font=new Font("Segoe UI",9);bar.Controls.Add(MakeButton("공",8,()=>Interact("ball")));bar.Controls.Add(MakeButton("간식",52,()=>Interact("treat")));
-        bar.Controls.Add(MakeButton("창",102,ChooseTarget));bar.Controls.Add(MakeButton("쉼",146,TogglePause));bar.Controls.Add(MakeButton("종료",190,Quit));
-        status.AutoSize=false;status.Location=new Point(240,12);status.Size=new Size(110,22);status.Text="준비 중";bar.Controls.Add(status);
+        bar.Controls.Add(MakeButton("터그",102,()=>Interact("tug")));bar.Controls.Add(MakeButton("창",152,ChooseTarget));bar.Controls.Add(MakeButton("쉼",196,TogglePause));bar.Controls.Add(MakeButton("종료",240,Quit));
+        status.AutoSize=false;status.Location=new Point(290,12);status.Size=new Size(110,22);status.Text="준비 중";bar.Controls.Add(status);
         ContextMenuStrip menu=new ContextMenuStrip();menu.Items.Add("다른 창 선택",null,(s,e)=>ChooseTarget());menu.Items.Add("숨기기 / 다시 표시",null,(s,e)=>TogglePause());menu.Items.Add("종료",null,(s,e)=>Quit());
         tray.Icon=SystemIcons.Application;tray.Text="Retrieviewer · 창 선택";tray.ContextMenuStrip=menu;tray.Visible=true;tray.DoubleClick+=(s,e)=>ChooseTarget();
         // Handles are created on the UI thread before the reader can signal EOF.
@@ -127,7 +127,7 @@ sealed class Companion : ApplicationContext {
         }
     }
     Button MakeButton(string title,int x,Action action){
-        Button b=new Button();b.Text=title;b.TabStop=false;b.Size=new Size(title=="간식"?46:40,28);b.Location=new Point(x,6);b.FlatStyle=FlatStyle.Flat;b.FlatAppearance.BorderSize=0;b.BackColor=Color.FromArgb(48,51,58);b.ForeColor=Color.White;b.Click+=(s,e)=>action();return b;
+        Button b=new Button();b.Text=title;b.TabStop=false;b.Size=new Size(title=="간식"||title=="터그"?46:40,28);b.Location=new Point(x,6);b.FlatStyle=FlatStyle.Flat;b.FlatAppearance.BorderSize=0;b.BackColor=Color.FromArgb(48,51,58);b.ForeColor=Color.White;b.Click+=(s,e)=>action();return b;
     }
     void ReadInput(){
         try{

@@ -36,7 +36,7 @@ export function createFramePump({pet,send,now=()=>performance.now()}){
    inFlight=true;
    try{send(frame);lastFrame=frame;}catch(error){inFlight=false;throw error;}return true;
   },
-  interact(kind){alive();if(!['ball','treat'].includes(kind))throw Error('Invalid overlay interaction');const accepted=pet.interact(kind);if(accepted)lastFrame=null;return accepted;},
+  interact(kind){alive();if(!['ball','treat','tug'].includes(kind))throw Error('Invalid overlay interaction');const accepted=pet.interact(kind);if(accepted)lastFrame=null;return accepted;},
   get hidden(){return !viewport||paused;},
   dispose(){if(!disposed){disposed=true;viewport=lastFrame=null;pet.dispose();}},
  };

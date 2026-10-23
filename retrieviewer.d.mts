@@ -39,14 +39,16 @@ export interface LifeReport {
   episode: string | null;
   intent: string;
   label: string;
-  interaction: 'ball' | 'treat' | null;
+  interaction: 'ball' | 'treat' | 'tug' | null;
   busy: boolean;
   energy: number;
   decisions: number;
-  cooldowns: {ball: number; treat: number};
+  cooldowns: {ball: number; treat: number; tug: number};
   gesture: {clip: string; progress: number} | null;
   ball: {x: number; z: number; height: number; carried: boolean} | null;
   treat: {x: number; z: number; height: number} | null;
+  /** Tug-of-war state while a tug interaction is active. */
+  tug?: {progress: number; grip: number} | null;
 }
 export interface PetFrame {
   artProfile: 'original' | 'q5';
@@ -72,7 +74,7 @@ export interface Pet {
   step(dt: number): number;
   frame(options: FrameOptions): PetFrame;
   /** False when busy or cooling down. */
-  interact(kind: 'ball' | 'treat'): boolean;
+  interact(kind: 'ball' | 'treat' | 'tug'): boolean;
   readonly disposed: boolean;
   dispose(): void;
 }
@@ -80,7 +82,7 @@ export function createPet(options?: PetOptions): Promise<Pet>;
 export function defaultLoadAsset(name: string): Promise<ArrayBuffer | Uint8Array>;
 export const STEP_SECONDS: number;
 export const MAX_CATCH_UP_SECONDS: number;
-export const INTERACTIONS: readonly ['ball', 'treat'];
+export const INTERACTIONS: readonly ['ball', 'treat', 'tug'];
 export const ART_PROFILES: readonly ['original', 'q5'];
 export const DEFAULT_ART_PROFILE: 'q5';
 export function getPetAssetFiles(artProfile?: 'original' | 'q5'): readonly string[];

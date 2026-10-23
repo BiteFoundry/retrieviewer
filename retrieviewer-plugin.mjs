@@ -82,7 +82,7 @@ export async function createPetPlugin({host,petOptions,fps=30,scheduler}={}){
    if(typeof dtSeconds!=='number'||!Number.isFinite(dtSeconds)||dtSeconds<0)throw RangeError('dtSeconds must be finite non-negative seconds');
    try{return draw(dtSeconds);}catch(error){halt();throw error;}
   },
-  // 'ball' | 'treat'. False when busy or cooling down; shows on the next frame.
+  // 'ball' | 'treat' | 'tug'. False when busy or cooling down; shows on the next frame.
   interact(kind){alive();return pet.interact(kind);},
   get running(){return running;},
   get disposed(){return disposed;},

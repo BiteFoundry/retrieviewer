@@ -265,7 +265,7 @@ var STYLE_BORDERLESS = 0, STYLE_TITLED = 1, STYLE_CLOSABLE = 2, STYLE_NONACTIVAT
 var BACKING_BUFFERED = 2, FLOATING_LEVEL = 3, ACTIVATION_ACCESSORY = 1, ANIMATION_NONE = 2;
 // canJoinAllSpaces | stationary | ignoresCycle | fullScreenAuxiliary
 var OVERLAY_SPACES = 1 | 16 | 64 | 256;
-var BAR_WIDTH = 354, BAR_HEIGHT = 40;
+var BAR_WIDTH = 404, BAR_HEIGHT = 40;
 
 var shell = null;
 
@@ -379,7 +379,7 @@ function registerClasses() {
     name: 'RetrieviewerController', superclass: 'NSObject',
     methods: {
       'onInput:': guarded('onInput'), 'onTick:': guarded('onTick'),
-      'onBall:': guarded('onBall'), 'onTreat:': guarded('onTreat'), 'onPick:': guarded('onPick'),
+      'onBall:': guarded('onBall'), 'onTreat:': guarded('onTreat'), 'onTug:': guarded('onTug'), 'onPick:': guarded('onPick'),
       'onPause:': guarded('onPause'), 'onQuit:': guarded('onQuit'),
       'onRefresh:': guarded('onRefresh'), 'onAttach:': guarded('onAttach'), 'onCancel:': guarded('onCancel'),
       'windowWillClose:': guarded('onWindowWillClose')
@@ -412,10 +412,11 @@ function startCompanion(testMode) {
   ballButton = makeButton('\uACF5', { x: 8, y: 6, width: 40, height: 28 }, 'onBall:');
   content.addSubview(ballButton);
   content.addSubview(makeButton('\uAC04\uC2DD', { x: 52, y: 6, width: 46, height: 28 }, 'onTreat:'));
-  content.addSubview(makeButton('\uCC3D', { x: 102, y: 6, width: 40, height: 28 }, 'onPick:'));
-  content.addSubview(makeButton('\uC27C', { x: 146, y: 6, width: 40, height: 28 }, 'onPause:'));
-  content.addSubview(makeButton('\uC885\uB8CC', { x: 190, y: 6, width: 46, height: 28 }, 'onQuit:'));
-  statusLabel = makeLabel(TEXT.preparing, { x: 242, y: 10, width: 108, height: 20 }, $.NSColor.whiteColor);
+  content.addSubview(makeButton('\uD130\uADF8', { x: 102, y: 6, width: 46, height: 28 }, 'onTug:'));
+  content.addSubview(makeButton('\uCC3D', { x: 152, y: 6, width: 40, height: 28 }, 'onPick:'));
+  content.addSubview(makeButton('\uC27C', { x: 196, y: 6, width: 40, height: 28 }, 'onPause:'));
+  content.addSubview(makeButton('\uC885\uB8CC', { x: 240, y: 6, width: 46, height: 28 }, 'onQuit:'));
+  statusLabel = makeLabel(TEXT.preparing, { x: 292, y: 10, width: 108, height: 20 }, $.NSColor.whiteColor);
   content.addSubview(statusLabel);
 
   // Menu bar item: the macOS counterpart of the Windows tray icon.
@@ -535,6 +536,7 @@ function startCompanion(testMode) {
   };
   shell.onBall = function () { core.interact('ball'); };
   shell.onTreat = function () { core.interact('treat'); };
+  shell.onTug = function () { core.interact('tug'); };
   shell.onPick = function () { choose(); };
   shell.onPause = function () { core.togglePause(); };
   shell.onQuit = function () { core.quit(); };

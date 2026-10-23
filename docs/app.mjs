@@ -22,6 +22,7 @@ const ko = {
   play: "여기서 놀아보기",
   ball: "공 던져주기",
   treat: "간식 주기",
+  tug: "터그 놀이",
   pause: "잠깐 쉬기",
   resume: "다시 놀기",
   demoNote: "같은 그림, 같은 움직임 엔진. 놀기를 누르면 약21MB를 불러와요.",
@@ -89,6 +90,7 @@ const ko = {
     "미리보기를 불러오지 못했어요. 아래 놀아보기로 직접 만나보세요.",
   ballSent: "공을 던졌어요!",
   treatSent: "간식을 줬어요.",
+  tugSent: "터그 놀이를 시작했어요!",
   busy: "아직 놀고 있거나 쉬는 중이에요. 잠시 뒤 다시 해주세요.",
 };
 const enExtra = {
@@ -103,6 +105,7 @@ const enExtra = {
     "The still preview could not load. Try Play here to meet the puppy.",
   ballSent: "Ball tossed!",
   treatSent: "Treat offered.",
+  tugSent: "Tug of war started!",
   busy: "Still playing or cooling down. Try again in a moment.",
 };
 let language = "en",
@@ -189,14 +192,14 @@ function syncControls() {
   pauseButton.disabled = !pet;
   pauseButton.setAttribute("aria-pressed", String(!!pet && !playing));
   pauseButton.textContent = t(pet && !playing ? "resume" : "pause");
-  for (const kind of ["ball", "treat"])
+  for (const kind of ["ball", "treat", "tug"])
     $("#" + kind).disabled = !pet || !playing;
 }
 function paint() {
   if (!pet) return;
   const frame = pet.frame({ columns, rows, cellAspect: 0.5, poseFps: 24 });
   art.textContent = frame.text;
-  for (const kind of ["ball", "treat"])
+  for (const kind of ["ball", "treat", "tug"])
     $("#" + kind).disabled =
       !playing || frame.report.busy || frame.report.cooldowns[kind] > 0;
   stage.dataset.ready = "true";
@@ -276,14 +279,12 @@ pauseButton.addEventListener("click", () => {
   if (playing) schedule();
   else cancelLoop();
 });
-for (const kind of ["ball", "treat"])
+for (const kind of ["ball", "treat", "tug"])
   $("#" + kind).addEventListener("click", () => {
     if (!pet || !playing) return;
     status(
       pet.interact(kind)
-        ? kind === "ball"
-          ? "ballSent"
-          : "treatSent"
+        ? kind + "Sent"
         : "busy",
     );
     paint();

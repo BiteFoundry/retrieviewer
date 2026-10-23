@@ -213,7 +213,7 @@ class Companion(object):
     def press(self, name):
         if self.quitting:
             return
-        if name in ('ball', 'treat'):
+        if name in ('ball', 'treat', 'tug'):
             if self.loaded and not self.paused:
                 self.emit({'type': 'interact', 'kind': name})
         elif name == 'pause':
@@ -460,7 +460,7 @@ def ascii_label(text, limit):
 
 class XDisplay(object):
     """Owned X11 resources: one ARGB pet window, one control strip, one picker."""
-    BAR_BUTTONS = (('ball', 'Ball'), ('treat', 'Treat'), ('window', 'Window'), ('pause', 'Pause'), ('quit', 'Quit'))
+    BAR_BUTTONS = (('ball', 'Ball'), ('treat', 'Treat'), ('tug', 'Tug'), ('window', 'Window'), ('pause', 'Pause'), ('quit', 'Quit'))
 
     def __init__(self, display_name=None, require_compositor=True, x=None):
         self.x = x or load_libraries()

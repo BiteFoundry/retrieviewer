@@ -36,7 +36,7 @@ export interface PetPlugin {
   /** Host-owned loop: advance seconds then render. False while hidden. Throws while running. */
   tick(dtSeconds: number): boolean;
   /** False when busy or cooling down. */
-  interact(kind: 'ball' | 'treat'): boolean;
+  interact(kind: 'ball' | 'treat' | 'tug'): boolean;
   readonly running: boolean;
   readonly disposed: boolean;
   dispose(): void;

@@ -38,7 +38,7 @@ test('UI/runloop wiring uses background stdin notifications, a common-mode timer
  assert.match(CODE,/app\.run;/);assert.match(CODE,/setActivationPolicy\(ACTIVATION_ACCESSORY\)/);
  assert.match(SOURCE,/data\.length === 0\) \{ core\.quit\(\); return; \} \/\/ EOF/);
  assert.match(CODE,/\$\.exit\(code\)/);assert.match(CODE,/ObjC\.import\('stdlib'\)/);
- for(const method of ['onInput:','onTick:','onBall:','onTreat:','onPick:','onPause:','onQuit:','onRefresh:','onAttach:','onCancel:','windowWillClose:'])
+ for(const method of ['onInput:','onTick:','onBall:','onTreat:','onTug:','onPick:','onPause:','onQuit:','onRefresh:','onAttach:','onCancel:','windowWillClose:'])
   assert.ok(CODE.includes(`'${method}': guarded(`),method);
  for(const action of [...CODE.matchAll(/makeButton\([^)]*\}, '([A-Za-z]+:)'\)/g)].map(m=>m[1]))assert.ok(CODE.includes(`'${action}': guarded(`),action);
 });
