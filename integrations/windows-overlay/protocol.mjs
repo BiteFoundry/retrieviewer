@@ -30,13 +30,16 @@ export function createFramePump({pet,send,now=()=>performance.now()}){
    alive();if(inFlight||!viewport||paused)return false;
    const t=now(),dt=last===null?0:Math.max(0,(t-last)/1000);last=t;
    pet.step(dt);if(t<nextPaint)return false;
+   // Do this BEFORE rasterization/Braille conversion. Older embedders without
+   // the optional hint retain the original byte-comparison fallback below.
+   if(lastFrame&&pet.needsFrame?.(viewport)===false)return false;
    const source=pet.frame(viewport),frame=cropFrame(source,revision);
    nextPaint=source.state?.state==='sleep'?t+200:0;
    // A held seat/down pose can be byte-identical for seconds. Advance the life
    // clock normally but avoid JSON, IPC, bitmap allocation and native repaint.
    if(lastFrame&&frame.x===lastFrame.x&&frame.y===lastFrame.y&&frame.columns===lastFrame.columns&&frame.rows===lastFrame.rows&&frame.text===lastFrame.text)return false;
    inFlight=true;
-   try{send(frame);lastFrame=frame;}catch(error){inFlight=false;throw error;}return true;
+   try{send(frame);lastFrame=frame;}catch(error){inFlight=false;lastFrame=null;nextPaint=0;throw error;}return true;
   },
   interact(kind){alive();if(!['ball','treat','tug'].includes(kind))throw Error('Invalid overlay interaction');const accepted=pet.interact(kind);if(accepted){lastFrame=null;nextPaint=0;}return accepted;},
   get hidden(){return !viewport||paused;},

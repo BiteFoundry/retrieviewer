@@ -37,14 +37,17 @@ for cell, box in zip(cells, boxes):
     keys.append(np.asarray(registered).copy())
 keys[7] = neutral.copy()
 frames = []
+source_keys = []
 for sign in (1, -1):  # watch-left is the dog's left: viewer right
     for returning in (False, True):
         for s in range(9):
             p = (8 - s if returning else s) / 8 * 7
-            lo, hi = int(p), min(7, int(p) + 1)
-            a, b = keys[7 + sign * lo], keys[7 + sign * hi]
-            # Closely spaced authored yaw keys; blend pixels only, not geometry.
-            frames.append(np.rint(a.astype(float) * (1 - (p - lo)) + b * (p - lo)).astype(np.uint8))
+            # A crossfade of different silhouettes draws two muzzles/shoulders.
+            # Hold actual whole-body keys instead; registration and pose timing
+            # stay unchanged and the return retraces the exact same drawings.
+            source_key = 7 + sign * int(p + .5)
+            source_keys.append(source_key)
+            frames.append(keys[source_key])
 raw = b''.join(frame.tobytes() for frame in frames)
 (stage / 'watch-36.gray').write_bytes(raw)
 contact = Image.new('RGB', (5 * 320, 3 * 345), '#171717')
@@ -56,6 +59,7 @@ contact.save(stage / 'registered-keys.png')
 Image.fromarray(keys[7]).save(stage / 'neutral.png')
 receipt = {'sourceSize': sheet.size, 'scale': scale, 'dx': dx, 'dy': dy,
            'wholeBodyArt': True, 'bodyCompositing': False, 'collarMatte': False, 'nonlinearWarp': False,
-           'perKeyScale': False, 'runtimeCompositing': False, 'keys': 15, 'frames': 36}
+           'perKeyScale': False, 'runtimeCompositing': False, 'pixelBlending': False,
+           'sourceKeys': source_keys, 'keys': 15, 'frames': 36}
 (stage / 'registration.json').write_text(json.dumps(receipt, indent=2), encoding='utf8')
 print(json.dumps(receipt))

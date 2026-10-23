@@ -59,6 +59,20 @@ async function gunzip(bytes){
 // Only immutable art/metadata is shared. Each pet still owns its animal, actor,
 // life, renderer and output. Last dispose drops the shared lease, not other pets.
 const sharedAssets=new Map();
+// Conservative pre-render invalidation: only known held source poses qualify.
+// Moving poses, gestures, sleep cues and visitors always take the normal path.
+// One small key, no second pixel buffer or animation cache. Needs/cooldowns are
+// intentionally absent: they still advance, but do not draw anything themselves.
+function heldFrameKey(state,report,{columns,rows,cellAspect=.5,camera,poseFps=24,contactEnabled=true}={}){
+ const seated=state.state==='idle'&&state.seatProgress===1&&!state.behavior&&!state.actionName&&!state.comfortPose;
+ const down=state.state==='down'&&(state.actionName==='lie-down'&&state.actionProgress===1||state.behavior==='rest');
+ if((!seated&&!down)||report.gesture||report.butterfly||report.snore!==null&&report.snore!==undefined)return null;
+ return JSON.stringify([columns,rows,cellAspect,poseFps,!!contactEnabled,camera?.viewportWidth,camera?.viewportHeight,
+  camera?.rect?.left,camera?.rect?.top,camera?.rect?.width,camera?.rect?.height,
+  state.state,state.x,state.z,state.bodyLift??0,state.view,state.flip,state.seatProgress,state.seatVariant,
+  state.actionName,down?state.actionProgress:0,state.behavior,state.behaviorProgress,
+  report.ball,report.treat]);
+}
 async function loadPetAssets(loadAsset,artProfile){
  // Node keeps filtered crops compressed; only the existing two-frame LRU is
  // expanded. Browser bundles retain the portable bit-packed implementation.
@@ -114,7 +128,7 @@ export async function createPet({loadAsset=defaultLoadAsset,seed,energy,pawTrans
   actor=createPaperActor(animal,info,{manualTricks:true,trickTimings:createSnappyTrickTimings(assets.actions.info),comfortTimings:createPaperComfortTimings(assets.actions.info),walkTransitions:true,scrambleSeconds:assets.comfort.info.scramble?.duration??0,fetchMotions:assets.comfort.info.version>=4?assets.comfort.info:null});
   life=createCompanionLife(actor,{seed,returnStyle,...energy===undefined?{}:{energy}});
  }catch(e){animal?.dispose?.();release();throw e;}
- let paint=null,paintKey='',time=0,acc=0,disposed=false;
+ let paint=null,paintKey='',time=0,acc=0,disposed=false,lastHeldFrameKey=null;
  const alive=()=>{if(disposed)throw Error('Pet is disposed');};
  return {
   // Fixed 1/60 s simulation; host deltas are clamped to 0.1 s so a stalled host
@@ -125,6 +139,9 @@ export async function createPet({loadAsset=defaultLoadAsset,seed,energy,pawTrans
    while(acc>=STEP_SECONDS-1e-9){actor.update(STEP_SECONDS);life.update(STEP_SECONDS);time+=STEP_SECONDS;acc=Math.max(0,acc-STEP_SECONDS);n++;}
    return n;
   },
+  // Optional host optimization. False only when a known held pose and all
+  // visible objects/settings match the last frame; frame() itself never skips.
+  needsFrame(options){alive();const key=heldFrameKey(actor.sample(time,{poseFps:options?.poseFps??24}),life.report,options);return key===null||key!==lastHeldFrameKey;},
   // Plain Braille text sized exactly columns x rows (2x4 dots per cell). `pixels`
   // is the renderer's buffer, valid only until the next frame()/dispose().
   frame({columns,rows,cellAspect=.5,camera,poseFps=24,contactEnabled=true}={}){
@@ -141,6 +158,7 @@ export async function createPet({loadAsset=defaultLoadAsset,seed,energy,pawTrans
    const placement=projection.placement(state.x,state.z,state.bodyLift??0),pixels=paint(state,{...placement,contactEnabled:!!contactEnabled});
    paintCompanionObjects(pixels,width,height,projection,report,state,paint.lastMouth);
    const {text}=rgbaToBraille(pixels,width,height,{method:'stable',brightness:1.18,contrast:1.1});
+   lastHeldFrameKey=heldFrameKey(state,report,{columns,rows,cellAspect,camera,poseFps,contactEnabled});
    return {text,columns,rows,pixels,state,report,placement,projection,artProfile,mouth:paint.lastMouth,contacts:paint.report()};
   },
   // 'ball' | 'treat' | 'tug'. False when busy or cooling down; unknown kinds throw.
@@ -151,7 +169,7 @@ export async function createPet({loadAsset=defaultLoadAsset,seed,energy,pawTrans
   dispose(){
    if(disposed)return;disposed=true;
    try{animal.dispose?.();}finally{
-    animal=actor=life=paint=cache=info=meta=null;paintKey='';
+    animal=actor=life=paint=cache=info=meta=null;paintKey='';lastHeldFrameKey=null;
     for(const k of BUNDLES)assets[k]=null;
     release();
    }

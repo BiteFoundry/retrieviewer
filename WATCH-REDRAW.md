@@ -159,6 +159,17 @@ after accepting candidates; the pending package tarball is obsolete.
 
 ## Local review
 
+Local follow-up (2026-10-24): source-key selection replaces the pixel crossfade
+in `prepare-watch-redraw.py`. All15 registered whole-body keys, common scale,
+ground registration,36 logical samples and canonical seat endpoints remain.
+Each sample is now one exact authored key; outward/return paths reuse the same
+bytes instead of drawing two semi-transparent muzzles/shoulders. No new image,
+geometry warp or runtime blend is introduced. Non-watch decoded pixels remain
+byte-exact. The behavior archive drops from1,286,465 to1,270,759 gzip bytes.
+`dist/watch-no-ghost-v1/` preserves the candidate and source-key receipt;
+`git show HEAD:puppy-paper-behaviors-q5.bin.gz` remains the immutable release A/B.
+Automated checks do not replace final owner approval of the new held-key cadence.
+
 - `node tools/prepare-watch-redraw.mjs` writes a candidate, not shipped assets.
 - `node tools/check-watch-redraw.mjs` makes a same-state old/new text replay.
 - `node tools/prepare-scramble-art.mjs` writes a candidate, not shipped assets.

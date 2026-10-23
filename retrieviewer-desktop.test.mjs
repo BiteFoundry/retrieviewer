@@ -35,6 +35,17 @@ test('desktop grid validation and exact, transparent crop',()=>{
  assert.equal(cropFrame({columns:1,rows:1,text:'\u2800'},1).columns,0);
  assert.throws(()=>cropFrame({columns:1,rows:1,text:'X'},1));
 });
+
+test('a failed send retries a static frame even when its pre-render key is already current',()=>{
+ let dirty=true,text='⠁',fail=false,sends=0,renders=0;
+ const pet={step(){},needsFrame:()=>dirty,frame(){renders++;dirty=false;return{columns:1,rows:1,text};},interact:()=>true,dispose(){}};
+ const pump=createFramePump({pet,now:()=>0,send(){sends++;if(fail){fail=false;throw Error('transport');}}});
+ pump.viewport({...viewport(),columns:1,rows:1});pump.tick();pump.ack();
+ text='⠃';dirty=true;fail=true;assert.throws(()=>pump.tick(),/transport/);
+ assert.equal(dirty,false,'failed frame was already rasterized');
+ assert.equal(pump.tick(),true,'must retry rather than skipping forever');pump.ack();
+ assert.equal(sends,3);assert.equal(renders,3);assert.equal(pump.tick(),false);pump.dispose();
+});
 test('one frame in flight, resize ack, hidden/pause stop time, resume has no catch-up',()=>{
  let now=0,disposed=0;const steps=[],sent=[],pet={step:dt=>steps.push(dt),frame:v=>({columns:v.columns,rows:v.rows,text:Array(v.rows).fill('\u2801'.repeat(v.columns)).join('\n')}),interact:k=>k==='ball',dispose:()=>disposed++};
  const pump=createFramePump({pet,send:m=>sent.push(m),now:()=>now});

@@ -1,5 +1,37 @@
 # Runtime weight and performance
 
+## Held-pose invalidation (local candidate, 2026-10-24)
+
+The desktop pump now asks `pet.needsFrame(viewport)` before rasterization. Only
+known held seated/down poses qualify; the key includes their source selection,
+world position, camera/grid and visible objects. Moving/turning poses, gestures,
+butterflies and sleep cues take the normal rendering path. Simulation, needs,
+cooldowns and autonomous decisions still advance. Accepted input, viewport
+revision and pause/resume invalidate immediately. `frame()` itself still paints
+and returns current metadata and the same borrowed-buffer contract. One small
+key is retained, not another raster; no dependency, timer or process is added.
+
+Same seed731, 480x135 cells, 450 ticks at30Hz, first throw at tick24, brake return:
+without the hint450 renderer calls, with it300; both publish259 identical native
+frames (transport SHA256 `4069444df1bc5c1a43375ff8f3f9a4cee9bc9965c047ae5f6bfecdcc01721985`).
+During one settled1s offer, full renderer calls fall from30 to0. One local pair
+measured CPU2469ms ->1499ms; timing is a sample, not a universal CPU saving.
+Reproduce with `node tools/benchmark-held-render.mjs`.
+
+Offscreen fresh-process diagnostic-GC RSS is effectively unchanged: loaded
+102,940,672 ->102,952,960 bytes; rendered179,982,336 ->180,019,200 bytes.
+The retained ArrayBuffer difference is -19,124 bytes, mainly fewer unique watch
+samples. This is a CPU/allocation-work improvement, NOT a large desktop RAM cut.
+No live native-helper RSS or Linux/macOS performance was measured in this pass.
+
+Long-run treat/tug attention now replans a local brake from the current speed:
+`d = v*v/(2*a)`, retaining heading, distance-driven gait phase and existing
+run/walk deceleration. It cancels obsolete waypoints rather than waiting for a
+15m trip to finish. A hand-fed treat appears immediately; recovery at the tested
+rear-running speeds finishes in1.08-1.94s, including turning and sitting.
+Existing roll/tug/walk-entry recovery still reaches connected source endpoints.
+This does not change ball-return variants or multiply physical simulation time.
+
 ## Spatial autonomy and allocation pass (0.0.10)
 
 Autonomous strolls, dashes and butterfly visits no longer end with an unconditional

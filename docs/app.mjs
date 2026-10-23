@@ -59,7 +59,7 @@ const ko = {
   runStep: "실행 → 앱 창 선택 → Attach 누르기",
   desktopLanguage: "데스크톱 창 선택창과 조작 메뉴는 영어로 표시됩니다.",
   latestUpdate:
-    '0.0.10 · 여기저기 놀고 낮잠도 잡니다. 공놀이가 더 활발해졌고, 돌아오는 동작은 셋 중 고를 수 있어요. 렌더링 메모리도 줄였습니다. <a href="https://github.com/BiteFoundry/retrieviewer/blob/main/WATCH-REDRAW.md">변경 기록</a>',
+    '0.0.11 · 고개 돌릴 때 잔상을 줄이고, 간식과 터그에 더 빨리 반응하도록 고쳤습니다. 가만히 있을 땐 덜 그립니다. <a href="https://github.com/BiteFoundry/retrieviewer/blob/main/WATCH-REDRAW.md">변경 기록</a>',
   copy: "복사",
   copied: "명령을 복사했어요.",
   copyFailed: "복사하지 못했어요. 위 명령을 직접 선택해 복사해 주세요.",
@@ -270,7 +270,7 @@ async function load() {
   playing = false;
   cancelLoop();
   try {
-    const { createPet } = await import("./runtime/0.0.10/retrieviewer.mjs");
+    const { createPet } = await import("./runtime/0.0.11/retrieviewer.mjs");
     const next = await createPet({ seed: 731, returnStyle: $("#return-style").value });
     if (closed) {
       next.dispose();
@@ -311,7 +311,7 @@ $("#sleep-pose").addEventListener("change",async()=>{
   }
   study=key;playing=false;cancelLoop();syncControls();status('previewLoading');
   try{
-    const response=await fetch('./sleep-'+key+'.txt?v=0.0.10');
+    const response=await fetch('./sleep-'+key+'.txt?v=0.0.11');
     if(!response.ok)throw Error('Sleep preview HTTP '+response.status);
     const text=await response.text();if(request!==studyRequest||closed)return;
     art.textContent=text.replace(/^(?:\u2800*\n)+/,'').replace(/(?:\n\u2800*)+$/,'');

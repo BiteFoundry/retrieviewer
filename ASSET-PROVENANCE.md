@@ -95,6 +95,13 @@ puppy sheet, not new photographs. COMFORT-ART.md records the prompt, source hash
 and fixed-scale preparation. The ninth archive is covered explicitly by
 ASSETS-LICENSE.md and ATTRIBUTION.md. Original sheet PNGs remain outside npm.
 
+Local candidate2026-10-24 changes only offline watch-frame selection: the same
+15 approved whole-body drawings are held, not crossfaded into double contours.
+Source sheet SHA256 and registration stay unchanged; `watchRegistration` now
+records the exact36 source-key indices and `pixelBlending:false`. No new generated
+or photographic input, asset family or attribution is added. Existing CC BY-SA4.0
+terms and all non-watch pixels remain unchanged. See WATCH-REDRAW.md for the A/B.
+
 Copyrightability of AI-generated expression, the precise derivative-work analysis,
 and worldwide name clearance are not conclusively determined here. Existing
 domestic trademark research records possible similar marks; owning an npm scope

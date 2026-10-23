@@ -22,12 +22,19 @@ test('approved whole-body redraw replaces only watch frames, without anatomical 
  const watch=load('./puppy-paper-behaviors-q5.bin.gz'),other=createHash('sha256'),turned=createHash('sha256');
  for(let i=0;i<watch.frameCount;i++)(i<90||i>=126?other:turned).update(watch.getFrame(i));
  assert.equal(other.digest('hex'),'47cd7eee60e3e71a15bd59a02cd7288364754a295fb9b2e4a02f0333f0e11072');
- // Freeze the owner's accepted WHOLE drawing, not just a protected face with
- // an unreviewed chest underneath. Numerical tests do not grant visual approval.
- assert.equal(turned.digest('hex'),'b53d5487f3ed70e98ee5a9e5162634b4323bf6215a62e3a1d0eefc542fd14081');
+ // Same accepted whole-body keys, now held instead of crossfaded. Numerical
+ // tests do not grant visual approval; the committed release remains the A/B.
+ assert.equal(turned.digest('hex'),'4d1cf5744e1330c6e9382f955dabf902482c266d63fe971fa90eea774205212d');
  const registration=JSON.parse(readFileSync(new URL('./pet-q5-manifest.json',import.meta.url))).entries['puppy-paper-behaviors'].watchRegistration;
  assert.equal(registration.wholeBodyArt,true);
- for(const key of ['bodyCompositing','collarMatte','nonlinearWarp','perKeyScale','runtimeCompositing'])assert.equal(registration[key],false,key);
+ for(const key of ['bodyCompositing','collarMatte','nonlinearWarp','perKeyScale','runtimeCompositing','pixelBlending'])assert.equal(registration[key],false,key);
+ const keys=new Map();assert.equal(registration.sourceKeys.length,36);
+ for(const [i,key] of registration.sourceKeys.entries()){
+  const frame=Uint8Array.from(watch.getFrame(90+i));
+  if(keys.has(key))assert.deepEqual(frame,keys.get(key),'held/return key '+key);
+  else keys.set(key,frame);
+ }
+ assert.equal(keys.size,15,'all authored keys remain; no synthetic crossfade poses');
 });
 
 test('redrawn archive manifest describes the encoded and decoded release bytes',()=>{

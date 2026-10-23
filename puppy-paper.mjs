@@ -1,7 +1,7 @@
 import {createCachedTween,retimeRun,cleanGroundOffset} from './puppy-clean.mjs';
 import {createPaperFootLock,footSourcePoint,createRearSampler,createPaperSupportEpisodes} from './puppy-paper-contact.mjs';
 import {createPaperSeatSampler} from './puppy-paper-seat.mjs';
-import {planPaperRun,planPaperWalk,planPaperCarry,planPaperStumble,paperWalkTarget,planPaperApproach,planPaperApproachTravel,PAPER_GAITS,PAPER_GROUND,paperGroundTarget} from './puppy-paper-world.mjs';
+import {planPaperRun,planPaperWalk,planPaperCarry,planPaperStumble,planPaperTravel,paperWalkTarget,planPaperApproach,planPaperApproachTravel,PAPER_DYNAMICS,PAPER_GAITS,PAPER_GROUND,paperGroundTarget} from './puppy-paper-world.mjs';
 import {createPaperDirector} from './puppy-paper-director.mjs';
 import {createPaperBehaviorSampler,paperBehaviorPose} from './puppy-paper-behaviors.mjs';
 import {createPaperAreaSampler} from './puppy-paper-area.mjs';
@@ -97,6 +97,9 @@ export function createPaperActor(animal,info,{manualTricks=false,trickTimings=nu
  const playAction=(name,done,duration=PAPER_ACTION_DURATIONS[name])=>{const timing=trickTimings?.[name];duration=timing?.duration??duration;if(!Number.isFinite(duration)||duration<=0)throw Error('Invalid paper action duration');activeAction={name,duration,timing};actionDone=done;stop();enter('action');};
  const finishTrick=name=>{if(name!=='spin'){view='approach';flip=false;seatProgress=1;seatVariant='default';enter('idle');}else{view='front';flip=false;seatProgress=0;enter('settle');}drain();};
  const issue=(skipEntry=false)=>{
+  // The walk-enter drawing finishes at a shared standing endpoint. A direct
+  // interaction queued during it must not start the obsolete walk afterwards.
+  if(skipEntry&&deferred){drain();return;}
   if(movementMode==='walk'&&!skipEntry){playAction('walk-enter',()=>issue(true));return;}
   arrived=false;completed=false;travelAge=0;travelDistance=0;const x=animal.position.x,z=animal.position.z;if(straight&&view==='approach')target[0]=x;
   const dx=target[0]-x,dz=target[1]-z,distance=Math.hypot(dx,dz),run=movementMode==='walk'?planPaperWalk(distance):planPaperRun(distance);phase=Math.ceil(phase);
@@ -182,6 +185,22 @@ export function createPaperActor(animal,info,{manualTricks=false,trickTimings=nu
   }
  }
  return{
+  // Attention interrupts a journey, not its momentum. Continue the current
+  // heading/gait while braking from the actual velocity, then recover to sit.
+  // Rolls/tugs still finish their connected authored recovery via dispatch.
+  attend(){
+   if(state!=='run'||!travel||!target||motionSpeed<1e-8)return dispatch(()=>requestAction('sit',{urgent:true}),{urgent:true});
+   const n=Math.hypot(travel.dx,travel.dz),remaining=Math.max(0,travel.plan.distance-(travelDistance-(travel.distanceBase??0)));
+   const a=movementMode==='walk'?PAPER_DYNAMICS.walkDeceleration:PAPER_DYNAMICS.deceleration;
+   const distance=Math.min(remaining,motionSpeed**2/(2*a));
+   if(!n||distance<1e-10)return dispatch(()=>requestAction('sit',{urgent:true}),{urgent:true});
+   const x=animal.position.x,z=animal.position.z,dx=travel.dx/n*distance,dz=travel.dz/n*distance;
+   const plan=planPaperTravel(distance,{speed:motionSpeed,startSpeed:motionSpeed,deceleration:motionSpeed**2/(2*distance)});
+   travel={...travel,x,z,dx,dz,plan,distanceBase:travelDistance,attending:true};
+   travelAge=0;target=[x+dx,z+dz];waypoints=[];route=false;deferred=null;
+   pendingAction='sit';preparationRate=3;scrambleArmed=false;completed=false;
+   return true;
+  },
   go(x,z){if(![x,z].every(Number.isFinite))throw Error('Invalid paper target');return dispatch(()=>{route=false;go(x,z);});},
   // Eager attention changes preparation/recovery cadence only. Existing dispatch
   // keeps actions/walks at safe endpoints; root physics and gait are unchanged.
@@ -210,7 +229,7 @@ export function createPaperActor(animal,info,{manualTricks=false,trickTimings=nu
    let enteredScramble=false;
    if(state==='run'&&travel&&target){
     travelAge+=dt;const p=travel.plan.at(travelAge),ratio=travel.plan.distance?p.distance/travel.plan.distance:1;
-    travelDistance=p.distance;motionSpeed=p.speed;motionStage=p.stage;
+    travelDistance=(travel.distanceBase??0)+p.distance;motionSpeed=p.speed;motionStage=p.stage;
     const gain=travel.plan.distance?p.speed/travel.plan.distance:0;
     animal.follow({x:travel.x+travel.dx*ratio,y:0,z:travel.z+travel.dz*ratio},{x:travel.dx*gain,y:0,z:travel.dz*gain},{heading:travel.heading});
     arrived=p.done;
@@ -240,7 +259,7 @@ export function createPaperActor(animal,info,{manualTricks=false,trickTimings=nu
    director.update(dt,state==='run',distance);
    if(state==='run'){
     phase+=distance/(travel.carry&&travelDistance<travel.carry.runDistance?PAPER_GAITS.approach.stride:travel.stride);
-    if(target&&arrived){completed=true;stop();target=null;if(movementMode==='walk')playAction('walk-exit',()=>{movementMode='run';enter(walkTransitions?'idle':'settle');drain();});else enter('finish');}
+    if(target&&arrived){completed=true;stop();target=null;if(movementMode==='walk')playAction('walk-exit',()=>{movementMode='run';enter(walkTransitions?'idle':'settle');if(pendingAction)prepareDirection();else drain();});else enter('finish');}
    }else if(state==='action'&&age>=activeAction.duration){
     const done=actionDone;activeAction=null;actionDone=null;done();
    }else if(state==='launch'&&age>=launchSeconds()){
@@ -281,7 +300,7 @@ export function createPaperActor(animal,info,{manualTricks=false,trickTimings=nu
    // This clip is a calibrated standing half-turn, not walk-specific motion.
    // The old turn's intro/outro added an unrelated squat to every reversal.
    if(walkTransitions&&state==='turn'){actionName='walk-turn';actionProgress=Math.min(1,age/turnSeconds());}
-   if(view==='approach'&&approachPlan&&(state==='run'||(state==='finish'&&completed))){const p=approachPlan.at(travelDistance);if(state==='finish'){behavior='brake';behaviorProgress=1;}else if(p.clip!=='run'){behavior=p.clip;behaviorProgress=p.progress;}}
+   if(view==='approach'&&approachPlan&&(state==='run'||(state==='finish'&&completed))){const p=approachPlan.at(travelDistance);if(state==='finish'&&!travel?.attending){behavior='brake';behaviorProgress=1;}else if(p.clip!=='run'){behavior=p.clip;behaviorProgress=p.progress;}}
    if(view==='approach'&&travel?.carry&&(state==='run'||state==='finish')){
     const p=state==='finish'?{clip:'carry-settle',progress:1}:travel.carry.poseAt(travelDistance);
     if(p.clip!=='run'){comfortPose=p;behavior=null;actionName=null;}

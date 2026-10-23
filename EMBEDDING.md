@@ -30,6 +30,12 @@ pet.dispose();
 - Frame contains text,columns,rows,artProfile,pixels,state,report,placement,
   projection,mouth,contacts. pixels is a **borrowed** RGBA buffer: valid only until
   next frame/dispose; copy if retaining. The wrapper also retains no frame.
+- needsFrame(frameOptions): optional pre-render check for a host that only needs
+  changed pictures. False means a known held pose and all visible objects match
+  the last frame. Always keep calling step(dt); needs/cooldowns/autonomy continue.
+  Moving poses, gestures, visitors and sleep cues conservatively return true.
+  frame() itself never skips or returns stale metadata. Force a frame when the
+  host loses its display contents (for example after hiding or reconnecting).
 - camera:{viewportWidth,viewportHeight,rect:{left,top,width,height}} places a pane
   within a larger viewport. Keep it consistent across time for metric perspective.
 - interact('ball'|'treat'): false while busy/cooling down; unknown kind throws.

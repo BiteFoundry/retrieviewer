@@ -1,8 +1,8 @@
 // Autonomous companion "life" controller layered over a paper puppy actor.
 // The parent calls actor.update(dt) THEN life.update(dt). Commands are only issued
 // while the actor rests at a shared safe endpoint (idle/down); everything else waits.
-// Exception: an accepted ball throw reacts at once via actor.chase (the actor owns safe
-// interruption); actors without chase fall back to go at the next safe endpoint.
+// Accepted interactions ask the actor for safe interruption: chase for a ball,
+// attend for a hand-fed treat/tug. Substitute actors can use safe-endpoint fallback.
 // Parameters are authored for feel, not canine science.
 import {paperCameraPoint,paperGroundTarget,PAPER_SCREEN,PAPER_CAMERA} from './puppy-paper-world.mjs';
 import {createBallPath,createFetchPatterns} from './puppy-companion-ball.mjs';
@@ -260,12 +260,15 @@ export function createCompanionLife(actor,{seed=731,energy=.8,returnStyle='auto'
   quiet=0;
   if(butterfly||lastEpisode==='butterfly'){
    butterfly=null;queue=[];hold=0;holdIntent=null;gesture=null;waiting=null;
-   if(kind!=='ball')actor.sit();
   }
   if(kind==='treat'||kind==='tug'){
    pending=kind;
-   // The pet wakes through its authored recovery, not after a long sleep timer.
-   if(['sleep','belly'].includes(actor.sample(clock).state))actor.sit();
+   queue=[];hold=0;holdIntent=null;gesture=null;waiting=null;
+   // Show the hand now, not several seconds later after the old route ends.
+   if(kind==='treat')treat=true;
+   if(typeof actor.attend==='function')actor.attend();
+   // Backward-compatible substitute actors may only support sleep recovery.
+   else if(['sleep','belly'].includes(actor.sample(clock).state))actor.sit();
    return true;
   }
   // Ball: launch now and drop obsolete controller plans; the actor's own state is left to chase.

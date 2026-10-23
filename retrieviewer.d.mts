@@ -89,6 +89,8 @@ export interface Pet {
   /** Seconds. Fixed 60 Hz simulation, at most .1 s catch-up per call. */
   step(dt: number): number;
   frame(options: FrameOptions): PetFrame;
+  /** Conservative pre-render check for held poses. Simulation still needs step(). */
+  needsFrame(options: FrameOptions): boolean;
   /** False when busy or cooling down. */
   interact(kind: 'ball' | 'treat' | 'tug'): boolean;
   /** Sets the next throw's return style. Does not interrupt a fetch in progress. */

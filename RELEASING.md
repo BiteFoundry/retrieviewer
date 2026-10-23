@@ -1,4 +1,21 @@
-# Retrieviewer 0.0.10 release process
+# Retrieviewer 0.0.11 release process
+
+Current target: `@bitefoundry/retrieviewer@0.0.11`, public `latest`.
+On2026-10-24 the owner accepted the reviewed candidate and authorized immediate
+release. This scope removes blended watch contours while retaining all15 approved
+whole-body keys, interrupts treat/tug journeys with velocity-continuous braking,
+and checks held-pose dirtiness before rasterization. Existing fetch patterns and
+all three return choices remain. No new runtime dependency, timer or process.
+RAM is effectively unchanged; this pass reduces repeated CPU/allocation work.
+
+Build a fresh exact tarball, install outside the source tree, compare every
+installed byte, check its owned Windows native lifecycle and bilingual browser
+runtime, then publish that exact tarball. Verify registry integrity and GitHub
+Pages runtime bytes afterwards. Do not restart the user's existing companion.
+Earlier npm artifacts remain immutable. MIT code / CC BY-SA4.0 artwork and
+experimental macOS / X11-only Linux boundaries remain unchanged.
+
+## Previous 0.0.10 scope (historical)
 
 The owner explicitly requested publication and website deployment after reviewing
 the repaired watch/fetch motion and restoring the original braking return as an
