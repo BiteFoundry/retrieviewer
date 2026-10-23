@@ -1,0 +1,14 @@
+{
+  "width": 320,
+  "height": 320,
+  "pairs": 3,
+  "samples": 17,
+  "bytes": 5222400,
+  "sha256": "613dbeeeaec11804e80db0216922c8f62294745514ee6283bdce61a6d784dd5e",
+  "sourceHashes": {
+    "puppy-paper-approach.bin.gz": "21f4015cf899f6b1b6602a8939bbe0eaa76c66cb466c6aabd77249d215ce8d7f",
+    "puppy-sitting-tweens.bin.gz": "5680d046726a1f296d02fefb713fe7f984b480d6a77e44fd4e2da5635a9d0fa9",
+    "preparer": "baf88cc94f684f097ec3bbab3bce676d3229c0e336f39ebde36e42d9940e9b02"
+  },
+  "method": "Existing approach run0 -> existing frontal standing -> reversed original sit preparation; pinned offline RIFE v4.6"
+}

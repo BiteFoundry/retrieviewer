@@ -1,0 +1,637 @@
+// Native macOS painter for the existing Braille engine, run with the built-in
+// '/usr/bin/osascript -l JavaScript overlay.jxa [--ipc-test|--self-test [proof.tiff]]'.
+// JXA + AppKit/Foundation/CoreGraphics bridge only: no compiler, Python, Swift,
+// Electron, downloaded binary, Accessibility API, event tap, injection, screen
+// image capture, privacy prompt or agent/terminal content access. Window titles,
+// positions and the foreground PID are read as metadata only.
+// stdout carries NDJSON protocol messages only; nothing else is ever written there.
+// Source is ASCII-only (non-ASCII text is \u-escaped) so osascript decoding cannot vary.
+// ES5 syntax only: no arrow functions, let/const, classes or template literals.
+
+// <pure> -- No ObjC below this line until </pure>; evaluated by Node tests.
+var MAX_CELLS = 125000, LOW_PROFILE_CELLS = 20000, MAX_LINE_BYTES = 800000;
+var MIN_WIDTH = 160, MIN_HEIGHT = 120;
+var INK = [248, 242, 232, 245];
+var TERMINAL_OWNERS = ['Terminal', 'iTerm2', 'iTerm', 'WezTerm', 'wezterm-gui', 'Alacritty', 'kitty', 'Ghostty', 'Warp', 'Hyper', 'Tabby'];
+var TEXT = {
+  preparing: '\uC900\uBE44 \uC911',
+  playing: '\uD568\uAED8 \uB178\uB294 \uC911',
+  accepted: '\uC88B\uC544!',
+  busy: '\uC7A0\uAE50 \uAE30\uB2E4\uB824',
+  engineError: '\uC5D4\uC9C4 \uC624\uB958',
+  chooseFromMenu: '\uBA54\uB274 \uB9C9\uB300\uC5D0\uC11C \uCC3D \uC120\uD0DD'
+};
+
+// Low profile: 12pt cells, or 16pt when a large window would exceed 20000 cells.
+function chooseGrid(rect) {
+  if (!rect) return { cell: 12, columns: 0, rows: 0 };
+  var cell = 12;
+  if (Math.floor(rect.width / cell) * Math.floor(rect.height / (cell * 2)) > LOW_PROFILE_CELLS) cell = 16;
+  return { cell: cell, columns: Math.floor(rect.width / cell), rows: Math.floor(rect.height / (cell * 2)) };
+}
+
+// CoreGraphics global space: origin at the primary display's top-left, y down, points.
+// Cocoa screen space: origin at the primary display's bottom-left, y up, points.
+// One formula covers secondary displays with negative origins; Retina scale does
+// not enter because both spaces are in points.
+function cgToCocoa(rect, primaryHeight) {
+  return { x: rect.x, y: primaryHeight - (rect.y + rect.height), width: rect.width, height: rect.height };
+}
+function cocoaToCg(rect, primaryHeight) {
+  return { x: rect.x, y: primaryHeight - (rect.y + rect.height), width: rect.width, height: rect.height };
+}
+function sameRect(a, b) {
+  if (!a || !b) return a === b;
+  return a.x === b.x && a.y === b.y && a.width === b.width && a.height === b.height;
+}
+
+function isInt(v) { return typeof v === 'number' && isFinite(v) && Math.floor(v) === v; }
+
+// Validates a protocol frame against the current grid; null means "empty frame".
+function parseFrame(m, cell, canvas) {
+  var columns = m.columns, rows = m.rows, x = m.x, y = m.y, text = m.text;
+  if (!isInt(columns) || !isInt(rows) || !isInt(x) || !isInt(y) || typeof text !== 'string') throw new Error('Invalid overlay frame');
+  if (columns === 0 && rows === 0 && text.length === 0) return null;
+  if (columns < 1 || rows < 1 || columns * rows > MAX_CELLS || x < 0 || y < 0 || !canvas ||
+      (x + columns) * cell > canvas.width || (y + rows) * cell * 2 > canvas.height) throw new Error('Out-of-bounds overlay frame');
+  var lines = text.split('\n');
+  if (lines.length !== rows) throw new Error('Invalid overlay row count');
+  for (var r = 0; r < rows; r++) {
+    var line = lines[r];
+    if (line.length !== columns) throw new Error('Invalid overlay column count');
+    for (var c = 0; c < columns; c++) {
+      var code = line.charCodeAt(c);
+      if (code < 0x2800 || code > 0x28ff) throw new Error('Not a Braille frame');
+    }
+  }
+  return { x: x, y: y, columns: columns, rows: rows, lines: lines };
+}
+
+// Cocoa rectangle (CG space) of a parsed frame inside the target canvas.
+function petRect(canvas, parsed, cell) {
+  return { x: canvas.x + parsed.x * cell, y: canvas.y + parsed.y * cell * 2, width: parsed.columns * cell, height: parsed.rows * cell * 2 };
+}
+
+// Same dot geometry as Overlay.cs: Braille bit order, half-cell pitch, 0.48 diameter.
+var DOT_DX = [0, 0, 0, 1, 1, 1, 0, 1], DOT_DY = [0, 1, 2, 0, 1, 2, 3, 3];
+function dotStamp(cell, scale) {
+  var step = cell / 2 * scale, diameter = Math.max(1.1 * scale, step * 0.48), radius = diameter / 2;
+  var center = 0.5 * step, frac = center - Math.floor(center), reach = Math.ceil(radius + 1), size = reach * 2 + 1;
+  var cover = new Float32Array(size * size), samples = 4;
+  for (var py = 0; py < size; py++) for (var px = 0; px < size; px++) {
+    var hit = 0;
+    for (var sy = 0; sy < samples; sy++) for (var sx = 0; sx < samples; sx++) {
+      var dx = px - reach + (sx + 0.5) / samples - frac, dy = py - reach + (sy + 0.5) / samples - frac;
+      if (dx * dx + dy * dy <= radius * radius) hit++;
+    }
+    cover[py * size + px] = hit / (samples * samples);
+  }
+  return { cover: cover, size: size, reach: reach, step: step };
+}
+// Premultiplied RGBA pixels at 'scale' pixels per point.
+function rasterize(parsed, cell, scale) {
+  var width = parsed.columns * cell * scale, height = parsed.rows * cell * 2 * scale;
+  var alpha = new Float32Array(width * height), stamp = dotStamp(cell, scale), dots = 0;
+  for (var row = 0; row < parsed.rows; row++) {
+    var line = parsed.lines[row];
+    for (var col = 0; col < parsed.columns; col++) {
+      var mask = line.charCodeAt(col) - 0x2800;
+      if (!mask) continue;
+      for (var bit = 0; bit < 8; bit++) {
+        if (!(mask & (1 << bit))) continue;
+        dots++;
+        var cx = Math.floor(col * cell * scale + (DOT_DX[bit] + 0.5) * stamp.step);
+        var cy = Math.floor(row * cell * 2 * scale + (DOT_DY[bit] + 0.5) * stamp.step);
+        for (var sy = 0; sy < stamp.size; sy++) {
+          var py = cy - stamp.reach + sy;
+          if (py < 0 || py >= height) continue;
+          for (var sx = 0; sx < stamp.size; sx++) {
+            var px = cx - stamp.reach + sx;
+            if (px < 0 || px >= width) continue;
+            var v = stamp.cover[sy * stamp.size + sx], i = py * width + px;
+            if (v > alpha[i]) alpha[i] = v;
+          }
+        }
+      }
+    }
+  }
+  var pixels = new Uint8Array(width * height * 4);
+  for (var p = 0; p < alpha.length; p++) {
+    if (!alpha[p]) continue;
+    var a = Math.round(alpha[p] * INK[3]);
+    pixels[p * 4] = Math.round(INK[0] * a / 255);
+    pixels[p * 4 + 1] = Math.round(INK[1] * a / 255);
+    pixels[p * 4 + 2] = Math.round(INK[2] * a / 255);
+    pixels[p * 4 + 3] = a;
+  }
+  return { width: width, height: height, pixels: pixels, dots: dots };
+}
+// Retina detail where affordable; never more than ~2M pixels per frame.
+function paintScale(rect, screenScale) {
+  var scale = screenScale >= 2 ? 2 : 1;
+  while (scale > 1 && rect.width * rect.height * scale * scale > 2000000) scale--;
+  return scale;
+}
+
+// Minimal baseline uncompressed little-endian RGBA TIFF (associated alpha):
+// AppKit's native bitmap container, decoded by NSImage without extra codecs.
+function tiffRGBA(width, height, pixels) {
+  var tags = [[256, 4, 1, width], [257, 4, 1, height], [258, 3, 4, 0], [259, 3, 1, 1], [262, 3, 1, 2],
+    [273, 4, 1, 0], [277, 3, 1, 4], [278, 4, 1, height], [279, 4, 1, width * height * 4], [284, 3, 1, 1], [338, 3, 1, 1]];
+  var ifd = 8, bitsAt = ifd + 2 + tags.length * 12 + 4, dataAt = bitsAt + 8;
+  tags[2][3] = bitsAt; tags[5][3] = dataAt;
+  var out = new Uint8Array(dataAt + pixels.length);
+  function u16(at, v) { out[at] = v & 255; out[at + 1] = (v >>> 8) & 255; }
+  function u32(at, v) { u16(at, v & 65535); u16(at + 2, (v >>> 16) & 65535); }
+  out[0] = 0x49; out[1] = 0x49; u16(2, 42); u32(4, ifd); u16(ifd, tags.length);
+  for (var t = 0; t < tags.length; t++) {
+    var at = ifd + 2 + t * 12, tag = tags[t];
+    u16(at, tag[0]); u16(at + 2, tag[1]); u32(at + 4, tag[2]);
+    if (tag[1] === 3 && tag[2] === 1) u16(at + 8, tag[3]); else u32(at + 8, tag[3]);
+  }
+  u32(bitsAt - 4, 0);
+  for (var b = 0; b < 4; b++) u16(bitsAt + b * 2, 8);
+  out.set(pixels, dataAt);
+  return out;
+}
+
+var B64 = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
+function base64(bytes) {
+  var parts = [], chunk = [], n = bytes.length, i = 0;
+  for (; i + 2 < n; i += 3) {
+    var v = (bytes[i] << 16) | (bytes[i + 1] << 8) | bytes[i + 2];
+    chunk.push(B64.charAt(v >> 18), B64.charAt((v >> 12) & 63), B64.charAt((v >> 6) & 63), B64.charAt(v & 63));
+    if (chunk.length >= 32768) { parts.push(chunk.join('')); chunk = []; }
+  }
+  if (i < n) {
+    var w = (bytes[i] << 16) | ((i + 1 < n ? bytes[i + 1] : 0) << 8);
+    chunk.push(B64.charAt(w >> 18), B64.charAt((w >> 12) & 63), i + 1 < n ? B64.charAt((w >> 6) & 63) : '=', '=');
+  }
+  parts.push(chunk.join(''));
+  return parts.join('');
+}
+
+// CGWindowListCopyWindowInfo dictionary (deep-unwrapped) to a plain record.
+function windowRecord(info) {
+  if (!info || typeof info !== 'object') return null;
+  var b = info.kCGWindowBounds, id = info.kCGWindowNumber, pid = info.kCGWindowOwnerPID;
+  if (!isInt(id) || !isInt(pid) || !b) return null;
+  return {
+    id: id, pid: pid, owner: typeof info.kCGWindowOwnerName === 'string' ? info.kCGWindowOwnerName : '',
+    name: typeof info.kCGWindowName === 'string' ? info.kCGWindowName : '',
+    layer: isInt(info.kCGWindowLayer) ? info.kCGWindowLayer : 0,
+    alpha: typeof info.kCGWindowAlpha === 'number' ? info.kCGWindowAlpha : 1,
+    onscreen: info.kCGWindowIsOnscreen === true || info.kCGWindowIsOnscreen === 1,
+    bounds: { x: Math.round(b.X), y: Math.round(b.Y), width: Math.round(b.Width), height: Math.round(b.Height) }
+  };
+}
+// Picker entries: ordinary (layer 0) visible windows of other processes. When
+// macOS withholds titles (no Screen Recording permission) the app name and
+// window number are shown instead; no permission is requested.
+function pickerTargets(infos, ownPid) {
+  var result = [];
+  for (var i = 0; i < infos.length; i++) {
+    var w = windowRecord(infos[i]);
+    if (!w || w.pid === ownPid || w.layer !== 0 || w.alpha <= 0 || w.bounds.width < MIN_WIDTH || w.bounds.height < MIN_HEIGHT) continue;
+    var terminal = TERMINAL_OWNERS.indexOf(w.owner) >= 0;
+    var label = (terminal ? '[\uD130\uBBF8\uB110] ' : '') + (w.name ? w.name + ' \u00B7 ' + w.owner : w.owner + ' \u00B7 \uCC3D') + ' #' + w.id;
+    result.push({ id: w.id, pid: w.pid, owner: w.owner, title: label, terminal: terminal });
+  }
+  result.sort(function (a, b) { return a.terminal === b.terminal ? (a.title < b.title ? -1 : a.title > b.title ? 1 : 0) : a.terminal ? -1 : 1; });
+  return result;
+}
+// Another window of the target's own app stacked above it means the selected
+// window is not that app's front window.
+function coveredBySameApp(aboveInfos, target) {
+  for (var i = 0; i < aboveInfos.length; i++) {
+    var w = windowRecord(aboveInfos[i]);
+    if (w && w.pid === target.pid && w.id !== target.id && w.layer === 0 && w.onscreen && w.alpha > 0) return true;
+  }
+  return false;
+}
+
+// Platform-neutral state machine shared by the AppKit shell and Node tests.
+// io: emit(msg) observe(target)->{info,frontPid,covered} paint(parsed,cell,canvas)
+//     hidePet() showBar(canvas) hideBar() status(text) loaded() quit()
+function createCore(io, options) {
+  var s = { target: options && options.target || null, testMode: !!(options && options.testMode), canvas: null, cell: 12,
+    revision: 0, visible: false, paused: false, loaded: false, quitting: false, picking: false };
+  function track(force) {
+    if (s.quitting) return;
+    var obs = s.target ? io.observe(s.target) : { info: null };
+    if (s.target && (!obs.info || obs.info.pid !== s.target.pid || obs.info.id !== s.target.id)) s.target = null;
+    var next = null, show = false;
+    if (s.target && obs.info.onscreen) {
+      next = obs.info.bounds;
+      show = !s.picking && (s.testMode || (obs.frontPid === s.target.pid && !obs.covered)) && next.width >= MIN_WIDTH && next.height >= MIN_HEIGHT;
+    }
+    var grid = chooseGrid(next);
+    if (grid.columns * grid.rows > MAX_CELLS) show = false;
+    if (force || show !== s.visible || !sameRect(next, s.canvas) || grid.cell !== s.cell) {
+      s.visible = show; s.canvas = next; s.cell = grid.cell; s.revision++; io.hidePet();
+      io.emit({ type: 'viewport', revision: s.revision, visible: show && !s.paused, selected: s.target !== null,
+        columns: grid.columns, rows: grid.rows, cellWidth: s.cell, cellHeight: s.cell * 2 });
+    }
+    if (s.visible) { io.showBar(s.canvas); if (s.paused) io.hidePet(); } else { io.hidePet(); io.hideBar(); }
+  }
+  function message(m) {
+    if (s.quitting) return;
+    if (!m || typeof m !== 'object') throw new Error('Invalid overlay message');
+    if (m.type === 'quit') { quit(); return; }
+    if (m.type === 'loaded') { s.loaded = true; io.status(TEXT.playing); io.loaded(); return; }
+    if (m.type === 'interaction') { io.status(m.accepted === true ? TEXT.accepted : TEXT.busy); return; }
+    if (m.type === 'error') { io.status(TEXT.engineError); quit(); return; }
+    if (m.type === 'frame') {
+      // Always acknowledge stale or hidden frames too, or the sender stalls.
+      var painted = s.visible && !s.paused && m.revision === s.revision;
+      if (painted) { var parsed = parseFrame(m, s.cell, s.canvas); if (parsed) io.paint(parsed, s.cell, s.canvas); else io.hidePet(); }
+      io.emit({ type: 'ack', painted: painted });
+    }
+  }
+  function quit() { if (s.quitting) return; s.quitting = true; io.quit(); }
+  return {
+    track: track, message: message, quit: quit,
+    interact: function (kind) { if (s.quitting || !s.loaded || s.paused) return; io.emit({ type: 'interact', kind: kind }); },
+    togglePause: function () { if (s.quitting) return; s.paused = !s.paused; io.emit({ type: 'pause', paused: s.paused }); track(true); },
+    attach: function (target) { s.target = target; s.paused = false; io.emit({ type: 'pause', paused: false }); },
+    setPicking: function (value) { s.picking = !!value; },
+    state: s
+  };
+}
+// </pure>
+
+var CG_ON_SCREEN_ONLY = 1, CG_ON_SCREEN_ABOVE = 2, CG_INCLUDING_WINDOW = 8, CG_EXCLUDE_DESKTOP = 16;
+var STYLE_BORDERLESS = 0, STYLE_TITLED = 1, STYLE_CLOSABLE = 2, STYLE_NONACTIVATING = 128;
+var BACKING_BUFFERED = 2, FLOATING_LEVEL = 3, ACTIVATION_ACCESSORY = 1, ANIMATION_NONE = 2;
+// canJoinAllSpaces | stationary | ignoresCycle | fullScreenAuxiliary
+var OVERLAY_SPACES = 1 | 16 | 64 | 256;
+var BAR_WIDTH = 354, BAR_HEIGHT = 40;
+
+var shell = null;
+
+function emit(value) {
+  var line = $(JSON.stringify(value) + '\n').dataUsingEncoding($.NSUTF8StringEncoding);
+  $.NSFileHandle.fileHandleWithStandardOutput.writeData(line);
+}
+
+// CGWindowListCopyWindowInfo returns a +1 CFArray. Older JXA hands it back as
+// an opaque Ref that must be cast; it is deep-copied into JS values and released.
+function windowInfos(option, relativeTo) {
+  var ref = $.CGWindowListCopyWindowInfo(option, relativeTo), list = null;
+  if (ref === null || ref === undefined) return [];
+  if (typeof Ref === 'function' && ref instanceof Ref) {
+    list = ObjC.deepUnwrap(ObjC.castRefToObject(ref));
+    if (list) $.CFRelease(ref);
+  } else {
+    list = ObjC.deepUnwrap(ref);
+  }
+  return list instanceof Array ? list : [];
+}
+function windowById(id) {
+  var list = windowInfos(CG_INCLUDING_WINDOW, id);
+  for (var i = 0; i < list.length; i++) { var w = windowRecord(list[i]); if (w && w.id === id) return w; }
+  return null;
+}
+function primaryHeight() {
+  var screens = $.NSScreen.screens;
+  return screens.count ? screens.objectAtIndex(0).frame.size.height : 0;
+}
+function maxBackingScale() {
+  var screens = $.NSScreen.screens, scale = 1;
+  for (var i = 0; i < screens.count; i++) scale = Math.max(scale, screens.objectAtIndex(i).backingScaleFactor);
+  return scale;
+}
+function frontPid() {
+  var app = $.NSWorkspace.sharedWorkspace.frontmostApplication;
+  return app && !app.isNil() ? app.processIdentifier : -1;
+}
+function ownPid() { return $.NSProcessInfo.processInfo.processIdentifier; }
+function rectFromStruct(frame) { return { x: frame.origin.x, y: frame.origin.y, width: frame.size.width, height: frame.size.height }; }
+function nsRect(r) { return $.NSMakeRect(r.x, r.y, r.width, r.height); }
+
+function makePanel(rect, style) {
+  var panel = $.NSPanel.alloc.initWithContentRectStyleMaskBackingDefer(nsRect(rect), style, BACKING_BUFFERED, false);
+  // JS wrappers own these windows; AppKit must not also release them on close.
+  panel.setReleasedWhenClosed(false);
+  panel.setHidesOnDeactivate(false);
+  panel.setAnimationBehavior(ANIMATION_NONE);
+  return panel;
+}
+// Transparent, shadowless, click-through, never key/main, above normal windows.
+function makePetPanel() {
+  var panel = makePanel({ x: 0, y: 0, width: 16, height: 32 }, STYLE_BORDERLESS | STYLE_NONACTIVATING);
+  panel.setOpaque(false);
+  panel.setBackgroundColor($.NSColor.clearColor);
+  panel.setHasShadow(false);
+  panel.setIgnoresMouseEvents(true);
+  panel.setFloatingPanel(true);
+  panel.setBecomesKeyOnlyIfNeeded(true);
+  panel.setLevel(FLOATING_LEVEL);
+  panel.setCollectionBehavior(OVERLAY_SPACES);
+  var view = $.NSImageView.alloc.initWithFrame($.NSMakeRect(0, 0, 16, 32));
+  view.setImageScaling(1); // NSImageScaleAxesIndependently: image fills the view exactly.
+  panel.setContentView(view);
+  return { panel: panel, view: view };
+}
+function paintInto(pet, parsed, cell, canvas) {
+  var rect = petRect(canvas, parsed, cell), scale = paintScale(rect, maxBackingScale());
+  var raster = rasterize(parsed, cell, scale);
+  var data = $.NSData.alloc.initWithBase64EncodedStringOptions($(base64(tiffRGBA(raster.width, raster.height, raster.pixels))), 0);
+  var image = $.NSImage.alloc.initWithData(data);
+  if (!image || image.isNil()) throw new Error('Overlay bitmap decode failed');
+  image.setSize($.NSMakeSize(rect.width, rect.height));
+  // New image and new position are applied before ordering in: no afterimage.
+  pet.view.setFrame($.NSMakeRect(0, 0, rect.width, rect.height));
+  pet.view.setImage(image);
+  pet.panel.setFrameDisplay(nsRect(cgToCocoa(rect, primaryHeight())), true);
+  if (!pet.panel.isVisible) pet.panel.orderFrontRegardless;
+  return { rect: rect, data: data, raster: raster };
+}
+function hidePanel(panel) { if (panel.isVisible) panel.orderOut(null); }
+function makeLabel(text, rect, color) {
+  var label = $.NSTextField.alloc.initWithFrame(nsRect(rect));
+  label.setStringValue($(text));
+  label.setEditable(false); label.setSelectable(false); label.setBordered(false); label.setDrawsBackground(false);
+  if (color) label.setTextColor(color);
+  return label;
+}
+function makeButton(title, rect, action) {
+  // RetrieviewerButton accepts the first click without activating this app.
+  var button = $.RetrieviewerButton.alloc.initWithFrame(nsRect(rect));
+  button.setTitle($(title));
+  button.setBezelStyle(1);
+  button.target = shell.controller;
+  button.action = action;
+  return button;
+}
+
+function registerClasses() {
+  function guarded(name) {
+    return { types: ['void', ['id']], implementation: function (sender) {
+      try { shell[name](sender); } catch (error) { fail(error); }
+    } };
+  }
+  ObjC.registerSubclass({
+    name: 'RetrieviewerButton', superclass: 'NSButton',
+    methods: { 'acceptsFirstMouse:': { types: ['bool', ['id']], implementation: function (event) { return true; } } }
+  });
+  ObjC.registerSubclass({
+    name: 'RetrieviewerController', superclass: 'NSObject',
+    methods: {
+      'onInput:': guarded('onInput'), 'onTick:': guarded('onTick'),
+      'onBall:': guarded('onBall'), 'onTreat:': guarded('onTreat'), 'onPick:': guarded('onPick'),
+      'onPause:': guarded('onPause'), 'onQuit:': guarded('onQuit'),
+      'onRefresh:': guarded('onRefresh'), 'onAttach:': guarded('onAttach'), 'onCancel:': guarded('onCancel'),
+      'windowWillClose:': guarded('onWindowWillClose')
+    }
+  });
+}
+
+function fail(error) {
+  try { emit({ type: 'error', message: String(error && error.message || error) }); } catch (ignored) {}
+  if (shell && shell.core) shell.core.quit(); else $.exit(1);
+}
+
+function startCompanion(testMode) {
+  var app = $.NSApplication.sharedApplication;
+  app.setActivationPolicy(ACTIVATION_ACCESSORY);
+  registerClasses();
+  var me = ownPid(), buffer = $.NSMutableData.data, newline = $('\n').dataUsingEncoding($.NSUTF8StringEncoding);
+  var input = $.NSFileHandle.fileHandleWithStandardInput, timer = null, picker = null, pickerItems = [], pickerList = null;
+  var announced = false, testTarget = null, statusItem = null, ballButton = null, statusLabel = null, attachedPid = 0;
+  var readModes = $([$.NSDefaultRunLoopMode, $.NSEventTrackingRunLoopMode, $.NSModalPanelRunLoopMode]);
+  var readNote = $.NSFileHandleReadCompletionNotification || $('NSFileHandleReadCompletionNotification');
+  var dataKey = $.NSFileHandleNotificationDataItem || $('NSFileHandleNotificationDataItem');
+  shell = { controller: $.RetrieviewerController.alloc.init };
+  var pet = makePetPanel();
+  var bar = makePanel({ x: 0, y: 0, width: BAR_WIDTH, height: BAR_HEIGHT }, STYLE_BORDERLESS | STYLE_NONACTIVATING);
+  bar.setOpaque(false);
+  bar.setBackgroundColor($.NSColor.colorWithCalibratedRedGreenBlueAlpha(28 / 255, 30 / 255, 34 / 255, 0.94));
+  bar.setFloatingPanel(true); bar.setBecomesKeyOnlyIfNeeded(true); bar.setLevel(FLOATING_LEVEL); bar.setCollectionBehavior(OVERLAY_SPACES);
+  var content = bar.contentView;
+  ballButton = makeButton('\uACF5', { x: 8, y: 6, width: 40, height: 28 }, 'onBall:');
+  content.addSubview(ballButton);
+  content.addSubview(makeButton('\uAC04\uC2DD', { x: 52, y: 6, width: 46, height: 28 }, 'onTreat:'));
+  content.addSubview(makeButton('\uCC3D', { x: 102, y: 6, width: 40, height: 28 }, 'onPick:'));
+  content.addSubview(makeButton('\uC27C', { x: 146, y: 6, width: 40, height: 28 }, 'onPause:'));
+  content.addSubview(makeButton('\uC885\uB8CC', { x: 190, y: 6, width: 46, height: 28 }, 'onQuit:'));
+  statusLabel = makeLabel(TEXT.preparing, { x: 242, y: 10, width: 108, height: 20 }, $.NSColor.whiteColor);
+  content.addSubview(statusLabel);
+
+  // Menu bar item: the macOS counterpart of the Windows tray icon.
+  statusItem = $.NSStatusBar.systemStatusBar.statusItemWithLength(-1);
+  statusItem.button.setTitle($('\u28BF'));
+  statusItem.button.setToolTip($('Retrieviewer'));
+  var menu = $.NSMenu.alloc.initWithTitle($('Retrieviewer'));
+  [['\uB2E4\uB978 \uCC3D \uC120\uD0DD', 'onPick:'], ['\uC228\uAE30\uAE30 / \uB2E4\uC2DC \uD45C\uC2DC', 'onPause:'], ['\uC885\uB8CC', 'onQuit:']].forEach(function (entry) {
+    var item = $.NSMenuItem.alloc.initWithTitleActionKeyEquivalent($(entry[0]), entry[1], $(''));
+    item.target = shell.controller;
+    menu.addItem(item);
+  });
+  statusItem.setMenu(menu);
+
+  function placeBar(canvas) {
+    var rect = { x: canvas.x + canvas.width - BAR_WIDTH - 10, y: canvas.y + 10, width: BAR_WIDTH, height: BAR_HEIGHT };
+    bar.setFrameDisplay(nsRect(cgToCocoa(rect, primaryHeight())), true);
+    if (!bar.isVisible) bar.orderFrontRegardless;
+  }
+  var core = createCore({
+    emit: emit,
+    observe: function (target) {
+      var info = windowById(target.id), result = { info: info, frontPid: -1, covered: false };
+      if (info && info.onscreen && !testMode) {
+        result.frontPid = frontPid();
+        if (result.frontPid === target.pid) result.covered = coveredBySameApp(windowInfos(CG_ON_SCREEN_ABOVE | CG_EXCLUDE_DESKTOP, target.id), target);
+      }
+      return result;
+    },
+    paint: function (parsed, cell, canvas) { paintInto(pet, parsed, cell, canvas); },
+    hidePet: function () { if (pet.panel.isVisible) { pet.panel.orderOut(null); pet.view.setImage(null); } },
+    showBar: placeBar,
+    hideBar: function () { hidePanel(bar); },
+    status: function (text) { statusLabel.setStringValue($(text)); },
+    loaded: function () { if (testMode) ballButton.performClick(null); },
+    quit: function () {
+      if (timer) timer.invalidate;
+      $.NSNotificationCenter.defaultCenter.removeObserver(shell.controller);
+      if (picker) { picker.setDelegate(null); picker.orderOut(null); }
+      pet.panel.orderOut(null); bar.orderOut(null);
+      if (testTarget) testTarget.orderOut(null);
+      if (statusItem) $.NSStatusBar.systemStatusBar.removeStatusItem(statusItem);
+      try { emit({ type: 'quit' }); } catch (ignored) {}
+      $.exit(0);
+    }
+  }, { testMode: testMode });
+  shell.core = core;
+
+  function refreshPicker() {
+    pickerItems = pickerTargets(windowInfos(CG_ON_SCREEN_ONLY | CG_EXCLUDE_DESKTOP, 0), me);
+    pickerList.removeAllItems;
+    for (var i = 0; i < pickerItems.length; i++) pickerList.addItemWithTitle($(pickerItems[i].title));
+  }
+  function choose() {
+    if (picker || core.state.quitting) return;
+    core.setPicking(true); core.track(true);
+    picker = makePanel({ x: 0, y: 0, width: 650, height: 230 }, STYLE_TITLED | STYLE_CLOSABLE);
+    picker.setTitle($('Retrieviewer \u00B7 \uD568\uAED8 \uC788\uC744 \uCC3D'));
+    picker.setLevel(FLOATING_LEVEL);
+    picker.setDelegate(shell.controller);
+    var view = picker.contentView;
+    view.addSubview(makeLabel('Codex\uB97C \uC0AC\uC6A9\uD558\uB294 \uD130\uBBF8\uB110 \uCC3D\uC744 \uC120\uD0DD\uD558\uC138\uC694.\n' +
+      '\uB0B4\uC6A9\uC744 \uC77D\uC9C0 \uC54A\uACE0 \uCC3D\uC758 \uC704\uCE58\u00B7\uD06C\uAE30\uB9CC \uB530\uB77C\uAC11\uB2C8\uB2E4. \uD0ED\uC740 \uAD6C\uBCC4\uD558\uC9C0 \uC54A\uC2B5\uB2C8\uB2E4.\n' +
+      '\uD654\uBA74 \uAE30\uB85D \uAD8C\uD55C\uC774 \uC5C6\uC73C\uBA74 \uC81C\uBAA9 \uB300\uC2E0 \uC571 \uC774\uB984\uACFC \uCC3D \uBC88\uD638\uAC00 \uBCF4\uC785\uB2C8\uB2E4.',
+      { x: 18, y: 150, width: 614, height: 64 }, null));
+    pickerList = $.NSPopUpButton.alloc.initWithFramePullsDown($.NSMakeRect(18, 106, 600, 28), false);
+    view.addSubview(pickerList);
+    view.addSubview(makeButton('\uC0C8\uB85C \uACE0\uCE68', { x: 18, y: 24, width: 100, height: 34 }, 'onRefresh:'));
+    view.addSubview(makeButton('\uC774 \uCC3D\uC5D0 \uBD99\uC774\uAE30', { x: 378, y: 24, width: 140, height: 34 }, 'onAttach:'));
+    view.addSubview(makeButton('\uCDE8\uC18C', { x: 528, y: 24, width: 90, height: 34 }, 'onCancel:'));
+    refreshPicker();
+    picker.center;
+    app.activateIgnoringOtherApps(true);
+    picker.makeKeyAndOrderFront(null);
+    emit({ type: 'picker', visible: picker.isVisible });
+  }
+  function pickerClosed() {
+    if (!picker) return;
+    picker.setDelegate(null); picker = null; pickerList = null; core.setPicking(false);
+    emit({ type: 'picker', visible: false });
+    if (core.state.quitting) return;
+    if (!core.state.target) statusLabel.setStringValue($(TEXT.chooseFromMenu));
+    statusItem.button.setToolTip($(core.state.target ? 'Retrieviewer \u00B7 \uCC3D\uC5D0 \uBD99\uC5B4 \uC788\uC74C' : 'Retrieviewer \u00B7 \uCC3D \uC120\uD0DD'));
+    // Hand focus back: to the window the user just chose, otherwise to whoever had it.
+    var chosen = attachedPid ? $.NSRunningApplication.runningApplicationWithProcessIdentifier(attachedPid) : null;
+    attachedPid = 0;
+    if (chosen && !chosen.isNil()) chosen.activateWithOptions(0); else app.deactivate;
+    core.track(true);
+  }
+  function readMore() { input.readInBackgroundAndNotifyForModes(readModes); }
+
+  shell.onInput = function (note) {
+    var data = note.userInfo.objectForKey(dataKey);
+    if (!data || data.isNil() || data.length === 0) { core.quit(); return; } // EOF: parent is gone.
+    buffer.appendData(data);
+    for (;;) {
+      var length = buffer.length;
+      var found = length ? buffer.rangeOfDataOptionsRange(newline, 0, $.NSMakeRange(0, length)) : null;
+      if (!found || found.location >= length) break;
+      var line = $.NSString.alloc.initWithDataEncoding(buffer.subdataWithRange($.NSMakeRange(0, found.location)), $.NSUTF8StringEncoding);
+      buffer = $.NSMutableData.dataWithData(buffer.subdataWithRange($.NSMakeRange(found.location + 1, length - found.location - 1)));
+      if (!line || line.isNil()) throw new Error('Overlay input is not UTF-8');
+      var text = ObjC.unwrap(line);
+      if (text.length) core.message(JSON.parse(text));
+      if (core.state.quitting) return;
+    }
+    if (buffer.length > MAX_LINE_BYTES) throw new Error('Oversized overlay input line');
+    readMore();
+  };
+  shell.onTick = function () {
+    if (!announced) {
+      announced = true;
+      if (!testMode) choose();
+      emit({ type: 'ready', pickerVisible: !!(picker && picker.isVisible) });
+    }
+    core.track(false);
+  };
+  shell.onBall = function () { core.interact('ball'); };
+  shell.onTreat = function () { core.interact('treat'); };
+  shell.onPick = function () { choose(); };
+  shell.onPause = function () { core.togglePause(); };
+  shell.onQuit = function () { core.quit(); };
+  shell.onRefresh = function () { if (picker) refreshPicker(); };
+  shell.onAttach = function () {
+    if (!picker) return;
+    var index = pickerList.indexOfSelectedItem;
+    if (index < 0 || index >= pickerItems.length) return;
+    var item = pickerItems[index];
+    core.attach({ id: item.id, pid: item.pid, title: item.title });
+    attachedPid = item.pid;
+    picker.close; // windowWillClose: finishes the hand-off.
+  };
+  shell.onCancel = function () { if (picker) picker.close; };
+  shell.onWindowWillClose = function () { pickerClosed(); };
+
+  if (testMode) {
+    // Diagnostics follow only an owned, off-screen window.
+    testTarget = makePanel({ x: -12000, y: -12000, width: 1280, height: 800 }, STYLE_BORDERLESS | STYLE_NONACTIVATING);
+    testTarget.orderFrontRegardless;
+    core.attach({ id: testTarget.windowNumber, pid: me, title: 'owned diagnostic window' });
+  }
+  $.NSNotificationCenter.defaultCenter.addObserverSelectorNameObject(shell.controller, 'onInput:', readNote, input);
+  readMore();
+  timer = $.NSTimer.timerWithTimeIntervalTargetSelectorUserInfoRepeats(0.05, shell.controller, 'onTick:', null, true);
+  $.NSRunLoop.mainRunLoop.addTimerForMode(timer, $.NSRunLoopCommonModes);
+  app.run;
+  return 0;
+}
+
+// Owned windows only: never clicks, captures, focuses or moves a user application.
+function selfTest(proofPath) {
+  var app = $.NSApplication.sharedApplication;
+  app.setActivationPolicy(ACTIVATION_ACCESSORY);
+  function pump() { $.NSRunLoop.currentRunLoop.runUntilDate($.NSDate.dateWithTimeIntervalSinceNow(0.25)); }
+  var frontBefore = frontPid(), result = { type: 'self-test' };
+  var target = makePanel({ x: -12000, y: -12000, width: 1600, height: 1000 }, STYLE_BORDERLESS | STYLE_NONACTIVATING);
+  var pet = makePetPanel();
+  try {
+    target.orderFrontRegardless; pump();
+    var info = windowById(target.windowNumber), height = primaryHeight();
+    result.windowList = !!info;
+    var expected = rectFromStruct(target.frame);
+    result.geometryConsistent = !!info && sameRect(cgToCocoa(info.bounds, height), expected);
+    var frame = { type: 'frame', revision: 1, x: 2, y: 1, columns: 3, rows: 2, text: '\u28FF\u2800\u2847\n\u2800\u28B8\u28FF' };
+    var parsed = parseFrame(frame, 12, info ? info.bounds : null);
+    var painted = paintInto(pet, parsed, 12, info.bounds);
+    result.dots = painted.raster.dots;
+    var rep = $.NSBitmapImageRep.imageRepWithData(painted.data);
+    result.bitmapDecoded = !!rep && !rep.isNil() && rep.pixelsWide === painted.raster.width && rep.pixelsHigh === painted.raster.height;
+    var scale = painted.raster.width / painted.rect.width;
+    result.inkAtDot = result.bitmapDecoded && rep.colorAtXY(Math.floor(3 * scale), Math.floor(3 * scale)).alphaComponent > 0.5;
+    result.clearBetweenDots = result.bitmapDecoded && rep.colorAtXY(Math.floor(18 * scale), Math.floor(6 * scale)).alphaComponent === 0;
+    result.followGeometry = sameRect(cocoaToCg(rectFromStruct(pet.panel.frame), height), petRect(info.bounds, parsed, 12));
+    result.clickThrough = pet.panel.ignoresMouseEvents === true;
+    result.nonActivating = (pet.panel.styleMask & STYLE_NONACTIVATING) !== 0;
+    result.neverKey = pet.panel.canBecomeKeyWindow === false && pet.panel.canBecomeMainWindow === false;
+    result.transparent = pet.panel.isOpaque === false && pet.panel.hasShadow === false;
+    target.setFrameDisplay($.NSMakeRect(-11000, -11500, 1800, 1100), true); pump();
+    var moved = windowById(target.windowNumber);
+    paintInto(pet, parsed, 12, moved.bounds);
+    result.followsMove = !!moved && sameRect(cocoaToCg(rectFromStruct(pet.panel.frame), height), petRect(moved.bounds, parsed, 12));
+    target.orderOut(null); pump();
+    var hidden = windowById(target.windowNumber);
+    result.hiddenDetected = !hidden || !hidden.onscreen;
+    hidePanel(pet.panel);
+    result.petHidden = pet.panel.isVisible === false;
+    result.foregroundPreserved = frontPid() === frontBefore;
+    if (proofPath) result.proofWritten = painted.data.writeToFileAtomically($(proofPath), true) === true;
+  } catch (error) {
+    result.error = String(error && error.message || error);
+  } finally {
+    target.orderOut(null); pet.panel.orderOut(null);
+  }
+  var checks = ['windowList', 'geometryConsistent', 'bitmapDecoded', 'inkAtDot', 'clearBetweenDots', 'followGeometry', 'clickThrough',
+    'nonActivating', 'neverKey', 'transparent', 'followsMove', 'hiddenDetected', 'petHidden', 'foregroundPreserved'];
+  result.passed = !result.error && result.dots > 0 && checks.every(function (key) { return result[key] === true; }) && (!proofPath || result.proofWritten === true);
+  emit(result);
+  return result.passed ? 0 : 1;
+}
+
+function run(argv) {
+  var code = 1;
+  try {
+    ObjC.import('Cocoa');
+    ObjC.import('CoreGraphics');
+    ObjC.import('stdlib');
+    ObjC.bindFunction('CFRelease', ['void', ['void *']]);
+    var args = [];
+    for (var i = 0; i < argv.length; i++) args.push(String(argv[i]));
+    if (args[0] === '--self-test' && args.length <= 2) code = selfTest(args[1] || null);
+    else if (args.length === 0 || (args.length === 1 && args[0] === '--ipc-test')) code = startCompanion(args[0] === '--ipc-test');
+    else throw new Error('Unsupported native painter argument');
+  } catch (error) {
+    try { emit({ type: 'error', message: String(error && error.message || error) }); } catch (ignored) {}
+    code = 1;
+  }
+  // Exit explicitly so osascript never prints a script result onto the protocol stream.
+  $.exit(code);
+}

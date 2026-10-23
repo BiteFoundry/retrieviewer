@@ -1,0 +1,16 @@
+Retrieviewer licensing
+
+Software source code: MIT License, see LICENSE-CODE.
+Bundled puppy artwork/frame data: Creative Commons Attribution-ShareAlike 4.0
+International (CC-BY-SA-4.0), see ASSETS-LICENSE.md and ATTRIBUTION.md.
+https://creativecommons.org/licenses/by-sa/4.0/legalcode.en
+
+The complete package is not MIT-only. Commercial use is allowed under the
+applicable terms. Artwork adaptations retain ShareAlike obligations; the
+separately licensed software does not become CC-licensed merely by bundling it.
+
+Third-party components retain their original notices, including the MIT license
+under vendor/procedural-animals. See THIRD-PARTY-NOTICES.md.
+
+No exclusive copyright in AI-generated output, registered trademark status,
+third-party endorsement or comprehensive legal clearance is claimed.

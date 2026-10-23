@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "packageName": "@bitefoundry/retrieviewer",
+  "artLicenseTermsApproved": true,
+  "assetRightsReviewCompleted": true,
+  "artRedistributionApproved": true,
+  "publicPublishApproved": true,
+  "artLicense": "CC-BY-SA-4.0",
+  "approvalDate": "2026-10-23",
+  "rightsReview": "ASSET-PROVENANCE.md",
+  "approvedRelease": "0.0.3",
+  "releaseScope": "Cross-platform desktop companion: Windows and AlmaLinux8 GLIBC2.28 X11 verified; macOS explicitly experimental and not runtime verified; native Wayland unsupported. Existing Q5 artwork and licenses unchanged. User explicitly authorized publishing these changes in this conversation."
+}

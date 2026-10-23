@@ -1,0 +1,440 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="dark" />
+    <title>Retrieviewer — a little company for your screen</title>
+    <meta
+      name="description"
+      content="A fluffy Braille-art retriever that lives above your app window. Toss a ball, offer a treat, get back to your thing. By BiteFoundry."
+    />
+    <meta
+      property="og:title"
+      content="Retrieviewer — a little company for your screen"
+    />
+    <meta
+      property="og:description"
+      content="An autonomous dot-art retriever for your desktop. Made by BiteFoundry."
+    />
+    <meta property="og:type" content="website" />
+    <meta
+      property="og:url"
+      content="https://bitefoundry.github.io/retrieviewer/"
+    />
+    <meta
+      property="og:image"
+      content="https://bitefoundry.github.io/retrieviewer/assets/preview.png"
+    />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="canonical" href="https://bitefoundry.github.io/retrieviewer/" />
+    <link rel="icon" href="./assets/icon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="./style.css" />
+    <link
+      rel="preload"
+      href="./assets/fonts/Manrope.ttf"
+      as="font"
+      type="font/ttf"
+      crossorigin
+    />
+    <link
+      rel="preload"
+      href="./assets/fonts/JuliaMono-Regular.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+    <script type="importmap">
+      { "imports": { "three": "./runtime/three.module.js" } }
+    </script>
+    <script type="module" src="./app.mjs"></script>
+  </head>
+  <body>
+    <a class="skip" href="#main" data-i18n="skip">Skip to content</a>
+    <header class="site-header wrap">
+      <a
+        class="brand"
+        href="https://github.com/BiteFoundry"
+        aria-label="BiteFoundry on GitHub"
+        ><svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true">
+          <g fill="currentColor">
+            <circle cx="5" cy="5" r="2" />
+            <circle cx="12" cy="5" r="2" />
+            <circle cx="19" cy="5" r="2" />
+            <circle cx="5" cy="12" r="2" />
+            <circle cx="12" cy="12" r="2" />
+            <circle cx="5" cy="19" r="2" />
+            <circle cx="12" cy="19" r="2" />
+            <circle cx="19" cy="19" r="2" />
+          </g></svg
+        >BiteFoundry<span>/ Retrieviewer</span></a
+      >
+      <nav aria-label="Main navigation">
+        <a
+          class="source-link"
+          href="https://github.com/BiteFoundry/retrieviewer"
+          >GitHub <span aria-hidden="true">↗</span></a
+        >
+        <div class="language" role="group" aria-label="Language / 언어">
+          <button type="button" data-language="en" aria-pressed="true">
+            EN
+          </button>
+          <button type="button" data-language="ko" aria-pressed="false">
+            한국어
+          </button>
+        </div>
+      </nav>
+    </header>
+    <main id="main">
+      <section class="hero wrap" aria-labelledby="hero-title">
+        <div class="hero-copy">
+          <h1 id="hero-title" data-i18n="headline">
+            A little company.<br />For your screen.
+          </h1>
+          <p class="intro" data-i18n="intro">
+            A fluffy dot-art retriever that hangs out beside your work. Toss a
+            ball. Offer a treat. Get back to your thing.
+          </p>
+          <a class="button primary" href="#install" data-i18n="adopt"
+            >Bring one home <span aria-hidden="true">↓</span></a
+          >
+          <p class="quiet" data-i18n="noAccount">
+            Runs locally, without an account or model API.
+          </p>
+        </div>
+        <figure class="puppy-demo" id="demo">
+          <div
+            class="dog-stage"
+            role="img"
+            aria-label="Live Braille-art retriever preview"
+            data-i18n-aria="dogLabel"
+          >
+            <pre id="puppy" aria-hidden="true"></pre>
+            <p
+              id="preview-fallback"
+              class="preview-fallback"
+              data-i18n="previewLoading"
+            >
+              Getting your retriever ready…
+            </p>
+          </div>
+          <div
+            class="play-controls"
+            role="group"
+            aria-label="Play with the puppy"
+            data-i18n-aria="playLabel"
+          >
+            <button
+              type="button"
+              class="button play"
+              id="play"
+              data-i18n="play"
+            >
+              Play here
+            </button>
+            <button
+              type="button"
+              class="button subtle"
+              id="ball"
+              disabled
+              data-i18n="ball"
+            >
+              Toss a ball
+            </button>
+            <button
+              type="button"
+              class="button subtle"
+              id="treat"
+              disabled
+              data-i18n="treat"
+            >
+              Give a treat
+            </button>
+            <button
+              type="button"
+              class="button subtle"
+              id="pause"
+              disabled
+              aria-pressed="false"
+              data-i18n="pause"
+            >
+              Pause
+            </button>
+          </div>
+          <p
+            class="demo-status"
+            id="demo-status"
+            role="status"
+            aria-live="polite"
+            data-i18n="demoNote"
+          >
+            Same art, same movement engine. Play loads about 21 MB.
+          </p>
+          <figcaption data-i18n="previewNote">
+            Browser preview · the installed pet follows a real app window.
+          </figcaption>
+          <button
+            class="retry"
+            type="button"
+            id="retry"
+            hidden
+            data-i18n="retry"
+          >
+            Try loading again
+          </button>
+        </figure>
+      </section>
+      <section class="life-section wrap" aria-labelledby="life-title">
+        <h2 id="life-title" data-i18n="lifeTitle">Let it be a dog.</h2>
+        <div class="life-copy">
+          <p data-i18n="lifeBody">
+            It wanders, runs, watches and takes a breather on its own. You don't
+            direct every step—just join in when you feel like it.
+          </p>
+          <p class="muted" data-i18n="mechanism">
+            A separate, transparent native window. Ordinary clicks pass through.
+            It hides when you switch away. Your editor, terminal and agent stay
+            untouched.
+          </p>
+        </div>
+      </section>
+      <section
+        class="install-section wrap"
+        id="install"
+        aria-labelledby="install-title"
+      >
+        <div class="section-title">
+          <h2 id="install-title" data-i18n="installTitle">
+            Two commands.<br />One new companion.
+          </h2>
+          <a
+            href="https://www.npmjs.com/package/@bitefoundry/retrieviewer"
+            class="text-link"
+            >npm · v0.0.3 <span aria-hidden="true">↗</span></a
+          >
+        </div>
+        <p class="install-location" data-i18n="installLocation">
+          Run in a terminal on the computer displaying your app. Next time, only
+          the second command is needed.
+        </p>
+        <ol class="commands">
+          <li>
+            <div class="command-label" data-i18n="installStep">
+              Install or update
+            </div>
+            <div class="command-row">
+              <code>npm install -g @bitefoundry/retrieviewer@latest</code
+              ><button
+                type="button"
+                class="copy"
+                data-copy="npm install -g @bitefoundry/retrieviewer@latest"
+                data-i18n="copy"
+              >
+                Copy
+              </button>
+            </div>
+          </li>
+          <li>
+            <div class="command-label" data-i18n="runStep">
+              Run, then choose an app window
+            </div>
+            <div class="command-row">
+              <code>retrieviewer desktop</code
+              ><button
+                type="button"
+                class="copy"
+                data-copy="retrieviewer desktop"
+                data-i18n="copy"
+              >
+                Copy
+              </button>
+            </div>
+          </li>
+        </ol>
+        <p
+          class="copy-feedback"
+          id="copy-status"
+          role="status"
+          aria-live="polite"
+        ></p>
+        <aside class="remote-note">
+          <strong data-i18n="remoteTitle"
+            >Using Cursor / VS Code Remote SSH?</strong
+          >
+          <p data-i18n="remoteBody">
+            Install on your local computer, where the window is displayed—not
+            inside the server's SSH terminal. A remote DISPLAY=:1 belongs to
+            that server's X11 desktop, not automatically to your local Cursor
+            window.
+          </p>
+        </aside>
+        <details>
+          <summary data-i18n="nodeTitle">Don't have Node.js / npm yet?</summary>
+          <div class="detail-body">
+            <p data-i18n="nodeBody">
+              Install a maintained Node.js release with npm from the official
+              download page, then reopen your terminal. Node 22.23.4 is our
+              tested AlmaLinux 8 baseline; the package requires Node 20+.
+            </p>
+            <a
+              class="text-link"
+              href="https://nodejs.org/en/download"
+              data-i18n="nodeLink"
+              >Get Node.js from the official source ↗</a
+            >
+            <p data-i18n="almaNode">
+              AlmaLinux 8 administrators can check the nodejs:22 module stream.
+              Don't reset an existing company-managed stream without approval.
+            </p>
+            <code class="block-code">sudo dnf module install nodejs:22</code
+            ><a
+              class="text-link"
+              href="https://github.com/BiteFoundry/retrieviewer/blob/main/PREREQUISITES.md"
+              data-i18n="prereqLink"
+              >Full prerequisites, shell-specific PATH fixes and desktop
+              libraries ↗</a
+            >
+          </div>
+        </details>
+        <details>
+          <summary data-i18n="npxTitle">
+            Try with npx / “command not found”
+          </summary>
+          <div class="detail-body">
+            <p data-i18n="npxBody">
+              With Node/npm installed, try once without a global install. npx
+              does not permanently add a retrieviewer command to PATH. For that,
+              use the global install above.
+            </p>
+            <code class="block-code"
+              >npx --yes --package @bitefoundry/retrieviewer@latest retrieviewer
+              desktop</code
+            >
+            <p data-i18n="pathBody">
+              Already installed globally? Check npm prefix -g. Linux/macOS
+              executables live in that prefix's bin directory; Windows uses the
+              prefix itself. csh/tcsh and bash need different PATH syntax.
+            </p>
+            <a
+              class="text-link"
+              href="https://github.com/BiteFoundry/retrieviewer/blob/main/PREREQUISITES.md#command-not-found"
+              data-i18n="pathLink"
+              >Find the right PATH fix for your shell ↗</a
+            >
+          </div>
+        </details>
+      </section>
+      <section
+        class="support-section wrap"
+        id="support"
+        aria-labelledby="support-title"
+      >
+        <h2 id="support-title" data-i18n="supportTitle">
+          A clear place to start.
+        </h2>
+        <dl class="support-list">
+          <div>
+            <dt>Windows 10/11</dt>
+            <dd data-i18n="windows">
+              Live tested · x64, Node and the .NET Framework 4 compiler.
+            </dd>
+          </div>
+          <div>
+            <dt>Linux X11</dt>
+            <dd data-i18n="linux">
+              AlmaLinux 8 / GLIBC 2.28 tested in an isolated composited desktop.
+              Needs Python 3.6+, X11/Xrender/Xext and a compositor.
+            </dd>
+          </div>
+          <div>
+            <dt>macOS</dt>
+            <dd data-i18n="mac">
+              Experimental. No real-Mac runtime verification yet.
+            </dd>
+          </div>
+          <div>
+            <dt>Wayland / SSH</dt>
+            <dd data-i18n="wayland">
+              No native Wayland overlay or headless display. Remote X11/VNC uses
+              that remote desktop, not the local IDE.
+            </dd>
+          </div>
+        </dl>
+        <p class="resource-note" data-i18n="resource">
+          Linux currently uses coarser 16px cells / 15fps to favor lower load;
+          Windows defaults to 8px / 30fps. Same Q5 art. The package is about 21
+          MB; a small Alma8 run used about 180 MiB Node RSS, plus its helper—not
+          a zero-resource widget.
+        </p>
+        <a
+          class="text-link"
+          href="https://github.com/BiteFoundry/retrieviewer/blob/main/DESKTOP-PLATFORMS.md"
+          data-i18n="supportLink"
+          >Requirements and actual verification ↗</a
+        >
+      </section>
+      <section class="goodbye-section wrap" aria-labelledby="goodbye-title">
+        <div>
+          <h2 id="goodbye-title" data-i18n="goodbyeTitle">
+            Easy to leave, too.
+          </h2>
+          <p data-i18n="goodbyeBody">
+            Quit from its controls, or use desktop-stop. No auto-start entry,
+            agent patch or shell wrapper to undo.
+          </p>
+        </div>
+        <div class="remove-commands">
+          <code>retrieviewer desktop-stop</code>
+          <details>
+            <summary data-i18n="removeTitle">Remove it completely</summary>
+            <code class="block-code"
+              >retrieviewer desktop-remove --yes<br />npm uninstall -g
+              @bitefoundry/retrieviewer</code
+            >
+            <p class="muted" data-i18n="removeNote">
+              If you separately enabled the OpenCode integration, disconnect it
+              before uninstalling.
+            </p>
+          </details>
+        </div>
+      </section>
+    </main>
+    <footer class="wrap site-footer">
+      <div>
+        <a class="footer-product" href="#main">Retrieviewer</a>
+        <p data-i18n="footerLine">A small companion, made by BiteFoundry.</p>
+      </div>
+      <div>
+        <p>
+          <a href="https://github.com/BiteFoundry/retrieviewer">GitHub</a> ·
+          <a href="https://www.npmjs.com/package/@bitefoundry/retrieviewer"
+            >npm</a
+          >
+          ·
+          <a
+            href="https://github.com/BiteFoundry/retrieviewer/issues"
+            data-i18n="feedback"
+            >Share feedback</a
+          >
+        </p>
+        <p data-i18n="licenses">Code MIT · Artwork CC BY-SA 4.0</p>
+        <a
+          href="https://github.com/BiteFoundry/retrieviewer/blob/main/ATTRIBUTION.md"
+          data-i18n="credits"
+          >Credits & artwork terms</a
+        ><span aria-hidden="true"> · </span
+        ><a href="./assets/fonts/NOTICE.md" data-i18n="fonts">Font licenses</a>
+      </div>
+    </footer>
+    <noscript
+      ><p class="wrap">
+        JavaScript is needed for language switching and the live preview.
+        Installation instructions above still work.
+        <a
+          href="https://github.com/BiteFoundry/retrieviewer/blob/main/README.ko.md"
+          >한국어 설치 안내</a
+        >
+      </p></noscript
+    >
+  </body>
+</html>

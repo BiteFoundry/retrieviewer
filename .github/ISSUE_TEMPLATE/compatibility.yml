@@ -1,0 +1,29 @@
+name: Compatibility report
+description: Tell us about your desktop, or a puppy that won't show up.
+body:
+  - type: markdown
+    attributes:
+      value: Please remove credentials, internal work and personal paths from logs/screenshots. For Remote SSH, tell us where the actual app window is displayed.
+  - type: input
+    id: version
+    attributes:
+      label: Retrieviewer and Node versions
+    validations:
+      required: true
+  - type: input
+    id: desktop
+    attributes:
+      label: OS / desktop session / window manager
+      description: Linux needs X11 + compositor. macOS is experimental. Include local vs SSH/VNC context.
+    validations:
+      required: true
+  - type: textarea
+    id: observed
+    attributes:
+      label: What happened? What did you expect?
+    validations:
+      required: true
+  - type: textarea
+    id: output
+    attributes:
+      label: Redacted command output or screenshot

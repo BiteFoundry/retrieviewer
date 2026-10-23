@@ -1,0 +1,11 @@
+node_modules/
+site-dist/
+dist/
+.impeccable/
+.env
+.env.*
+.npmrc
+*.log
+__pycache__/
+.DS_Store
+Thumbs.db
