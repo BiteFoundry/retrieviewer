@@ -15,7 +15,7 @@ const ko = {
   skip: "본문으로 이동",
   headline: "일하는 화면에,<br>작은 친구 하나.",
   intro:
-    "혼자 뛰어놀고, 잠깐 쉬기도 하는 보송한 도트 리트리버. 가끔 공을 던져주고 간식을 주세요. 나머지 시간은 각자의 일을 하면 돼요.",
+    "검은 터미널 화면만 보고 있기 지루해서 강아지 친구 하나를 만들었습니다.",
   adopt: '우리 화면으로 데려오기 <span aria-hidden="true">↓</span>',
   noAccount: "계정이나 모델 API 없이, 내 컴퓨터에서 함께해요.",
   previewLoading: "강아지를 만나기 위해 준비하고 있어요…",
@@ -44,14 +44,17 @@ const ko = {
   playLabel: "강아지와 놀기",
   lifeTitle: "강아지는 강아지답게.",
   lifeBody:
-    "스스로 걷고 뛰다가 잠들어요. 가끔 나비를 쫓기도 해요. 함께 놀고 싶을 때만 끼어들면 돼요.",
+    "혼자 돌아다니다 발라당 눕고, 잠도 잡니다. 가끔은 나비를 쫓고요. 내킬 때 공이나 간식을 주고, 터그 놀이도 해주세요.",
   mechanism:
-    "별도의 투명 네이티브 창으로 동작해요. 일반 클릭은 통과하고, 다른 창으로 옮겨가면 숨습니다. 에디터·터미널·에이전트를 개조하지 않아요.",
+    "투명한 창을 겹쳐 띄웁니다. 일반 클릭은 통과하고, 다른 창으로 옮겨가면 숨습니다. 에디터나 터미널을 수정하지 않아요.",
   installTitle: "명령 두 줄이면,<br>작은 친구가 생겨요.",
   installLocation:
     "앱 화면이 보이는 컴퓨터의 터미널에서 실행하세요. 다음부터는 두 번째 명령만 실행하면 돼요.",
   installStep: "설치 또는 업데이트",
-  runStep: "실행한 뒤, 선택창에서 앱 창 고르기",
+  runStep: "실행 → 앱 창 선택 → Attach 누르기",
+  desktopLanguage: "데스크톱 창 선택창과 조작 메뉴는 영어로 표시됩니다.",
+  latestUpdate:
+    '0.0.9 · 주변을 살필 때 몸통이 부풀어 보이던 부분을 다듬었습니다. <a href="https://github.com/BiteFoundry/retrieviewer/blob/main/PUPPY-MEMORY.md">변경 기록</a>',
   copy: "복사",
   copied: "명령을 복사했어요.",
   copyFailed: "복사하지 못했어요. 위 명령을 직접 선택해 복사해 주세요.",
@@ -79,7 +82,7 @@ const ko = {
   wayland:
     "네이티브 Wayland·화면 없는 서버는 미지원이에요. 원격 X11/VNC는 그 원격 화면에서 동작하며 로컬 IDE와는 별개예요.",
   resource:
-    "Linux는 16px 셀·15fps, Windows는 8px 셀·30fps예요. 패키지는 약19MB. 0.0.6 Windows 오버레이 검사에서 Node RSS는 약96~106MiB였고 헬퍼는 별도예요. 사용량은 화면 크기와 동작에 따라 달라져요. 이번 버전은 Linux GUI에서 재측정하지 않았어요.",
+    "그림은 같지만 기본 설정은 달라요. Windows는 8px 셀·30fps, Linux는 좀 더 굵은 16px 셀·15fps입니다. 패키지는 약19MB. 메모리 사용량은 창 크기와 동작에 따라 달라집니다.",
   supportLink: "필요 조건과 실제 검증 범위 보기 ↗",
   goodbyeTitle: "헤어질 때도, 간단하게.",
   goodbyeBody:

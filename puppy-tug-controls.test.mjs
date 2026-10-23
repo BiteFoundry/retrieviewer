@@ -79,8 +79,24 @@ test('browser preview: third tug button, EN/KO copy, cooldown loops and cache-bu
  const html=read('./docs/index.html'),app=read('./docs/app.mjs');
  assert.match(html,/id="tug"\s+disabled\s+data-i18n="tug"\s*>\s*Play tug\s*</);
  assert.ok(html.indexOf('id="treat"')<html.indexOf('id="tug"')&&html.indexOf('id="tug"')<html.indexOf('id="pause"'));
- assert.match(html,/app\.mjs\?v=0\.0\.9"/);
+ assert.match(html,/app\.mjs\?v=0\.0\.9-web2"/);
  assert.match(app,/ {2}tug: "터그 놀이",/);assert.match(app,/tugSent: "터그 놀이를 시작했어요!"/);assert.match(app,/tugSent: "Tug of war started!"/);
  assert.equal(app.match(/for \(const kind of \["ball", "treat", "tug"\]\)/g).length,3);
  assert.doesNotMatch(app,/\["ball", "treat"\]/);assert.match(app,/kind \+ "Sent"/);
+});
+
+test('website keeps bilingual current-release guidance and two primary install steps',()=>{
+ const html=read('./docs/index.html'),app=read('./docs/app.mjs');
+ const {version}=JSON.parse(read('./package.json'));
+ assert.ok(html.includes(`npm · v${version}`));
+ assert.ok(html.includes(`${version} · Steadier body proportions`));
+ for(const key of ['desktopLanguage','latestUpdate']){
+  assert.ok(html.includes(`data-i18n="${key}"`));
+  assert.match(app,new RegExp(`\\n  ${key}:`));
+ }
+ const commands=html.match(/<ol class="commands">([\s\S]*?)<\/ol>/)[1];
+ assert.equal((commands.match(/<li>/g)||[]).length,2);
+ assert.match(commands,/retrieviewer desktop/);assert.match(commands,/Attach/);
+ assert.doesNotMatch(html+app,/0\.0\.6 Windows|96[–~]106/,'historical memory samples belong in measurement notes');
+ assert.match(html,/analytics\.mjs\?v=1/,'preserve existing private analytics setup');
 });

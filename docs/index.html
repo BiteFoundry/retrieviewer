@@ -7,7 +7,7 @@
     <title>Retrieviewer — a little company for your screen</title>
     <meta
       name="description"
-      content="A fluffy Braille-art retriever that lives above your app window. Toss a ball, offer a treat, get back to your thing. By BiteFoundry."
+      content="I got bored staring at a terminal, so I made a dog. A dot-art retriever for your app window, by BiteFoundry."
     />
     <meta
       property="og:title"
@@ -44,7 +44,7 @@
       type="font/woff2"
       crossorigin
     />
-    <script type="module" src="./app.mjs?v=0.0.9"></script>
+    <script type="module" src="./app.mjs?v=0.0.9-web2"></script>
   </head>
   <body>
     <a class="skip" href="#main" data-i18n="skip">Skip to content</a>
@@ -89,8 +89,7 @@
             A little company.<br />For your screen.
           </h1>
           <p class="intro" data-i18n="intro">
-            A fluffy dot-art retriever that hangs out beside your work. Toss a
-            ball. Offer a treat. Get back to your thing.
+            I got bored staring at a terminal, so I made a dog.
           </p>
           <a class="button primary" href="#install" data-i18n="adopt"
             >Bring one home <span aria-hidden="true">↓</span></a
@@ -203,14 +202,13 @@
         <h2 id="life-title" data-i18n="lifeTitle">Let it be a dog.</h2>
         <div class="life-copy">
           <p data-i18n="lifeBody">
-            It wanders, runs, watches and naps on its own. Occasionally, a
-            butterfly catches its attention. You don't
-            direct every step—just join in when you feel like it.
+            It wanders, flops over and naps on its own. Sometimes it chases a
+            butterfly. Toss a ball, offer a treat or play tug when you feel like it.
           </p>
           <p class="muted" data-i18n="mechanism">
             A separate, transparent native window. Ordinary clicks pass through.
-            It hides when you switch away. Your editor, terminal and agent stay
-            untouched.
+            It follows your selected app window and hides when you switch away,
+            leaving your editor and terminal untouched.
           </p>
         </div>
       </section>
@@ -252,7 +250,7 @@
           </li>
           <li>
             <div class="command-label" data-i18n="runStep">
-              Run, then choose an app window
+              Run, choose an app window, then click Attach
             </div>
             <div class="command-row">
               <code>retrieviewer desktop</code
@@ -267,6 +265,13 @@
             </div>
           </li>
         </ol>
+        <p class="quiet" data-i18n="desktopLanguage">
+          The desktop window picker and controls use English.
+        </p>
+        <p class="quiet" data-i18n="latestUpdate">
+          0.0.9 · Steadier body proportions when looking around.
+          <a href="https://github.com/BiteFoundry/retrieviewer/blob/main/PUPPY-MEMORY.md">Update notes</a>
+        </p>
         <p
           class="copy-feedback"
           id="copy-status"
@@ -346,7 +351,7 @@
         aria-labelledby="support-title"
       >
         <h2 id="support-title" data-i18n="supportTitle">
-          A clear place to start.
+          Support
         </h2>
         <dl class="support-list">
           <div>
@@ -377,10 +382,9 @@
           </div>
         </dl>
         <p class="resource-note" data-i18n="resource">
-          Linux currently uses coarser 16px cells / 15fps to favor lower load;
-          Windows defaults to 8px / 30fps. Same Q5 art. The package is about 19
-          MB. Short 0.0.6 Windows overlay checks used about 96–106 MiB Node RSS, plus its helper.
-          Usage varies with viewport and activity. No fresh Linux GUI measurement.
+          Same artwork, different defaults: Windows uses 8px cells / 30fps;
+          Linux uses coarser 16px cells / 15fps. The package is about 19 MB.
+          Memory use varies with window size and activity.
         </p>
         <a
           class="text-link"
