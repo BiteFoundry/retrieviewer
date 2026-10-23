@@ -79,6 +79,8 @@ const ko = {
   licenses: "코드 MIT · 그림 CC BY-SA4.0",
   credits: "크레딧과 그림 이용 조건",
   fonts: "글꼴 라이선스",
+  webAnalytics:
+    '홈페이지 방문은 쿠키 없는 <a href="https://developers.cloudflare.com/web-analytics/about/">Cloudflare Web Analytics</a>로 집계해요. 설치한 강아지는 사용 통계를 전송하지 않아요.',
   loading: "강아지를 불러오고 있어요… 약21MB를 내려받아요.",
   running: "공을 던져주거나 간식을 줘 보세요. 아니면 그냥 지켜봐도 좋아요.",
   paused: "잠깐 쉬고 있어요. 다시 놀기를 누르면 이어집니다.",

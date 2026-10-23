@@ -47,7 +47,7 @@
     <script type="importmap">
       { "imports": { "three": "./runtime/three.module.js" } }
     </script>
-    <script type="module" src="./app.mjs?v=0.0.3-site2"></script>
+    <script type="module" src="./app.mjs?v=0.0.3-site3"></script>
   </head>
   <body>
     <a class="skip" href="#main" data-i18n="skip">Skip to content</a>
@@ -424,6 +424,11 @@
           >Credits & artwork terms</a
         ><span aria-hidden="true"> · </span
         ><a href="./assets/fonts/NOTICE.md" data-i18n="fonts">Font licenses</a>
+        <p data-i18n="webAnalytics">
+          Website visits use cookie-free
+          <a href="https://developers.cloudflare.com/web-analytics/about/">Cloudflare Web Analytics</a>.
+          The installed pet does not send usage analytics.
+        </p>
       </div>
     </footer>
     <noscript
@@ -436,5 +441,6 @@
         >
       </p></noscript
     >
+    <script type="module" src="./analytics.mjs?v=1"></script>
   </body>
 </html>
