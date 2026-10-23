@@ -94,6 +94,8 @@ try {
   );
   assert.equal(requests.filter((u) => u.includes(".bin.gz")).length, 8);
   checks.push("same public Q5 core loads eight archives");
+  assert.equal(await page.locator("#play").isVisible(), false);
+  checks.push("Play trigger hides after successful load");
   await page.getByRole("button", { name: "Toss a ball", exact: true }).click();
   assert.match(await page.locator("#demo-status").textContent(), /Ball tossed/);
   checks.push("ball reaches actual engine");
