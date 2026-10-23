@@ -166,14 +166,23 @@ The remote-display guidance is a Surface note with a Leaf heading and Muted expl
 
 The signature component is a real engine preview rendered as monochrome Braille text in JuliaMono. A still preview appears before the visitor requests play; runtime assets load on Play. Keep ball, treat, pause / resume, retry and polite status feedback connected to the engine's actual state. The artwork is hidden from text reading while the stage has a localized accessible description. Preserve the distinction between the browser preview and the installed window-following companion.
 
-### Website copy refresh (0.0.9)
+### Website copy refresh (0.0.10)
 
 Keep the introduction personal and brief: a dog made to keep a terminal company.
 The two-command install includes choosing a window and clicking Attach; a quiet
 note explains that desktop controls use English even on the Korean website.
 Current-release notes stay small beside installation, with technical measurements
 linked rather than promoted as a memory guarantee. The existing EN/KO controls,
-palette and still-sleep previews remain; no new media or runtime is added.
+palette and still-sleep previews remain. The release note describes roaming,
+napping in different places and lower rendering allocations without a RAM-budget
+promise. The matching versioned engine stays lazy-loaded on Play; no new media.
+
+The0.0.10 preview also reuses the existing native-select treatment for ball
+return: auto, original brake, trot and run-then-trot. A label explains that a
+change applies to the next throw. A small launch-command example accompanies
+it, alongside the existing color command. Keep these optional controls below
+the dog, not in the two primary installation steps; preserve EN/KO labels and
+the original braking choice. No additional imagery or animation framework.
 
 ## Do's and Don'ts
 

@@ -29,6 +29,10 @@ import {createPet,getPetAssetFiles,DEFAULT_ART_PROFILE} from '@bitefoundry/retri
 import {createPetPlugin} from '@bitefoundry/retrieviewer/plugin';
 assert.equal(DEFAULT_ART_PROFILE,'q5');assert.equal(getPetAssetFiles().length,19);
 const a=await createPet({seed:731});let count=0,clears=0,frame;
+assert.equal(a.frame({columns:24,rows:8}).report.returnStyle,'auto');
+assert.equal(a.setReturnStyle('brake'),'brake');assert.equal(a.interact('ball'),true);
+assert.equal(a.frame({columns:24,rows:8}).report.returnMode,'brake');
+assert.equal(a.setReturnStyle('trot'),'trot');assert.equal(a.frame({columns:24,rows:8}).report.returnMode,'brake');
 const plugin=await createPetPlugin({host:{getSize:()=>({columns:40,rows:12}),render:f=>{frame=f;count++;},clear:()=>clears++},petOptions:{seed:731}});
 try {
  plugin.tick(1/30);assert.equal(frame.artProfile,'q5');assert.equal(count,1);
@@ -58,6 +62,7 @@ for(const key of Object.keys(cliEnv))if(key.startsWith('OPENCODE_'))delete cliEn
 const help=execFileSync(process.execPath,[join(installed,'retrieviewer-cli.mjs'),'--help'],{cwd:consumer,env:cliEnv,encoding:'utf8',timeout:10000});
 assert.match(help,/retrieviewer enable/);assert.doesNotMatch(help,/[\u2801-\u28ff]/u);
 assert.match(help,/retrieviewer desktop/);assert.match(help,/desktop-remove --yes/);
+assert.match(help,/--return-style auto\|brake\|trot\|run-trot/);
 const desktopStatus=JSON.parse(execFileSync(process.execPath,[join(installed,'retrieviewer-cli.mjs'),'desktop-status','--json'],{cwd:consumer,env:cliEnv,encoding:'utf8',timeout:10000}));
 assert.deepEqual(desktopStatus,{running:false});
 for(const file of ['integrations/windows-overlay/Overlay.cs','integrations/windows-overlay/desktop.mjs','integrations/windows-overlay/worker.mjs','integrations/windows-overlay/protocol.mjs','WINDOWS-COMPANION.md'])assert.ok(paths.includes(file));

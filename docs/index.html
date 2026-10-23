@@ -29,7 +29,7 @@
     <meta name="twitter:card" content="summary_large_image" />
     <link rel="canonical" href="https://bitefoundry.github.io/retrieviewer/" />
     <link rel="icon" href="./assets/icon.svg" type="image/svg+xml" />
-    <link rel="stylesheet" href="./style.css?v=0.0.9" />
+    <link rel="stylesheet" href="./style.css?v=0.0.10" />
     <link
       rel="preload"
       href="./assets/fonts/Manrope.ttf"
@@ -44,7 +44,7 @@
       type="font/woff2"
       crossorigin
     />
-    <script type="module" src="./app.mjs?v=0.0.9-web2"></script>
+    <script type="module" src="./app.mjs?v=0.0.10"></script>
   </head>
   <body>
     <a class="skip" href="#main" data-i18n="skip">Skip to content</a>
@@ -173,8 +173,12 @@
             <label><span data-i18n="poseLabel">Sleeping artwork · still preview</span>
               <select id="sleep-pose"><option value="live" data-i18n="livePose">Live puppy</option><option value="side" data-i18n="sidePose">Left-side nap</option><option value="right" data-i18n="rightPose">Right-side nap</option><option value="belly" data-i18n="bellyPose">Belly up</option><option value="curl" data-i18n="curlPose">Curled up</option><option value="chin" data-i18n="chinPose">Chin on paws</option></select>
             </label>
+            <label><span data-i18n="returnLabel">Ball return · next throw</span>
+              <select id="return-style"><option value="auto" data-i18n="autoReturn">Mix all three</option><option value="brake" data-i18n="brakeReturn">Brake</option><option value="trot" data-i18n="trotReturn">Trot</option><option value="run-trot" data-i18n="runTrotReturn">Run, then trot</option></select>
+            </label>
           </div>
           <p class="ink-command"><code id="ink-command">retrieviewer desktop --ink cream</code></p>
+          <p class="ink-command"><code id="return-command">retrieviewer desktop --return-style auto</code></p>
           <p
             class="demo-status"
             id="demo-status"
@@ -202,7 +206,7 @@
         <h2 id="life-title" data-i18n="lifeTitle">Let it be a dog.</h2>
         <div class="life-copy">
           <p data-i18n="lifeBody">
-            It wanders, flops over and naps on its own. Sometimes it chases a
+            It explores near and far, then picks a spot for a nap. Sometimes it chases a
             butterfly. Toss a ball, offer a treat or play tug when you feel like it.
           </p>
           <p class="muted" data-i18n="mechanism">
@@ -224,7 +228,7 @@
           <a
             href="https://www.npmjs.com/package/@bitefoundry/retrieviewer"
             class="text-link"
-            >npm · v0.0.9 <span aria-hidden="true">↗</span></a
+            >npm · v0.0.10 <span aria-hidden="true">↗</span></a
           >
         </div>
         <p class="install-location" data-i18n="installLocation">
@@ -269,8 +273,8 @@
           The desktop window picker and controls use English.
         </p>
         <p class="quiet" data-i18n="latestUpdate">
-          0.0.9 · Steadier body proportions when looking around.
-          <a href="https://github.com/BiteFoundry/retrieviewer/blob/main/PUPPY-MEMORY.md">Update notes</a>
+          0.0.10 · More room to roam and nap. Livelier fetch, three return styles and lower rendering memory use.
+          <a href="https://github.com/BiteFoundry/retrieviewer/blob/main/WATCH-REDRAW.md">Update notes</a>
         </p>
         <p
           class="copy-feedback"

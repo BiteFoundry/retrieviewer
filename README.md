@@ -45,6 +45,13 @@ Choose the dot color at launch: `retrieviewer desktop --ink gold`, or
 `retrieviewer desktop --ink dark` for light backgrounds. Default: `cream`.
 Quit a running companion first. Colors reuse the same artwork; no screen capture.
 
+Version 0.0.10 offers `--return-style auto|brake|trot|run-trot`.
+`auto` mixes the original braking return, a trot and run-then-trot, without
+adjacent repeats. For example, `retrieviewer desktop --return-style brake` keeps
+the original return. Quit and relaunch to change the desktop choice; an existing
+companion is not restarted for you. Embedders can use `createPet({returnStyle:'auto'})`
+and `pet.setReturnStyle('brake')`; changes apply to the next throw, not mid-fetch.
+
 > **Cursor / VS Code Remote SSH:** run those commands in your **local** computer's
 > terminal, not the remote server's terminal. The puppy belongs where the window
 > is displayed. A server's `DISPLAY=:1` refers to that server's X11 display, which

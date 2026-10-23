@@ -34,6 +34,11 @@ const ko = {
   bellyPose: "발라당",
   curlPose: "몸 말고 자기",
   chinPose: "앞발에 턱 괴기",
+  returnLabel: "공 물고 돌아오기 · 다음 공놀이부터",
+  autoReturn: "세 동작 섞기",
+  brakeReturn: "제동",
+  trotReturn: "총총",
+  runTrotReturn: "달리다 총총",
   sleepStudy: "수면 그림 미리보기예요. 움직이는 강아지를 선택하면 다시 이어집니다.",
   pause: "잠깐 쉬기",
   resume: "다시 놀기",
@@ -44,7 +49,7 @@ const ko = {
   playLabel: "강아지와 놀기",
   lifeTitle: "강아지는 강아지답게.",
   lifeBody:
-    "혼자 돌아다니다 발라당 눕고, 잠도 잡니다. 가끔은 나비를 쫓고요. 내킬 때 공이나 간식을 주고, 터그 놀이도 해주세요.",
+    "가까운 곳도 먼 곳도 돌아다니다, 마음에 드는 자리에서 낮잠을 잡니다. 가끔은 나비를 쫓고요. 내킬 때 공이나 간식을 주고, 터그 놀이도 해주세요.",
   mechanism:
     "투명한 창을 겹쳐 띄웁니다. 일반 클릭은 통과하고, 다른 창으로 옮겨가면 숨습니다. 에디터나 터미널을 수정하지 않아요.",
   installTitle: "명령 두 줄이면,<br>작은 친구가 생겨요.",
@@ -54,7 +59,7 @@ const ko = {
   runStep: "실행 → 앱 창 선택 → Attach 누르기",
   desktopLanguage: "데스크톱 창 선택창과 조작 메뉴는 영어로 표시됩니다.",
   latestUpdate:
-    '0.0.9 · 주변을 살필 때 몸통이 부풀어 보이던 부분을 다듬었습니다. <a href="https://github.com/BiteFoundry/retrieviewer/blob/main/PUPPY-MEMORY.md">변경 기록</a>',
+    '0.0.10 · 여기저기 놀고 낮잠도 잡니다. 공놀이가 더 활발해졌고, 돌아오는 동작은 셋 중 고를 수 있어요. 렌더링 메모리도 줄였습니다. <a href="https://github.com/BiteFoundry/retrieviewer/blob/main/WATCH-REDRAW.md">변경 기록</a>',
   copy: "복사",
   copied: "명령을 복사했어요.",
   copyFailed: "복사하지 못했어요. 위 명령을 직접 선택해 복사해 주세요.",
@@ -265,13 +270,14 @@ async function load() {
   playing = false;
   cancelLoop();
   try {
-    const { createPet } = await import("./runtime/0.0.9/retrieviewer.mjs");
-    const next = await createPet({ seed: 731 });
+    const { createPet } = await import("./runtime/0.0.10/retrieviewer.mjs");
+    const next = await createPet({ seed: 731, returnStyle: $("#return-style").value });
     if (closed) {
       next.dispose();
       return;
     }
     pet = next;
+    pet.setReturnStyle($("#return-style").value);
     playing = true;
     $("#preview-fallback").hidden = true;
     status("running");
@@ -291,6 +297,11 @@ $("#ink").addEventListener("change",()=>{
   const ink=$("#ink").value;stage.dataset.ink=ink;
   $("#ink-command").textContent="retrieviewer desktop --ink "+ink;
 });
+$("#return-style").addEventListener("change",()=>{
+  const value=$("#return-style").value;
+  pet?.setReturnStyle(value);
+  $("#return-command").textContent="retrieviewer desktop --return-style "+value;
+});
 $("#sleep-pose").addEventListener("change",async()=>{
   const key=$("#sleep-pose").value,request=++studyRequest;
   if(key==='live'){
@@ -300,7 +311,7 @@ $("#sleep-pose").addEventListener("change",async()=>{
   }
   study=key;playing=false;cancelLoop();syncControls();status('previewLoading');
   try{
-    const response=await fetch('./sleep-'+key+'.txt?v=0.0.9');
+    const response=await fetch('./sleep-'+key+'.txt?v=0.0.10');
     if(!response.ok)throw Error('Sleep preview HTTP '+response.status);
     const text=await response.text();if(request!==studyRequest||closed)return;
     art.textContent=text.replace(/^(?:\u2800*\n)+/,'').replace(/(?:\n\u2800*)+$/,'');

@@ -49,7 +49,7 @@ export function createPaperProjection({viewportWidth,viewportHeight,rect,width,h
  const cx=rect.width/2,cy=rect.height/2;
  return{
   project(x,y,z){const p=paperCameraPoint(x,y,z);if(p.depth<=.02)throw Error('Paper point behind camera');return{x:(cx+f*p.x/p.depth)/rect.width,y:(cy-f*p.y/p.depth)/rect.height,depth:p.depth};},
-  placement(x,z){const p=this.project(x,0,z),sourceSize=f*PAPER_CAMERA.canvasMeters/p.depth;return{x:p.x,y:p.y,size:sourceSize/rect.height,pixelAspect:(rect.width/width)/(rect.height/height),depth:p.depth,
+  placement(x,z,lift=0){const p=this.project(x,lift,z),sourceSize=f*PAPER_CAMERA.canvasMeters/p.depth;return{x:p.x,y:p.y,size:sourceSize/rect.height,pixelAspect:(rect.width/width)/(rect.height/height),depth:p.depth,
    groundFromPixel:(px,py)=>this.ground(px/width,py/height),pixelFromGround:point=>{const q=this.project(point.x,0,point.z);return{x:q.x*width,y:q.y*height};}};},
   ground(u,v){
    if(![u,v].every(Number.isFinite))return null;
@@ -104,11 +104,57 @@ export function planPaperApproachTravel(distance){
  return{distance,duration,peak:Math.max(...segments.map(p=>p.peak)),brakingDistance:brakeDistance,at(t){if(!Number.isFinite(t))throw Error('Invalid approach time');if(t>=duration)return{distance,speed:0,stage:'arrived',done:true};let offset=0;for(let i=0;i<segments.length;i++){const p=segments[i];if(t<p.duration||i===segments.length-1){const s=p.at(t);return{...s,distance:offset+s.distance};}t-=p.duration;offset+=p.distance;}}};
 }
 
+// Ball-carry return: a true diagonal trot, optionally preceded by whole gallop
+// cycles. The last small gathering steps MOVE through the final centimeters;
+// the standing endpoint is reached at zero velocity, never a skidding still.
+export function planPaperCarry(distance,{mixed=false,settleSeconds=.22}={}){
+ if(!Number.isFinite(distance)||distance<=0||typeof mixed!=='boolean'||!Number.isFinite(settleSeconds)||settleSeconds<=0||settleSeconds>1)throw Error('Invalid carry travel');
+ const gait=PAPER_GAITS.trot,runDistance=mixed?Math.max(0,Math.floor((distance-1.5)/run.stride))*run.stride:0;
+ const remaining=distance-runDistance,gatherDistance=Math.min(.088,remaining*.2),trotDistance=remaining-gatherDistance;
+ const cycles=Math.max(1,Math.ceil(trotDistance/gait.stride)),stride=trotDistance/cycles;
+ const speed=Math.min(gait.speed,stride*gait.frequency),entrySpeed=Math.min(speed,2*gatherDistance/settleSeconds,Math.sqrt(2*2.5*trotDistance));
+ const gatherSeconds=2*gatherDistance/entrySpeed;
+ const segments=[];
+ if(runDistance)segments.push(planPaperTravel(runDistance,{speed:run.speed,...PAPER_DYNAMICS,endSpeed:speed}));
+ segments.push(planPaperTravel(trotDistance,{speed,acceleration:2.5,deceleration:4,startSpeed:runDistance?speed:0,endSpeed:entrySpeed}));
+ segments.push(planPaperTravel(gatherDistance,{speed:entrySpeed,startSpeed:entrySpeed,deceleration:entrySpeed/gatherSeconds}));
+ const duration=segments.reduce((a,p)=>a+p.duration,0),gatherStart=runDistance+trotDistance;
+ return{distance,duration,peak:Math.max(...segments.map(p=>p.peak)),brakingDistance:gatherDistance,stride,runDistance,trotDistance,gatherStart,gatherSeconds,
+  poseAt(d){const phase=(d-runDistance)/stride;return d<runDistance?{clip:'run',progress:d/run.stride}:d<gatherStart?{clip:'carry-trot',progress:phase%1,cycle:Math.floor(phase)}:{clip:'carry-settle',progress:1-Math.sqrt(Math.max(0,(distance-d)/gatherDistance))};},
+  at(t){if(!Number.isFinite(t))throw Error('Invalid carry time');if(t>=duration)return{distance,speed:0,stage:'arrived',done:true};let offset=0;for(let i=0;i<segments.length;i++){const p=segments[i];if(t<p.duration||i===segments.length-1){const s=p.at(t);return{...s,distance:offset+s.distance};}t-=p.duration;offset+=p.distance;}}
+ };
+}
+
 // Finish at a shared cycle endpoint without animating extra strides in place.
 // Short paths use shorter strides and a correspondingly lower speed ceiling.
 export function planPaperRun(distance){
  const cycles=Math.max(1,Math.ceil(distance/run.stride)),stride=distance/cycles||run.stride;
  return{stride,cycles,plan:planPaperTravel(distance,{speed:Math.min(run.speed,stride*run.frequency),...PAPER_DYNAMICS})};
+}
+
+// A single forward chase ending in a braced stumble/catch at the ball. Solve
+// entry distance and stride TOGETHER: positive entry velocity, exact contact
+// phase, no pre-impact braking, no overshoot/second go and no extra run cycle.
+export function planPaperStumble(distance,{entryPhase=.25,brakeSeconds=.27,catchSeconds=.36,catchSpeedRatio=.18,duration=.82}={}){
+ if(![distance,entryPhase,brakeSeconds,catchSeconds,catchSpeedRatio,duration].every(Number.isFinite)||distance<=0||entryPhase<=0||entryPhase>=1||brakeSeconds<=0||catchSeconds<=0||catchSpeedRatio<=0||catchSpeedRatio>=1||duration<brakeSeconds+catchSeconds||duration>3)throw Error('Invalid stumble travel');
+ const cycles=Math.max(0,Math.ceil(distance/run.stride-entryPhase)),contacts=cycles+entryPhase,a=PAPER_DYNAMICS.acceleration;
+ const coefficient=((1+catchSpeedRatio)*brakeSeconds+catchSpeedRatio*catchSeconds)/2;
+ const speedAt=d=>Math.min(run.speed,d/contacts*run.frequency,Math.sqrt(2*a*d));
+ let lo=0,hi=distance;
+ for(let i=0;i<60;i++){const d=(lo+hi)/2;if(d+coefficient*speedAt(d)<distance)lo=d;else hi=d;}
+ const entryDistance=(lo+hi)/2,entrySpeed=speedAt(entryDistance),stride=entryDistance/contacts,catchSpeed=entrySpeed*catchSpeedRatio;
+ const entry=planPaperTravel(entryDistance,{speed:entrySpeed,acceleration:a,deceleration:PAPER_DYNAMICS.deceleration,endSpeed:entrySpeed});
+ const plan=planPaperTravel(distance,{speed:entrySpeed,acceleration:a,deceleration:PAPER_DYNAMICS.deceleration,endSpeed:entrySpeed});
+ const brakeDistance=(entrySpeed+catchSpeed)*brakeSeconds/2,impactDistance=distance-entryDistance;
+ return{plan,stride,entryDistance,entrySpeed,entryTime:entry.duration,entryPhase,duration,impactDistance,
+  impactAt(age){
+   if(!Number.isFinite(age))throw Error('Invalid stumble age');const t=Math.max(0,age);
+   if(t>=brakeSeconds+catchSeconds)return{distance:impactDistance,speed:0,stage:'rest'};
+   if(t<brakeSeconds){const deceleration=(entrySpeed-catchSpeed)/brakeSeconds;return{distance:entrySpeed*t-deceleration*t*t/2,speed:entrySpeed-deceleration*t,stage:'bracing'};}
+   const u=t-brakeSeconds,deceleration=catchSpeed/catchSeconds;
+   return{distance:brakeDistance+catchSpeed*u-deceleration*u*u/2,speed:catchSpeed-deceleration*u,stage:'catching'};
+  }
+ };
 }
 export function planPaperWalk(distance){
  const gait=PAPER_GAITS.walk,cycles=Math.max(1,Math.ceil(distance/gait.stride)),stride=distance/cycles||gait.stride;

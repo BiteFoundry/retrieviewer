@@ -1,0 +1,30 @@
+// Owner-approved momentum artwork, staged separately from the rejected v4 route.
+import {readFileSync,writeFileSync,mkdirSync} from 'node:fs';
+import {execFileSync} from 'node:child_process';
+import {gunzipSync,gzipSync} from 'node:zlib';
+import {createHash} from 'node:crypto';
+import {readPackedFrames,packFrames} from '../puppy-frame-store.mjs';
+import {encodePredictiveFrames} from '../puppy-frame-predictive.mjs';
+const stage='dist/stumble-runtime-v3';mkdirSync(stage,{recursive:true});
+const read=file=>readPackedFrames(gunzipSync(readFileSync(file)));
+const rear=read('puppy-paper-rear-gallop-q5.bin.gz');
+writeFileSync(stage+'/entry.gray',rear.getFrame(7*9));writeFileSync(stage+'/exit.gray',rear.getFrame(5*9));
+execFileSync('python',['tools/prepare-stumble-v3.py',stage,...(process.argv.includes('--references')?['--references']:[])],{stdio:'inherit',windowsHide:true});
+if(process.argv.includes('--references'))process.exit(0);
+const sourceRef='9fc9628b6e42bd5da1efb02521ed4ab6e59f7763';
+const source=file=>execFileSync('git',['show',sourceRef+':'+file],{windowsHide:true,maxBuffer:8*1024*1024});
+const sourceGzip=source('puppy-companion-comfort-q5.bin.gz'),sourceMeta=source('puppy-companion-comfort.json');
+writeFileSync(stage+'/source-comfort-q5.bin.gz',sourceGzip);writeFileSync(stage+'/source-comfort.json',sourceMeta);
+const previous='dist/fetch-art-v2',old=readPackedFrames(gunzipSync(sourceGzip)),base=JSON.parse(sourceMeta);
+const pickup=read(previous+'/comfort-candidate-q5.bin.gz'),pickupMeta=JSON.parse(readFileSync(previous+'/comfort-candidate.json'));
+if(base.version!==2||base.frames!==13)throw Error('Expected unchanged source comfort family');
+const keys=readFileSync(stage+'/keys.gray'),count=25+keys.length/102400;
+const raw=Buffer.concat([...Array.from({length:13},(_,i)=>Buffer.from(old.getFrame(i))),...Array.from({length:12},(_,i)=>Buffer.from(pickup.getFrame(25+i))),keys]);
+const encoded=encodePredictiveFrames(packFrames(raw,320,320,count)),gz=gzipSync(encoded,{level:9}),store=readPackedFrames(encoded),sha=b=>createHash('sha256').update(b).digest('hex');
+for(let i=0;i<13;i++)if(!Buffer.from(store.getFrame(i)).equals(Buffer.from(old.getFrame(i))))throw Error('Existing tug/sleep changed');
+for(let i=0;i<12;i++)if(!Buffer.from(store.getFrame(13+i)).equals(Buffer.from(pickup.getFrame(25+i))))throw Error('Accepted pickup changed');
+const scramble=JSON.parse(readFileSync(stage+'/motion.json')),pickups=Object.fromEntries(Object.entries(pickupMeta.pickups).map(([view,m])=>[view,{...m,frames:m.frames.map(f=>f-12)}]));
+const meta={...base,version:5,frames:count,clips:[...base.clips,'scramble','pickup-rear','pickup-side'],scramble,pickups,method:'Approved momentum poses, single depth pursuit, exact source endpoints; one common scale per authored batch, no runtime image warp or expanded film.',gzipBytes:gz.length,residentPixelBytes:store.residentPixelBytes,encodedSha256:sha(encoded),sourceComfort:{ref:sourceRef,encodedSha256:base.encodedSha256,frames:13,gzipBytes:sourceGzip.length},approvedArtwork:'Owner-approved whole-body momentum study, 2026-10-23',sourceSheetHashes:{rear:sha(readFileSync('dist/stumble-originals-v3/04-rear-three-quarter.png')),breakdowns:sha(readFileSync(stage+'/breakdowns-source.png'))}};
+writeFileSync(stage+'/comfort-candidate-q5.bin.gz',gz);writeFileSync(stage+'/comfort-candidate.json',JSON.stringify(meta,null,2));
+if(process.argv.includes('--apply')){writeFileSync('puppy-companion-comfort-q5.bin.gz',gz);writeFileSync('puppy-companion-comfort.json',JSON.stringify(meta,null,2)+'\n');}
+console.log(JSON.stringify({frames:count,gzipAdded:gz.length-base.gzipBytes,portablePixelAdded:store.residentPixelBytes-base.residentPixelBytes,applied:process.argv.includes('--apply')}));

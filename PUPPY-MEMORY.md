@@ -1,5 +1,60 @@
 # Runtime weight and performance
 
+## Spatial autonomy and allocation pass (0.0.10)
+
+Autonomous strolls, dashes and butterfly visits no longer end with an unconditional
+trip to the front-center home. Only an occasional check-in or ball return comes
+back there. Check-ins have a 90-second spacing; lingering front and center for
+40 active seconds prompts a later outing, after the current episode finishes.
+Outings alternate sides and near/middle/far depths, up to 15m behind the world
+origin. Sideways room is calculated from the existing camera frustum, not a fixed
+narrow x corridor. Naps/rests find side nooks 0.7–2.6m behind the origin and often
+stay in a suitable nook already found. All travel still uses the same integrated
+gait and projection; there is no scale animation, teleport or extra dog artwork.
+
+Ten seeded 20-minute simulations spent 7–27% of time in the front-center zone,
+used both sides and multiple sleeping spots, and preserved stationary nap roots.
+Tests also cover uninterrupted gait travel, fetching home from a distant nap,
+and hand-fed treats without a detour. These are design parameters, not claims
+about measured canine behavior. The rare butterfly's lateral bounds now follow
+its current depth too, so a side-positioned puppy faces the visitor correctly.
+
+Memory changes reuse existing code and built-in Node compression:
+
+- Stable Braille output joins one reusable row of glyph references instead of
+  creating one string rope node per cell. Exact text and dot thresholds unchanged.
+- Minification integral tables allocate on first use, with uint32 sums for byte
+  art. Even the largest 640² source sum fits exactly; fractional custom images
+  retain Float64 tables. Fractional footprint arithmetic stays unchanged.
+- Node's retained crop compression uses DEFLATE level3 instead of level1.
+  Levels6/9 were rejected for 3.3s/21.5s crop-processing startup in the local probe.
+  Level3 cuts retained crop payload from22,222,718 to20,517,500 bytes, at about
+  half a second extra startup. Browser art storage and files stay unchanged.
+
+Three fresh Windows processes per side, same 450-frame 480×135 ball sequence;
+medians measured **before changing autonomy**, to isolate the memory work:
+
+| Metric | Before | After |
+| --- | ---: | ---: |
+| Initial load | 916ms | 1,419ms |
+| Loaded process RSS | 99.7MiB | 97.4MiB |
+| Rendered ArrayBuffers after diagnostic GC | 29.0MiB | 26.1MiB |
+| Rendered process RSS after diagnostic GC | 237.6MiB | 167.8MiB |
+| Peak benchmark-process RSS | 250.5MiB | 191.0MiB |
+| Mean frame time | 3.53ms | 3.59ms |
+| Frame time p95 | 6.35ms | 6.72ms |
+
+All six frame hashes equal
+`3a296d0a737eaa1d9a5923e3496e8c62b2d5e99fbe871806b907429515597a3d`.
+This synchronous off-screen workload is **not the resident desktop RAM figure**:
+GC, deferred native-close callbacks and allocator retention affect RSS. A short
+owned-window native run of the combined changes measured105MiB Node RSS; helper
+memory is separate. It verified painting, ball IPC and clean worker/helper exit,
+without restarting the user's pet. No real Mac/Linux RAM measurement this pass.
+Proof files are local `dist/roam-memory-{before,after}*.json` and
+`dist/windows-overlay-qa/lifecycle-receipt.json`. No new dependency, process,
+timer, art frame, reduction in resolution, palette change or package art bytes.
+
 ## Fixed-volume watch torso (0.0.9)
 
 Paw registration alone in0.0.8 left the upper torso unconstrained. In the36

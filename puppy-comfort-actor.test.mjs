@@ -69,7 +69,7 @@ test('chase during belly hold cuts the hold, finishes the roll, then runs',()=>{
  for(let i=0;i<30;i++)p.step();
  assert.equal(p.actor.chase(0,-3),true);assert.equal(p.actor.sample(0).queued,true);
  const {frames,s}=p.until(s=>s.state==='run'&&!s.queued);
- assert.ok(frames<4*60,`recovered in ${frames} frames`);assert.equal(s.comfortPose,undefined);
+ assert.ok(frames<=1.7*60,`recovered in ${frames} frames`);assert.equal(s.comfortPose,undefined);
  p.until(s=>p.actor.state==='idle'&&!s.queued);
  assert.ok(Math.abs(p.actor.sample(0).z-(-3))<.13);
 });

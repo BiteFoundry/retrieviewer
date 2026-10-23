@@ -14,10 +14,14 @@ const json=name=>JSON.parse(readFileSync(new URL(name,import.meta.url)));
 const stride=json('./puppy-stride-meta.json'),actions=json('./puppy-paper-actions-v9.json');
 
 test('tiny tug keys share the exact original seat endpoint and bounded source cache',()=>{
- const bytes=readPackedFrames(gunzipSync(readFileSync(new URL('./puppy-companion-comfort-q5.bin.gz',import.meta.url))));
+ const encoded=gunzipSync(readFileSync(new URL('./puppy-companion-comfort-q5.bin.gz',import.meta.url)));
+ const bytes=readPackedFrames(encoded),original=readPackedFrames(encoded,{frameIndices:Array.from({length:13},(_,i)=>i)});
  const seat=readPackedFrames(gunzipSync(readFileSync(new URL('./puppy-paper-seat-q5.bin.gz',import.meta.url))));
  const sample=createComfortSpriteSampler(bytes,json('./puppy-companion-comfort.json'));
- assert.ok(bytes.residentPixelBytes<350_000);
+ assert.ok(original.residentPixelBytes<350_000,'adding separate fetch keys must not inflate tug/sleep retained art');
+ const fetchOnly=readPackedFrames(encoded,{frameIndices:Array.from({length:37},(_,i)=>i)});
+ assert.ok(fetchOnly.residentPixelBytes-original.residentPixelBytes<750_000,'accepted fetch source increment stays bounded');
+ assert.ok(bytes.residentPixelBytes-fetchOnly.residentPixelBytes<300_000,'eight new trot/gather keys stay bounded');
  const neutral=Uint8Array.from(sample({clip:'tug',progress:0}).filter((_,i)=>i%4===0));
  assert.deepEqual(neutral,seat.getFrame(50));
  for(let i=0;i<181;i++){const rgba=sample({clip:'tug',progress:i/180});assert.equal(rgba.length,320*320*4);}

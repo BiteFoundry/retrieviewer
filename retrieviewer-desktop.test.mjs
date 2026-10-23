@@ -52,6 +52,14 @@ test('desktop CLI is separate, strictly parsed, no agent mutation',async()=>{
  await runCli(['desktop'],io);await runCli(['desktop-status','--json'],io);await runCli(['desktop-stop'],io);
  await assert.rejects(runCli(['desktop-clean'],io),/--yes/);await runCli(['desktop-clean','--yes'],io);await assert.rejects(runCli(['desktop-remove'],io),/--yes/);await runCli(['desktop-remove','--yes'],io);assert.equal(starts,1);assert.equal(stops,1);assert.equal(cleans,2);assert.match(out,/running/);
 });
+test('desktop return style is explicit, strictly validated and forwarded without agent changes',async()=>{
+ for(const style of ['auto','brake','trot','run-trot']){
+  const options=parseArguments(['desktop','--return-style',style]).options;assert.equal(options['return-style'],style);
+  let received;await runCli(['desktop','--ink','gold','--return-style',style],{output:{write(){}},desktop:{startDesktop:async o=>{received=o;return{running:true};}},installer:{enable(){throw Error('No agent changes');}}});
+  assert.deepEqual(received,{ink:'gold',returnStyle:style});
+ }
+ for(const args of [['desktop','--return-style','bad'],['desktop','--return-style'],['desktop','--return-style','auto','--return-style','brake'],['desktop-status','--return-style','brake']])assert.throws(()=>parseArguments(args));
+});
 test('cache removal is narrow; preserve unknown files, other pet settings, unrecognized session',async()=>{
  const stateDir=await mkdtemp(join(tmpdir(),'retrieviewer-desktop-test-')),options={stateDir};const paths=desktopPaths(options);await mkdir(paths.root,{recursive:true});
  await writeFile(join(stateDir,'settings.json'),'user-owned');await writeFile(join(paths.root,'notes.txt'),'keep');await writeFile(join(paths.root,'overlay-'+ 'a'.repeat(20)+'.exe'),'fixture');

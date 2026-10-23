@@ -5,7 +5,7 @@ import {readFileSync} from 'node:fs';
 import {readPackedFrames,packFrames} from './puppy-frame-store.mjs';
 import {encodePredictiveFrames} from './puppy-frame-predictive.mjs';
 import {getPetAssetFiles} from './retrieviewer.mjs';
-const codec={compress:bytes=>deflateRawSync(bytes,{level:1}),expand:(bytes,size)=>inflateRawSync(bytes,{maxOutputLength:size})};
+const codec={compress:bytes=>deflateRawSync(bytes,{level:3}),expand:(bytes,size)=>inflateRawSync(bytes,{maxOutputLength:size})};
 
 test('Node compressed crops reconstruct every packaged frame exactly with only two cached rasters',()=>{
  let before=0,after=0,frames=0;

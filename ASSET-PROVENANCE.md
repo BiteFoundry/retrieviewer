@@ -6,6 +6,17 @@ of exclusive ownership of AI output.
 
 ## Evidence checked
 
+- Unreleased comfort v6 adds a front-facing carry-trot study generated using
+  built-in imagegen with only the existing approach and arrival-seat puppy as
+  references. No new photograph/video input. Eight whole-pose keys (four unique
+  trot phases, four gathering steps) are appended; accepted v5's37 frames remain
+  pixel-exact. One common scale, whole-image floor translation, per-key measured
+  mouth/support anchors, no anatomical compositing. Last gathering key is exact
+  arrival-seat source0. Full prompt/source hash and size evidence live in
+  dist/carry-trot-v1/NOTES.md and puppy-companion-comfort.json. Existing artwork
+  attribution and CC BY-SA4.0 remain. The owner subsequently requested publishing
+  the reviewed candidate with the original braking return preserved as an option.
+
 - PUPPY-STUDY.md identifies the initial built-in image-generation output and
   the two photographic inputs. The generated source and both local reference
   images were visually inspected. Their stored Commons metadata was checked
@@ -34,6 +45,25 @@ worker histories stay outside the public package. Tests and the packed file list
 must be checked again for the final release bytes.
 
 ## Remaining limits
+
+Unreleased0.0.10 replaces the36 watch samples with an owner-approved whole-body
+redraw (head, neck, shoulders and foreleg weight transfer together). Built-in
+imagegen referenced only the existing approved puppy and its generated study,
+not new photographs. One common uniform scale and whole-frame floor translation
+replace the earlier row-dependent warps; no anatomical masks or body compositing.
+WATCH-REDRAW.md and the manifest retain preparation/source digests. Other behavior
+frames remain byte-identical. Existing CC BY-SA4.0 attribution remains in place.
+The owner then approved the new momentum-pose studies on2026-10-23 and requested
+implementation. The working tree now includes a v5 comfort family: the original13
+tug/sleep frames remain byte-exact,12 standing pickup keys are retained, and12
+rear stumble samples replace the rejected lateral choreography. Four samples
+are registered directly from the approved rear-quarter study; the others use a
+built-in imagegen breakdown sheet referenced only from that approved art and the
+existing puppy. Exact existing run/rear pickup endpoints remain shared. Uniform
+batch scales and whole-frame translations only, no anatomical compositing or live
+image deformation. Source digests, timings and transforms are in the comfort
+metadata; prompts/raw originals remain local, outside npm. Visual acceptance of
+the completed animation was followed by the owner's explicit publication request.
 
 0.0.9 adds offline torso-envelope constraints to the same single-source watch
 coordinate field, using only the existing seated key as a volume reference.

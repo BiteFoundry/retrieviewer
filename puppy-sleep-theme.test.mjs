@@ -12,9 +12,11 @@ import {createFramePump} from './integrations/windows-overlay/protocol.mjs';
 const json=name=>JSON.parse(readFileSync(new URL(name,import.meta.url)));
 test('four sleeping keys and mirrored side reuse one fixed-size scratch',()=>{
  const info=json('./puppy-companion-comfort.json');
- const store=readPackedFrames(gunzipSync(readFileSync(new URL('./puppy-companion-comfort-q5.bin.gz',import.meta.url))));
+ const encoded=gunzipSync(readFileSync(new URL('./puppy-companion-comfort-q5.bin.gz',import.meta.url))),store=readPackedFrames(encoded);
  const scratch=new Uint8ClampedArray(320*320*4),sample=createComfortSpriteSampler(store,info,scratch);
- assert.ok(info.gzipBytes-103549<30_000);assert.ok(store.residentPixelBytes-291337<55_000);
+ const original=readPackedFrames(encoded,{frameIndices:Array.from({length:13},(_,i)=>i)});
+ assert.ok((info.sourceComfort?.gzipBytes??info.gzipBytes)-103549<30_000);
+ assert.ok(original.residentPixelBytes-291337<55_000,'sleep increment excludes separately authored fetch poses');
  for(const variant of Object.keys(info.sleep)){
   const a=Uint8ClampedArray.from(sample({clip:'sleep',variant}));
   assert.equal(sample({clip:'sleep',variant,right:true}),scratch);

@@ -33,11 +33,15 @@ try{
  await page.locator('[data-copy]').first().click();
  assert.equal(await page.evaluate(()=>navigator.clipboard.readText()),'npm install -g @bitefoundry/retrieviewer@latest');
  await page.locator('[data-language=ko]').click();
+ await page.locator('#return-style').selectOption('brake');
+ assert.equal(await page.locator('#return-command').textContent(),'retrieviewer desktop --return-style brake');
  await page.locator('#play').click();
  await page.waitForFunction(()=>Number(document.querySelector('.dog-stage').dataset.frames)>4,{},{timeout:45000});
  assert.ok(runtime.length>10&&runtime.every(u=>u.includes(`/runtime/${version}/`)));
  await page.locator('#ball').click();
  await page.waitForFunction(()=>document.querySelector('#ball').disabled);
+ await page.locator('#return-style').selectOption('trot');
+ assert.equal(await page.locator('#return-command').textContent(),'retrieviewer desktop --return-style trot');
  await page.locator('#pause').click();
  await page.locator('#sleep-pose').selectOption('right');
  await page.waitForFunction(()=>document.querySelector('#demo-status').textContent.includes('수면'));

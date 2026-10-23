@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {readFileSync,existsSync} from 'node:fs';
 import {fileURLToPath} from 'node:url';
 import {getPetAssetFiles,DEFAULT_ART_PROFILE} from './retrieviewer.mjs';
+import {validateRelease} from './tools/check-release.mjs';
 
 const root=new URL('./',import.meta.url),pkg=JSON.parse(readFileSync(new URL('package.json',root)));
 const included=name=>pkg.files.some(p=>name===p||name.startsWith(p+'/'));
@@ -20,10 +21,11 @@ test('local package includes transitive runtime imports and assets, not project 
  for(const name of getPetAssetFiles()){
   assert.ok(included(name),`missing asset: ${name}`);assert.ok(existsSync(new URL(name,root)));
  }
- assert.equal(pkg.name,'@bitefoundry/retrieviewer');assert.equal(pkg.version,'0.0.9');
+ assert.equal(pkg.name,'@bitefoundry/retrieviewer');assert.equal(pkg.version,'0.0.10');
  assert.equal(pkg.private,false,'public release candidate');
  const policy=JSON.parse(readFileSync(new URL('release-policy.json',root)));
- for(const key of ['artLicenseTermsApproved','assetRightsReviewCompleted','artRedistributionApproved','publicPublishApproved'])assert.equal(policy[key],true,key);
+ for(const key of ['artLicenseTermsApproved','assetRightsReviewCompleted','artRedistributionApproved'])assert.equal(policy[key],true,key);
+ assert.equal(typeof policy.publicPublishApproved,'boolean','development may hold publication without breaking package-integrity checks');
  assert.equal(policy.artLicense,'CC-BY-SA-4.0');
  assert.equal(pkg.license,'SEE LICENSE IN LICENSE');
  assert.equal(pkg.exports['./tui'],'./integrations/opencode/tui.tsx');
@@ -46,4 +48,11 @@ test('local package includes transitive runtime imports and assets, not project 
  assert.equal(pkg.exports['./plugin'].types,'./retrieviewer-plugin.d.mts');
  assert.equal(included('puppy-stride-tweens.bin.gz'),false);
  assert.ok(included('vendor/procedural-animals/LICENSE'));
+});
+
+test('the actual publication hold is enforced independently of package integrity',()=>{
+ const policy=JSON.parse(readFileSync(new URL('release-policy.json',root))),lock=JSON.parse(readFileSync(new URL('package-lock.json',root)));
+ const errors=validateRelease({pkg,lock,policy,files:pkg.files});
+ if(policy.publicPublishApproved)assert.deepEqual(errors,[]);
+ else assert.deepEqual(errors,['BLOCKED: release policy publicPublishApproved is false, must be exactly true']);
 });

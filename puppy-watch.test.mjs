@@ -7,60 +7,49 @@ import {readPackedFrames} from './puppy-frame-store.mjs';
 import {paperWatchProgress,PAPER_WATCH_TIMING,createPaperActor} from './puppy-paper.mjs';
 import {createPaperBody} from './puppy-paper-world.mjs';
 const load=name=>readPackedFrames(gunzipSync(readFileSync(new URL(name,import.meta.url))));
-test('watch endpoints share the seated source; paw registration preserves the same ground plane',()=>{
+
+test('watch endpoints share the seated source and authored paws stay on the ground plane',()=>{
  const seat=Uint8Array.from(load('./puppy-paper-seat-q5.bin.gz').getFrame(50)),watch=load('./puppy-paper-behaviors-q5.bin.gz');
  for(const i of [90,107,108,125])assert.deepEqual(watch.getFrame(i),seat);
  const floor=f=>{for(let y=319;y>=0;y--)for(let x=90;x<251;x++)if(f[y*320+x]>8)return y;};
- for(let i=90;i<126;i++)assert.equal(floor(watch.getFrame(i)),floor(seat),'ground plane '+i);
+ // A paw can lift one source pixel during weight transfer. Never copy frozen
+ // paw patches into new drawings merely to force identical raster bounds.
+ for(let i=90;i<126;i++)assert.ok(Math.abs(floor(watch.getFrame(i))-floor(seat))<=1,'floor '+i);
  assert.notDeepEqual(watch.getFrame(98).subarray(0,170*320),watch.getFrame(116).subarray(0,170*320));
 });
-test('all four paws stay aligned without stitching a separate lower body onto the chest',()=>{
- const seat=Uint8Array.from(load('./puppy-paper-seat-q5.bin.gz').getFrame(50)),watch=load('./puppy-paper-behaviors-q5.bin.gz');
- function score(f,cx,top,bottom,dx){
-  let a=0,b=0,aa=0,bb=0,ab=0,n=0;
-  for(let y=top;y<bottom;y++)for(let x=cx-11;x<=cx+11;x++){
-   const av=seat[y*320+x],bv=f[y*320+x+dx];a+=av;b+=bv;aa+=av*av;bb+=bv*bv;ab+=av*bv;n++;
-  }
-  return (ab-a*b/n)/Math.sqrt((aa-a*a/n)*(bb-b*b/n));
- }
- for(let i=90;i<126;i++){
-  const f=watch.getFrame(i);
-  for(const [cx,top,bottom] of [[105,275,291],[138,278,301],[185,278,301],[218,275,291]]){
-   const scores=Array.from({length:9},(_,k)=>({dx:k-4,score:score(f,cx,top,bottom,k-4)})).sort((a,b)=>b.score-a.score);
-   assert.ok(Math.abs(scores[0].dx)<=2,JSON.stringify({frame:i,paw:cx,residual:scores[0].dx}));
-  }
- }
-});
-test('turned faces keep original pixels; the connected neck/body uses one coordinate warp, not compositing',()=>{
- const watch=load('./puppy-paper-behaviors-q5.bin.gz'),hash=createHash('sha256');
- for(let i=90;i<126;i++)if(![90,107,108,125].includes(i))hash.update(watch.getFrame(i).subarray(0,180*320));
- // The neck must now join a fixed-volume chest spatially. Protect the face,
- // not the inflated source chest that the old y230 digest accidentally froze.
- assert.equal(hash.digest('hex'),'39dce09ec8ce000a792a31b1d2670cdec753a19f9d0f13fad72b651361ac3259');
+
+test('approved whole-body redraw replaces only watch frames, without anatomical compositing or warps',()=>{
+ const watch=load('./puppy-paper-behaviors-q5.bin.gz'),other=createHash('sha256'),turned=createHash('sha256');
+ for(let i=0;i<watch.frameCount;i++)(i<90||i>=126?other:turned).update(watch.getFrame(i));
+ assert.equal(other.digest('hex'),'47cd7eee60e3e71a15bd59a02cd7288364754a295fb9b2e4a02f0333f0e11072');
+ // Freeze the owner's accepted WHOLE drawing, not just a protected face with
+ // an unreviewed chest underneath. Numerical tests do not grant visual approval.
+ assert.equal(turned.digest('hex'),'b53d5487f3ed70e98ee5a9e5162634b4323bf6215a62e3a1d0eefc542fd14081');
  const registration=JSON.parse(readFileSync(new URL('./pet-q5-manifest.json',import.meta.url))).entries['puppy-paper-behaviors'].watchRegistration;
- assert.equal(registration.bodyCompositing,false);
+ assert.equal(registration.wholeBodyArt,true);
+ for(const key of ['bodyCompositing','collarMatte','nonlinearWarp','perKeyScale','runtimeCompositing'])assert.equal(registration[key],false,key);
 });
-test('all watch frames keep seated chest area/width within 2% and center within one source pixel',()=>{
+
+test('redrawn archive manifest describes the encoded and decoded release bytes',()=>{
+ const entry=JSON.parse(readFileSync(new URL('./pet-q5-manifest.json',import.meta.url))).entries['puppy-paper-behaviors'];
+ const gzip=readFileSync(new URL(entry.file,import.meta.url)),encoded=gunzipSync(gzip),store=readPackedFrames(encoded),hash=createHash('sha256');
+ for(let i=0;i<store.frameCount;i++)hash.update(store.getFrame(i));
+ assert.equal(entry.gzipBytes,gzip.length);assert.equal(entry.encodedBytes,encoded.length);
+ assert.equal(entry.uniqueFrames,store.uniqueCount);assert.equal(entry.frames,store.frameCount);
+ assert.equal(entry.encodedSha256,createHash('sha256').update(encoded).digest('hex'));
+ assert.equal(entry.quantizedSha256,hash.digest('hex'));
+});
+
+test('whole-body watch includes lower-body weight transfer while retaining its authored mass',()=>{
  const seat=Uint8Array.from(load('./puppy-paper-seat-q5.bin.gz').getFrame(50)),watch=load('./puppy-paper-behaviors-q5.bin.gz');
- function torso(f){let area=0,width=0,center=0;
-  for(let y=205;y<=230;y++){let left=320,right=-1;
-   for(let x=0;x<320;x++)if(f[y*320+x]>24){area++;center+=x;left=Math.min(left,x);right=Math.max(right,x);}
-   width+=right-left+1;
-  }
-  return{area,width,cx:center/area};
- }
- const base=torso(seat);
- for(let i=90;i<126;i++){
-  const actual=torso(watch.getFrame(i));
-  for(const key of ['area','width'])assert.ok(Math.abs(actual[key]/base[key]-1)<=.02,JSON.stringify({frame:i,key,ratio:actual[key]/base[key]}));
-  assert.ok(Math.abs(actual.cx-base.cx)<=1,'torso center '+i);
- }
- // Include the belly/hips near the handoff to the four-paw field as well;
- // protecting the narrow chest alone previously missed swelling farther down.
  const area=f=>{let n=0;for(let y=205;y<=270;y++)for(let x=0;x<320;x++)if(f[y*320+x]>24)n++;return n;};
  const baseline=area(seat);
- for(let i=90;i<126;i++)assert.ok(Math.abs(area(watch.getFrame(i))/baseline-1)<=.03,'whole torso area '+i);
+ // Accepted silhouette varies roughly -6%..+5%, not runtime scale. This is a
+ // regression bound for that approved art, not a reason to warp other drawings.
+ for(let i=90;i<126;i++)assert.ok(Math.abs(area(watch.getFrame(i))/baseline-1)<=.07,'whole torso area '+i);
+ for(const i of [98,116])assert.notDeepEqual(watch.getFrame(i).subarray(205*320,301*320),seat.subarray(205*320,301*320),'lower body is not a frozen layer');
 });
+
 test('watch turns, holds the gaze and returns without teleporting or scaling the actor',()=>{
  assert.equal(paperWatchProgress(0),0);assert.equal(paperWatchProgress(.6),.5);assert.equal(paperWatchProgress(1.2),.5);assert.equal(paperWatchProgress(1.9),1);
  for(let t=0;t<2;t+=.01){const p=paperWatchProgress(t);assert.ok(p>=0&&p<=1);assert.ok(p>=paperWatchProgress(Math.max(0,t-.01)));}

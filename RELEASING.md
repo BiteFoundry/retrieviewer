@@ -1,13 +1,34 @@
-# Retrieviewer 0.0.9 release process
+# Retrieviewer 0.0.10 release process
 
-Current target: `@bitefoundry/retrieviewer@0.0.9`, public `latest`, continuing the
-approved npm release workflow. The owner requested correction of the watch
-torso's swelling on2026-10-23. Offline single-source registration now constrains
-chest width/area/center and whole torso area, keeping the four paw anchors and
-floor. Face pixels through y179 stay exact; neck coordinates can join the fixed
-torso without image compositing. No new frames, dependencies, runtime work or
-buffers. English desktop UI remains. MIT/CC BY-SA4.0 unchanged. Preserve0.0.8
-and earlier registry bytes; publish only the exact tested0.0.9 tarball.
+The owner explicitly requested publication and website deployment after reviewing
+the repaired watch/fetch motion and restoring the original braking return as an
+option. The publication gate is approved for this0.0.10 scope. The earlier hold
+and old local candidate tarballs are superseded; build and verify a fresh exact
+artifact before upload. This authorization does not cover rejected art/motion.
+
+Current target: `@bitefoundry/retrieviewer@0.0.10`, public `latest`. The owner
+explicitly requested npm publication and website deployment on2026-10-23.
+Spatial autonomy no longer returns home after every outing; napping uses side
+nooks, with occasional check-ins and ball returns kept. Existing calibrated
+travel, English desktop UI and MIT/CC BY-SA4.0 licenses remain. Allocation
+work uses flat Braille row joins, exact lazy integer minification tables and
+Node DEFLATE level3. See PUPPY-MEMORY.md for measured memory/startup tradeoffs.
+Watch art replaces36 frames. The stationary six-key stumble and v4 lateral
+overshoot/reChase choreography were rejected. The37-key v5 comfort family is now
+integrated (original13 +12 standing pickup +12 rear stumble); source/preparation
+records are in dist/stumble-runtime-v3. Its entry-speed/stride/catch physics end
+at the ball on one depth pursuit. No lateral detour or extra recovery hop. The
+same default assets now include eight added carry-trot/gather keys (45-key comfort
+family) with exact old37-frame preservation. Impact timing is .65s. Fetch returns
+retain the original braking approach alongside trot and run-then-trot. The new
+`returnStyle` option selects auto or one fixed style; auto mixes all three without
+adjacent repeats. `setReturnStyle()` applies to the next throw. Desktop accepts
+`--return-style`, reports its choice, and never restarts a running companion to
+change it. No new artwork or extra raster buffer for restoring the old option.
+Four style-specific seeded replays and fresh native checks pass; see
+WATCH-REDRAW.md for current verification and additional pixel payloads.
+No new runtime dependencies, processes or timers. Preserve0.0.9 and
+earlier registry bytes; publish only the exact tested0.0.10 tarball.
 Historical scope below is not current verification.
 
 Target: `@bitefoundry/retrieviewer@0.0.4`, public npm registry, `latest` tag.

@@ -1,6 +1,6 @@
 {
   "name": "@bitefoundry/retrieviewer",
-  "version": "0.0.9",
+  "version": "0.0.10",
   "description": "A fluffy Braille desktop pet for Windows and Linux X11, with experimental macOS support and an embeddable TUI engine.",
   "license": "SEE LICENSE IN LICENSE",
   "homepage": "https://bitefoundry.github.io/retrieviewer/",
@@ -89,6 +89,7 @@
     "PUPPY-MEMORY.md",
     "PUPPY-Q5-COMPARISON.md",
     "COMFORT-ART.md",
+    "WATCH-REDRAW.md",
     "BUTTERFLY.md",
     "examples/embed.mjs",
     "examples/live.mjs",
@@ -109,6 +110,7 @@
     "puppy-paper-trick-timing.mjs",
     "puppy-paper-paw-transport.mjs",
     "puppy-companion-life.mjs",
+    "puppy-companion-ball.mjs",
     "puppy-companion-objects.mjs",
     "puppy-companion-sprites.mjs",
     "puppy-comfort-sprites.mjs",

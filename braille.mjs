@@ -31,8 +31,10 @@ function stableBraille(rgba,width,height,brightness,contrast){
     n=Math.imul(n^(n>>>16),0x45d9f3b);n=Math.imul(n^(n>>>16),0x45d9f3b);n=(n^(n>>>16))>>>0;
     if(value>(n+.5)/4294967296){masks[(y>>2)*columns+(x>>1)]|=BRAILLE_BITS[y&3][x&1];dots++;}
   }
-  const lines=[];
-  for(let y=0;y<rows;y++){let line='';for(let x=0;x<columns;x++)line+=GLYPHS[masks[y*columns+x]];lines.push(line);}
+  // Reuse one row of glyph references. Per-cell string concatenation retained
+  // thousands of rope nodes until the final join on large desktop grids.
+  const lines=new Array(rows),cells=new Array(columns);
+  for(let y=0;y<rows;y++){for(let x=0;x<columns;x++)cells[x]=GLYPHS[masks[y*columns+x]];lines[y]=cells.join('');}
   return{text:lines.join('\n'),columns,rows,dots};
 }
 export function rgbaToBraille(rgba,width,height,{brightness=1,contrast=1,method='floyd'}={}){

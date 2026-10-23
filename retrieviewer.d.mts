@@ -1,9 +1,12 @@
 /** A headless pet: the host owns input, time and terminal rendering. */
+export type FetchReturnStyle = 'auto' | 'brake' | 'trot' | 'run-trot';
 export interface PetOptions {
   /** Asset names are relative; return original file bytes (keep .gz files compressed). */
   loadAsset?: (name: string) => Promise<ArrayBuffer | ArrayBufferView>;
   seed?: number;
   energy?: number;
+  /** Default auto mixes all three existing return styles without adjacent repeats. */
+  returnStyle?: FetchReturnStyle;
   /** Keep true for the current paw correction; false selects the legacy comparison. */
   pawTransport?: boolean;
   /** Default q5 (32 levels). Original requires separately supplied original assets. */
@@ -32,6 +35,8 @@ export interface PetState {
   seatProgress: number | null;
   behavior: string | null;
   actionName: string | null;
+  /** Physical vertical lift during an optional authored recovery bound. */
+  bodyLift?: number;
   [key: string]: unknown;
 }
 export interface LifeReport {
@@ -47,7 +52,12 @@ export interface LifeReport {
   decisions: number;
   cooldowns: {ball: number; treat: number; tug: number};
   gesture: {clip: string; progress: number} | null;
-  ball: {x: number; z: number; height: number; carried: boolean} | null;
+  ball: {x: number; z: number; height: number; carried: boolean; spin?: number; speed?: number; phase?: 'flight' | 'roll' | 'rest'; settled?: boolean} | null;
+  /** Local deterministic fetch variation; null outside a ball interaction. */
+  fetchPattern: 'clean' | 'rolling' | 'miss' | 'tumble' | null;
+  /** Ball-carry gait, selected independently of the fetch/roaming random stream. */
+  returnStyle: FetchReturnStyle;
+  returnMode: Exclude<FetchReturnStyle, 'auto'> | null;
   /** Rare autonomous visitor; absent during direct user interactions. */
   butterfly: {x: number; z: number; height: number; phase: number; opacity: number} | null;
   treat: {x: number; z: number; height: number} | null;
@@ -81,6 +91,8 @@ export interface Pet {
   frame(options: FrameOptions): PetFrame;
   /** False when busy or cooling down. */
   interact(kind: 'ball' | 'treat' | 'tug'): boolean;
+  /** Sets the next throw's return style. Does not interrupt a fetch in progress. */
+  setReturnStyle(style: FetchReturnStyle): FetchReturnStyle;
   readonly disposed: boolean;
   dispose(): void;
 }

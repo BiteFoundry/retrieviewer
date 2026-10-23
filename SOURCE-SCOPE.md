@@ -16,8 +16,8 @@ unshipped historical art. It does not claim to include or rerun all305 tests.
 The same source runtime was exercised on Windows and an isolated AlmaLinux8
 GLIBC2.28 composited X11 display. macOS still has no real-host verification.
 
-The checked-in package version is now0.0.4, adding the reviewed runtime
-optimizations and comfort extension. The extra tug art uses the same declared
+The checked-in package version is now0.0.10, including spatial autonomy,
+allocation improvements and the earlier comfort extension. The extra tug art uses the same declared
 CC BY-SA4.0 terms; original generated sheet PNGs remain local. Nothing is
 republished over immutable npm0.0.3. See RELEASING.md for the current checks,
 authorization and platform verification limits.

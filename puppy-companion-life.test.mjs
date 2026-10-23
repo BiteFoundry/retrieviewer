@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {createPaperActor} from './puppy-paper.mjs';
-import {createPaperBody} from './puppy-paper-world.mjs';
+import {createPaperBody,createPaperProjection,PAPER_GAITS} from './puppy-paper-world.mjs';
 import {createCompanionLife} from './puppy-companion-life.mjs';
 import {createSnappyTrickTimings} from './puppy-paper-trick-timing.mjs';
 const info=JSON.parse(readFileSync(new URL('./puppy-stride-meta.json',import.meta.url)));
@@ -78,4 +78,50 @@ test('hand-fed treat never turns into an autonomous walk while eating',()=>{
   if(!f.report.busy){complete=true;break;}
  }
  assert.ok(sawChew&&complete);assert.equal(puppy.life.report.treat,null);
+});
+
+test('autonomy uses both sides and depth, lingers away and naps in different nooks without teleporting',()=>{
+ const projection=createPaperProjection({viewportWidth:1920,viewportHeight:1080,rect:{left:0,top:0,width:1920,height:1080},width:960,height:540});
+ for(const seed of [0,1,2,4,20,30,43,256,731,990]){
+  const p=make(seed),napSpots=new Set();let last=null,near=0,minZ=0,minU=.5,maxU=.5,awayHolds=0,sleeping=0;
+  for(let i=0;i<1200*60;i++){
+   const {state:s,report:r}=p.step(),u=projection.project(s.x,0,s.z).x;
+   minZ=Math.min(minZ,s.z);minU=Math.min(minU,u);maxU=Math.max(maxU,u);
+   if(s.z>-.5&&Math.abs(s.x)<.32)near++;
+   if(last)assert.ok(Math.hypot(s.x-last.x,s.z-last.z)<=PAPER_GAITS.front.speed/60+1e-8,'root always follows integrated gait travel');
+   if(r.intent==='far'&&s.state==='idle'&&s.speed===0&&s.z<-.65)awayHolds++;
+   if(s.state==='sleep'){
+    sleeping++;assert.ok(s.z<=-.5&&s.z>=-3.5&&Math.abs(s.x)>.15,'nap must be away from the front-center magnet');
+    napSpots.add(`${s.x.toFixed(2)}/${s.z.toFixed(2)}`);
+    if(last?.state==='sleep'){assert.equal(s.x,last.x);assert.equal(s.z,last.z);}
+   }
+   last=s;
+  }
+  assert.ok(near/(1200*60)<.4,`${seed}: too much front-center occupancy`);
+  assert.ok(minZ< -3&&minU<.35&&maxU>.65,`${seed}: needs lateral and depth coverage`);
+  assert.ok(awayHolds>60,`${seed}: dash should linger at its destination`);
+  assert.ok(sleeping>60&&napSpots.size>=2,`${seed}: needs more than one sleeping place`);
+ }
+});
+
+test('a ball from a distant nap interrupts, fetches and returns; a treat stays at that nap',()=>{
+ for(const kind of ['ball','treat']){
+  const p=make(43);let nap=null;
+  for(let i=0;i<180*60;i++){const f=p.step();if(f.state.state==='sleep'){nap=f.state;break;}}
+  assert.ok(nap&&nap.z<-.5);assert.equal(p.life.interact(kind),true);
+  let reacted=false,finished=false;
+  for(let i=0;i<60*60;i++){
+   const f=p.step();
+   if(kind==='treat'&&f.report.intent==='chew'){
+    reacted=true;assert.equal(f.state.x,nap.x);assert.equal(f.state.z,nap.z);assert.equal(f.state.speed,0);
+   }
+   if(kind==='ball'&&f.report.intent==='fetch'&&f.state.speed>0)reacted=true;
+   if(!f.report.busy){
+    finished=true;
+    if(kind==='ball'){assert.ok(Math.abs(f.state.x)<.002);assert.ok(Math.abs(f.state.z-.2)<.002);}
+    break;
+   }
+  }
+  assert.ok(reacted&&finished,kind+' must remain responsive away from home');
+ }
 });

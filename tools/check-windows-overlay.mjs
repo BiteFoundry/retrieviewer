@@ -29,7 +29,7 @@ console.log(JSON.stringify(receipt,null,2));
 // The actual detached worker + named pipe + native painter, bound only to its own
 // off-screen test window. No user window or target selection is touched here.
 const helperSpec={command:executable,args:['--ipc-test'],mode:'windows-overlay',fps:30};
-const worker=spawn(process.execPath,[fileURLToPath(new URL('integrations/windows-overlay/worker.mjs',packageRoot)),'--helper-spec',JSON.stringify(helperSpec)],{windowsHide:true,stdio:['ignore','ignore','pipe','ipc'],env:{...process.env,RETRIEVIEWER_HOME:stateDir}});
+const worker=spawn(process.execPath,[fileURLToPath(new URL('integrations/windows-overlay/worker.mjs',packageRoot)),'--helper-spec',JSON.stringify(helperSpec)],{windowsHide:true,stdio:['ignore','ignore','pipe','ipc'],env:{...process.env,RETRIEVIEWER_HOME:stateDir,RETRIEVIEWER_RETURN_STYLE:'brake'}});
 let stderr='';worker.stderr.on('data',s=>stderr+=s);const delay=ms=>new Promise(r=>setTimeout(r,ms));
 try{
  await new Promise((resolve,reject)=>{const timeout=setTimeout(()=>reject(Error('Worker startup timed out')),10000);worker.once('message',m=>{clearTimeout(timeout);m.error?reject(Error(m.error)):resolve(m);});worker.once('exit',code=>{clearTimeout(timeout);reject(Error('Worker startup exit '+code+' '+stderr));});});
@@ -37,6 +37,7 @@ try{
  let status;for(let i=0;i<80;i++){status=await desktopStatus({stateDir});if(status.paintedFrames>=8)break;await delay(100);}
  if(!(status.paintedFrames>=8&&status.visible&&status.selected))throw Error('Native worker did not paint frames: '+JSON.stringify(status)+' '+stderr);
  if(status.lastInteraction?.kind!=='ball'||!status.lastInteraction.accepted)throw Error('Native ball button did not reach the real pet engine');
+ if(status.returnStyle!=='brake')throw Error('Desktop return style did not reach its worker');
  const session=await readSession({stateDir});
  let wrongTokenRejected=false;try{await requestSession({...session,token:'0'.repeat(64)},'status');}catch{wrongTokenRejected=true;}
  if(!wrongTokenRejected)throw Error('Unauthenticated native control accepted');
@@ -45,6 +46,6 @@ try{
  if(worker.exitCode!==0)throw Error('Worker did not exit cleanly: '+worker.exitCode+' '+stderr);
  let painterExited=false;try{process.kill(status.painterPid,0);}catch(e){painterExited=e.code==='ESRCH';}
  if(!painterExited||(await desktopStatus({stateDir})).running!==false)throw Error('Companion left a process/session behind');
- const lifecycle={paintedFrames:status.paintedFrames,nativeBallButton:status.lastInteraction,nodeRssMiB:Math.round(status.rssBytes/1048576),wrongTokenRejected,stopped:stopped.stopped,workerExited:true,painterExited,scope:'actual native worker with owned off-screen target only'};
+ const lifecycle={paintedFrames:status.paintedFrames,nativeBallButton:status.lastInteraction,returnStyle:status.returnStyle,nodeRssMiB:Math.round(status.rssBytes/1048576),wrongTokenRejected,stopped:stopped.stopped,workerExited:true,painterExited,scope:'actual native worker with owned off-screen target only'};
  await writeFile(join(out,'lifecycle-receipt.json'),JSON.stringify(lifecycle,null,2)+'\n');console.log(JSON.stringify(lifecycle,null,2));
 }finally{if(worker.exitCode===null){await stopDesktop({stateDir}).catch(()=>{});await delay(500);if(worker.exitCode===null)worker.kill();}}

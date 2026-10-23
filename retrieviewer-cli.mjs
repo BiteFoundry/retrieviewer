@@ -13,7 +13,7 @@ Usage:
   retrieviewer doctor [--agent ID] [--json]
   retrieviewer agents [--json]
   retrieviewer preview [--original]
-  retrieviewer desktop [--ink cream|gold|dark]
+  retrieviewer desktop [--ink cream|gold|dark] [--return-style auto|brake|trot|run-trot]
   retrieviewer desktop-status [--json]
   retrieviewer desktop-stop
   retrieviewer desktop-clean --yes
@@ -27,12 +27,13 @@ Desktop is a separate native overlay, NOT a Codex plugin. Choose a window once;
 use Codex normally. Exit from its tray icon or desktop-stop. No auto-start is added.
 Windows is verified; macOS and Linux X11 adapters are experimental. Native Wayland
 app tracking is not supported. Linux targets AlmaLinux8/GLIBC2.28, system Python3.6+.
+Return style defaults to auto (mix all three). Restart the companion to change it.
 `;
 export function parseArguments(args){
  const [command='help',...rest]=args,options={};
  for(let i=0;i<rest.length;i++){
   const token=rest[i];
-  if(token==='--agent'||token==='--ink'){
+  if(token==='--agent'||token==='--ink'||token==='--return-style'){
    const key=token.slice(2);
    if(options[key]||!rest[i+1]||rest[i+1].startsWith('-'))throw Error(token+' requires one value');
    options[key]=rest[++i];
@@ -41,8 +42,9 @@ export function parseArguments(args){
  }
  if(options.agent&&!AGENTS.some(a=>a.id===options.agent))throw Error('Unknown agent: '+options.agent);
  if(options.ink&&!['cream','gold','dark'].includes(options.ink))throw Error('--ink must be cream, gold or dark');
+ if(options['return-style']&&!['auto','brake','trot','run-trot'].includes(options['return-style']))throw Error('--return-style must be auto, brake, trot or run-trot');
  if(!['help','--help','-h','enable','disable','disconnect','status','doctor','agents','preview','desktop','desktop-status','desktop-stop','desktop-clean','desktop-remove'].includes(command))throw Error('Unknown command: '+command);
- const allowed={desktop:['ink'],enable:['agent','yes','json','dry-run'],disconnect:['agent','yes','json','dry-run'],disable:['agent','json'],status:['agent','json'],doctor:['agent','json'],agents:['json'],preview:['original'],'desktop-status':['json'],'desktop-clean':['yes'],'desktop-remove':['yes']};
+ const allowed={desktop:['ink','return-style'],enable:['agent','yes','json','dry-run'],disconnect:['agent','yes','json','dry-run'],disable:['agent','json'],status:['agent','json'],doctor:['agent','json'],agents:['json'],preview:['original'],'desktop-status':['json'],'desktop-clean':['yes'],'desktop-remove':['yes']};
  for(const key of Object.keys(options))if(!(allowed[command]??[]).includes(key))throw Error(`--${key} is not supported by ${command}`);
  return {command,options};
 }
@@ -53,7 +55,7 @@ export async function runCli(args,{input=process.stdin,output=process.stdout,err
   if(['desktop-clean','desktop-remove'].includes(command)&&!options.yes)throw Error('Use '+command+' --yes to remove only the companion cache.');
   const api=desktop??await import('./integrations/windows-overlay/desktop.mjs');
   const action={'desktop':'startDesktop','desktop-status':'desktopStatus','desktop-stop':'stopDesktop','desktop-clean':'cleanDesktop','desktop-remove':'removeDesktop'}[command];
-  emit(await api[action](options.ink?{ink:options.ink}:{}));return 0;
+  emit(await api[action]({...options.ink?{ink:options.ink}:{},...options['return-style']?{returnStyle:options['return-style']}:{} }));return 0;
  }
  if(command==='preview'){await import('./examples/live.mjs');return 0;}
  if(['status','doctor','agents'].includes(command)){

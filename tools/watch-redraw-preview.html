@@ -1,0 +1,22 @@
+<!doctype html><html lang="ko"><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Retrieviewer · 고개 돌리기 검수</title>
+<style>
+@font-face{font-family:JuliaMono;src:url('./assets/fonts/JuliaMono-Regular.woff2') format('woff2');font-display:swap}
+*{box-sizing:border-box}body{margin:0;background:#080a09;color:#f0f2ed;font:14px/1.6 system-ui,sans-serif}header,footer{padding:16px 24px;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}h1{font:inherit;margin:0}p{margin:0;color:#a2aaa4}main{display:grid;grid-template-columns:1fr 1fr;gap:24px;padding:24px}section{min-width:0}h2{font:inherit;font-weight:600}figure{height:65vh;position:relative;overflow:hidden;margin:0}.stage{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%)}pre{position:absolute;margin:0;font-family:JuliaMono,monospace;white-space:pre;color:#f0f2ed;letter-spacing:0}button{font:inherit;min-height:44px;padding:8px 16px;border:1px solid #303a32;border-radius:8px;background:#111512;color:#f0f2ed;cursor:pointer}button:focus-visible{outline:2px solid #c9e7b9;outline-offset:3px}@media(max-width:700px){main{grid-template-columns:1fr}figure{height:40vh}}
+</style>
+<header><h1>고개 돌리기 · 배포 전 검수</h1><p>같은 카메라·같은 움직임. 양쪽을 똑같이 확대했습니다.</p></header>
+<main><section><h2>기존 0.0.9 그림</h2><figure><div class="stage"><pre id="before"></pre></div></figure></section><section><h2>새 원화 후보 · 전신의 무게 이동</h2><figure><div class="stage"><pre id="after"></pre></div></figure></section></main>
+<footer><p id="status" role="status">불러오는 중</p><label>프레임 <input id="seek" type="range" min="0" max="0" value="0" disabled></label><div><button id="pause" disabled>멈추기</button> <button id="restart" disabled>처음부터</button></div></footer>
+<script type="module">
+const before=document.querySelector('#before'),after=document.querySelector('#after'),status=document.querySelector('#status');
+let data=null,index=0,clock=0,last=0,raf=0,playing=!matchMedia('(prefers-reduced-motion: reduce)').matches,cell=1;
+function fit(){if(!data)return;const r=before.closest('figure').getBoundingClientRect();cell=Math.min(r.width/data.columns,r.height/(data.rows*2))*1.7;const c=document.createElement('canvas').getContext('2d');c.font='100px JuliaMono';const ratio=c.measureText('⣿').width/100||.6;for(const el of [before,after]){el.style.fontSize=cell/ratio+'px';el.style.lineHeight=cell*2+'px';el.parentElement.style.width=data.columns*cell+'px';el.parentElement.style.height=data.rows*cell*2+'px';}draw();}
+function draw(){if(!data)return;const f=data.frames[index];for(const [el,key]of [[before,'before'],[after,'after']]){el.textContent=f[key].text;el.style.left=f[key].x*cell+'px';el.style.top=f[key].y*cell*2+'px';}status.textContent=f.time.toFixed(1)+'초 · '+(f.behavior??'기다리는 중');document.querySelector('#seek').value=index;}
+function stop(){cancelAnimationFrame(raf);raf=0;last=0;}
+function tick(now){raf=0;if(!playing||document.hidden)return;clock+=last?Math.min(.1,(now-last)/1000):0;last=now;index=Math.floor(clock*data.fps)%data.frames.length;draw();raf=requestAnimationFrame(tick);}
+function start(){stop();if(playing&&!document.hidden)raf=requestAnimationFrame(tick);document.querySelector('#pause').textContent=playing?'멈추기':'재생';}
+document.querySelector('#pause').onclick=()=>{playing=!playing;start();};document.querySelector('#restart').onclick=()=>{clock=0;index=0;draw();};
+document.querySelector('#seek').oninput=e=>{index=Number(e.target.value);clock=index/data.fps;playing=false;start();draw();};
+document.addEventListener('visibilitychange',()=>document.hidden?stop():start());window.addEventListener('pagehide',stop);new ResizeObserver(fit).observe(before.closest('figure'));
+try{const r=await fetch('./watch-redraw-preview.json');if(!r.ok)throw Error(r.status);data=await r.json();await document.fonts.load('12px JuliaMono');fit();for(const b of document.querySelectorAll('button,input'))b.disabled=false;document.querySelector('#seek').max=data.frames.length-1;start();}catch(e){status.textContent='불러오지 못했습니다. 새로고침해 주세요.';console.error(e);}
+</script></html>

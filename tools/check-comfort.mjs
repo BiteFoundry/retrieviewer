@@ -3,10 +3,10 @@ import {createPet} from '../retrieviewer.mjs';
 import {mkdirSync,writeFileSync} from 'node:fs';
 import {deflateSync} from 'node:zlib';
 import {resolve,join} from 'node:path';
-const out=resolve('dist/comfort-qa');mkdirSync(out,{recursive:true});
+import {fileURLToPath} from 'node:url';
 const crc=bytes=>{let c=0xffffffff;for(const b of bytes){c^=b;for(let i=0;i<8;i++)c=c&1?0xedb88320^(c>>>1):c>>>1;}return(c^0xffffffff)>>>0;};
 const chunk=(type,bytes)=>{const t=Buffer.from(type),out=Buffer.alloc(12+bytes.length);out.writeUInt32BE(bytes.length);t.copy(out,4);Buffer.from(bytes).copy(out,8);out.writeUInt32BE(crc(Buffer.concat([t,bytes])),8+bytes.length);return out;};
-function png(frame){
+export function png(frame){
  const cell=8,w=frame.columns*cell,h=frame.rows*cell*2,raw=Buffer.alloc(h*(w*3+1));
  for(const [row,line] of frame.text.split('\n').entries())for(const [col,char] of [...line].entries()){
   const bits=char.codePointAt(0)-0x2800;
@@ -21,6 +21,8 @@ function png(frame){
  const head=Buffer.alloc(13);head.writeUInt32BE(w);head.writeUInt32BE(h,4);head[8]=8;head[9]=2;
  return Buffer.concat([Buffer.from([137,80,78,71,13,10,26,10]),chunk('IHDR',head),chunk('IDAT',deflateSync(raw)),chunk('IEND',Buffer.alloc(0))]);
 }
+if(process.argv[1]&&resolve(process.argv[1])===fileURLToPath(import.meta.url)){
+const out=resolve('dist/comfort-qa');mkdirSync(out,{recursive:true});
 const receipt=[];
 for(const [kind,seed] of [['belly',4],['sleep',43],['tug',2]]){
  const pet=await createPet({seed});let time=0,found=0;const snapshots=[];
@@ -45,3 +47,4 @@ for(const [kind,seed] of [['belly',4],['sleep',43],['tug',2]]){
 }
 writeFileSync(join(out,'receipt.json'),JSON.stringify(receipt,null,2));
 console.log(JSON.stringify(receipt.map(({kind,snapshots})=>({kind,frames:snapshots.map(s=>s.name)}))));
+}

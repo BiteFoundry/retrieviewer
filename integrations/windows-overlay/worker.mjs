@@ -10,6 +10,7 @@ import {controlAddress,parseHelperSpec} from '../desktop/platform.mjs';
 
 let helper,pump,timer,server,session,paths,owned=false,stopping=false,frames=0,paintedFrames=0,visible=false,selected=false,pickerVisible=false,pendingViewport=null,lastInteraction=null;
 let nativeError=null;
+const returnStyle=process.env.RETRIEVIEWER_RETURN_STYLE??'auto';
 let nativeStderr='';
 const sendParent=message=>{if(process.connected)process.send(message);};
 async function stop(){
@@ -33,7 +34,7 @@ try{
    body+=bytes.toString('utf8');if(body.length>2048)return socket.destroy();if(!body.includes('\n'))return;
    let command;try{command=JSON.parse(body.split('\n')[0]);}catch{return socket.destroy();}
    if(command.token!==session.token||!['status','stop'].includes(command.command))return socket.destroy();
-   socket.end(JSON.stringify(command.command==='stop'?{stopped:true}:{running:true,reachable:true,selected,visible,pickerVisible,frames,paintedFrames,lastInteraction,pid:process.pid,painterPid:helper?.pid,rssBytes:process.memoryUsage().rss})+'\n');
+   socket.end(JSON.stringify(command.command==='stop'?{stopped:true}:{running:true,reachable:true,selected,visible,pickerVisible,frames,paintedFrames,lastInteraction,returnStyle,pid:process.pid,painterPid:helper?.pid,rssBytes:process.memoryUsage().rss})+'\n');
    if(command.command==='stop')stop();
   });
  });
@@ -48,7 +49,7 @@ try{
  reader.on('line',line=>{
   if(line.length>100000)return stop();let m;try{m=JSON.parse(line);}catch{return stop();}
   try{
-   if(m.type==='ready'){pickerVisible=m.pickerVisible===true;sendParent({running:true,windowPicker:pickerVisible,mode:spec.mode,pid:process.pid});}
+   if(m.type==='ready'){pickerVisible=m.pickerVisible===true;sendParent({running:true,windowPicker:pickerVisible,mode:spec.mode,returnStyle,pid:process.pid});}
    else if(m.type==='error'){nativeError=String(m.message??'Desktop painter failed');sendParent({error:nativeError});stop();}
    else if(m.type==='picker')pickerVisible=m.visible===true;
    else if(m.type==='viewport'){pendingViewport=m;visible=m.visible;selected=m.selected===true;pump?.viewport(m);}
@@ -58,7 +59,7 @@ try{
    else if(m.type==='quit')stop();
   }catch(error){write({type:'error',message:error.message});stop();}
  });
- const {createPet}=await import('../../retrieviewer.mjs');const pet=await createPet();
+ const {createPet}=await import('../../retrieviewer.mjs');const pet=await createPet({returnStyle});
  if(stopping)pet.dispose();else{
   pump=createFramePump({pet,send:write});if(pendingViewport)pump.viewport(pendingViewport);
   write({type:'loaded',ink:process.env.RETRIEVIEWER_INK??'cream'});timer=setInterval(()=>{try{pump.tick();}catch(error){write({type:'error',message:error.message});stop();}},1000/spec.fps);

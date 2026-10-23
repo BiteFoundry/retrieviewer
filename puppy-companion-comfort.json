@@ -1,18 +1,22 @@
 {
-  "version": 2,
+  "version": 6,
   "width": 320,
   "height": 320,
-  "frames": 13,
+  "frames": 45,
   "clips": [
     "tug",
-    "sleep"
+    "sleep",
+    "scramble",
+    "pickup-rear",
+    "pickup-side",
+    "carry-trot"
   ],
-  "gzipBytes": 129148,
-  "residentPixelBytes": 341139,
+  "gzipBytes": 457052,
+  "residentPixelBytes": 1302445,
   "sourceSheetSha256": "10fde9dacca5cb45acd68f387e7ed3bcf88cd72cf0f9c4220d31d819db91731e",
   "neutralSha256": "19f89a8bcb5a937e528593a8f36db846a0d45a5ee398f1b0873c056e5be2fa0a",
-  "encodedSha256": "35327cc103b1f7ac2ff1b09ed98658fd8ff1dcef322de9c9b18071a4358b7b87",
-  "method": "Built-in imagegen authored tug keys. One fixed scale, ground/center translation only. Exact existing Q5 seat first/last. No expanded tween film or live body deformation.",
+  "encodedSha256": "f4e7604e3a581f5b610eb0f7873deee317a6e2ad0ff548106db2e64f6bead89b",
+  "method": "Approved momentum poses, single depth pursuit, exact source endpoints; one common scale per authored batch, no runtime image warp or expanded film.",
   "registration": {
     "sheetSize": [
       1774,
@@ -136,5 +140,327 @@
     "belly": "e1967d9156a119d04e25fd6428fe5dcdbd2156c5e4eba0347217847874006109",
     "curl": "10c9a85701af3587c48c1d8158972a07026e79a18a2375d86108538eda05aae7",
     "chin": "e971eaa6861b597f0dba3a487403cee5f120cba0a9f9584d831b5634d096dee7"
+  },
+  "scramble": {
+    "frames": [
+      25,
+      26,
+      27,
+      28,
+      29,
+      30,
+      31,
+      32,
+      33,
+      34,
+      35,
+      36
+    ],
+    "times": [
+      0,
+      0.035,
+      0.07,
+      0.105,
+      0.14,
+      0.19,
+      0.25,
+      0.32,
+      0.39,
+      0.48,
+      0.57,
+      0.65
+    ],
+    "duration": 0.65,
+    "floorOffsets": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "entryView": "rear",
+    "entryPhase": 0.25,
+    "trajectory": "single-pass-target",
+    "brakeSeconds": 0.19,
+    "catchSeconds": 0.29,
+    "catchSpeedRatio": 0.24,
+    "registration": {
+      "commonScale": 0.7160493827160493,
+      "commonDx": 39.580246913580254,
+      "wholeFrameFloorTranslations": true,
+      "approvedBatchScale": 0.47313240809175766,
+      "approvedBatchDx": 1.1088664421997976,
+      "approvedOriginalKeys": [
+        2,
+        4,
+        6,
+        8
+      ],
+      "perPoseScale": false,
+      "bodyCompositing": false,
+      "nonlinearWarp": false,
+      "exactSourceEndpoints": true
+    }
+  },
+  "pickups": {
+    "rear": {
+      "frames": [
+        13,
+        14,
+        15,
+        16,
+        17,
+        18
+      ],
+      "times": [
+        0,
+        0.09,
+        0.18,
+        0.28,
+        0.4,
+        0.52
+      ],
+      "duration": 0.52,
+      "floorOffsets": [
+        0,
+        2,
+        2,
+        1,
+        1,
+        0
+      ]
+    },
+    "front": {
+      "frames": [
+        19,
+        20,
+        21,
+        22,
+        23,
+        24
+      ],
+      "times": [
+        0,
+        0.09,
+        0.18,
+        0.28,
+        0.4,
+        0.52
+      ],
+      "duration": 0.52,
+      "floorOffsets": [
+        -4,
+        1,
+        1,
+        1,
+        1,
+        -4
+      ],
+      "mouth": [
+        [
+          255,
+          151
+        ],
+        [
+          250,
+          225
+        ],
+        [
+          280,
+          275
+        ],
+        [
+          274,
+          287
+        ],
+        [
+          268,
+          238
+        ],
+        [
+          255,
+          151
+        ]
+      ]
+    }
+  },
+  "sourceComfort": {
+    "ref": "9fc9628b6e42bd5da1efb02521ed4ab6e59f7763",
+    "encodedSha256": "35327cc103b1f7ac2ff1b09ed98658fd8ff1dcef322de9c9b18071a4358b7b87",
+    "frames": 13,
+    "gzipBytes": 129148
+  },
+  "approvedArtwork": "Owner-approved whole-body momentum study, 2026-10-23",
+  "sourceSheetHashes": {
+    "rear": "7beaf6a3250590563d98af860c369c91993d5aea6b7b901f368d3992d120b09b",
+    "breakdowns": "7a565ccf2aa54f38a89979826ecc7d2d77110abbcd1bfbe6ab2cb4d86093daf2"
+  },
+  "carryTrot": {
+    "frames": [
+      37,
+      38,
+      39,
+      40
+    ],
+    "times": [
+      0,
+      0.25,
+      0.5,
+      0.75
+    ],
+    "duration": 1,
+    "cyclic": true,
+    "floorOffsets": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "mouth": [
+      [
+        198,
+        177
+      ],
+      [
+        197,
+        179
+      ],
+      [
+        189,
+        178
+      ],
+      [
+        190,
+        179
+      ]
+    ],
+    "registration": {
+      "commonScale": 0.6843853820598007,
+      "commonDx": 68.1594684385382,
+      "perPoseScale": false,
+      "bodyCompositing": false,
+      "wholeFrameFloorTranslation": true,
+      "selectedSourceKeys": [
+        0,
+        1,
+        2,
+        6,
+        8,
+        9,
+        10,
+        11
+      ]
+    },
+    "settle": {
+      "frames": [
+        41,
+        42,
+        43,
+        44
+      ],
+      "times": [
+        0,
+        0.07,
+        0.14,
+        0.22
+      ],
+      "duration": 0.22,
+      "floorOffsets": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "mouth": [
+        [
+          203,
+          179
+        ],
+        [
+          194,
+          180
+        ],
+        [
+          191,
+          180
+        ],
+        [
+          195,
+          183
+        ]
+      ]
+    },
+    "feet": [
+      [
+        {
+          "id": "fore-left",
+          "x": 168,
+          "y": 260,
+          "stance": false
+        },
+        {
+          "id": "fore-right",
+          "x": 220,
+          "y": 298,
+          "stance": true
+        }
+      ],
+      [
+        {
+          "id": "fore-left",
+          "x": 174,
+          "y": 267,
+          "stance": false
+        },
+        {
+          "id": "fore-right",
+          "x": 210,
+          "y": 298,
+          "stance": true
+        }
+      ],
+      [
+        {
+          "id": "fore-left",
+          "x": 164,
+          "y": 298,
+          "stance": true
+        },
+        {
+          "id": "fore-right",
+          "x": 217,
+          "y": 260,
+          "stance": false
+        }
+      ],
+      [
+        {
+          "id": "fore-left",
+          "x": 160,
+          "y": 298,
+          "stance": true
+        },
+        {
+          "id": "fore-right",
+          "x": 216,
+          "y": 270,
+          "stance": false
+        }
+      ]
+    ]
+  },
+  "carrySource": {
+    "encodedSha256": "efa81c6f464646d101873223869cebf5ca28c80529ad4ab26380d3b97cc2af54",
+    "frames": 37,
+    "gzipBytes": 375968,
+    "residentPixelBytes": 1043388,
+    "sheetSha256": "43e41a678d348439bf989535bf30761cc23ac9d4ca049705a9a651e1e8b61ee0"
   }
 }

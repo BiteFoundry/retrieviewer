@@ -9,3 +9,4 @@ for i,f in enumerate(files):
  im=Image.frombytes('L',(320,320),f.read_bytes())
  out.paste(im,(i%5*320,i//5*350+25));d.text((i%5*320+8,i//5*350+5),f.stem,fill='white')
 out.save(p/'sources.png')
+Image.frombytes('L',(320,320),(p/'seat-50.gray').read_bytes()).save(p/'seat-reference.png')

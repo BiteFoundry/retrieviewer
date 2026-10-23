@@ -1,0 +1,24 @@
+// Offline pose-first fetch candidate. Keep it staged until visual acceptance.
+import {readFileSync,writeFileSync,mkdirSync} from 'node:fs';
+import {execFileSync} from 'node:child_process';
+import {gunzipSync,gzipSync} from 'node:zlib';
+import {createHash} from 'node:crypto';
+import {readPackedFrames,packFrames} from '../puppy-frame-store.mjs';
+import {encodePredictiveFrames} from '../puppy-frame-predictive.mjs';
+const stage='dist/fetch-art-v2';mkdirSync(stage,{recursive:true});
+const read=name=>readPackedFrames(gunzipSync(readFileSync(name+'-q5.bin.gz')));
+const stride=read('puppy-stride-tweens'),rear=read('puppy-paper-rear-gallop');
+for(const [name,store,index] of [['plant',stride,5*17],['stand',stride,20*17],['rear',rear,5*9]])writeFileSync(stage+'/'+name+'.gray',store.getFrame(index));
+execFileSync('python',['tools/prepare-fetch-art.py',stage,...process.argv.includes('--references')?['--references']:[]],{stdio:'inherit',windowsHide:true});
+if(process.argv.includes('--references'))process.exit(0);
+const old=read('puppy-companion-comfort'),info=JSON.parse(readFileSync('puppy-companion-comfort.json'));
+if(info.version!==2||info.frames!==13)throw Error('Expected original tug/sleep family');
+const keys=readFileSync(stage+'/keys.gray'),added=keys.length/(320*320),count=13+added;
+if(!Number.isInteger(added))throw Error('Invalid pose bytes');
+const raw=Buffer.concat([...Array.from({length:13},(_,i)=>Buffer.from(old.getFrame(i))),keys]);
+const encoded=encodePredictiveFrames(packFrames(raw,320,320,count)),gz=gzipSync(encoded,{level:9}),store=readPackedFrames(encoded),sha=b=>createHash('sha256').update(b).digest('hex');
+for(let i=0;i<13;i++)if(!Buffer.from(store.getFrame(i)).equals(Buffer.from(old.getFrame(i))))throw Error('Existing comfort frames changed');
+const motion=JSON.parse(readFileSync(stage+'/motions.json'));
+const meta={...info,version:4,frames:count,clips:[...info.clips,'scramble','pickup-rear','pickup-side'],...motion,registration:{...info.registration,fetch:motion.registration},sourceComfort:{version:info.version,frames:info.frames,encodedSha256:info.encodedSha256},method:info.method+' Pose-first moving stumble and standing directional pickups; no expanded tween film.',gzipBytes:gz.length,residentPixelBytes:store.residentPixelBytes,encodedSha256:sha(encoded),sourceSheetHashes:Object.fromEntries(['scramble','pickup'].map(name=>[name,sha(readFileSync(stage+'/'+name+'-source.png'))]))};
+writeFileSync(stage+'/comfort-candidate-q5.bin.gz',gz);writeFileSync(stage+'/comfort-candidate.json',JSON.stringify(meta,null,2));
+console.log(JSON.stringify({frames:count,gzipAdded:gz.length-info.gzipBytes,pixelPayloadAdded:store.residentPixelBytes-info.residentPixelBytes,staged:true}));

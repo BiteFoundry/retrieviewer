@@ -2,7 +2,7 @@ import {createPaperActor,createPaperRenderer,createPaperComfortTimings} from './
 import {createPaperProjection,createPaperBody} from './puppy-paper-world.mjs';
 import {rgbaToBraille} from './braille.mjs';
 import {createSnappyTrickTimings} from './puppy-paper-trick-timing.mjs';
-import {createCompanionLife} from './puppy-companion-life.mjs';
+import {createCompanionLife,FETCH_RETURN_STYLES} from './puppy-companion-life.mjs';
 import {paintCompanionObjects} from './puppy-companion-objects.mjs';
 import {readPackedFrames} from './puppy-frame-store.mjs';
 
@@ -65,7 +65,9 @@ async function loadPetAssets(loadAsset,artProfile){
  let codec;
  if(typeof process!=='undefined'&&process.versions?.node){
   const {deflateRawSync,inflateRawSync}=await import('node:zlib');
-  codec={compress:bytes=>deflateRawSync(bytes,{level:1}),expand:(bytes,size)=>inflateRawSync(bytes,{maxOutputLength:size})};
+  // Level 3 trims retained crop payload without the multi-second startup cost
+  // of levels 6..9. Pixels, synchronous frame access and the LRU stay identical.
+  codec={compress:bytes=>deflateRawSync(bytes,{level:3}),expand:(bytes,size)=>inflateRawSync(bytes,{maxOutputLength:size})};
  }
  const load=async name=>bytesOf(name,await loadAsset(name));
  const json=async name=>JSON.parse(new TextDecoder().decode(await load(name)));
@@ -94,13 +96,14 @@ async function acquireAssets(loadAsset,artProfile){
  try{return{data:await entry.promise,release};}catch(error){release();throw error;}
 }
 
-export async function createPet({loadAsset=defaultLoadAsset,seed,energy,pawTransport=true,artProfile=DEFAULT_ART_PROFILE}={}){
+export async function createPet({loadAsset=defaultLoadAsset,seed,energy,pawTransport=true,artProfile=DEFAULT_ART_PROFILE,returnStyle='auto'}={}){
  if(typeof loadAsset!=='function')throw TypeError('loadAsset must be a function');
  if(seed===undefined)seed=globalThis.crypto?.getRandomValues?globalThis.crypto.getRandomValues(new Uint32Array(1))[0]:731;
  if(!Number.isInteger(seed)||seed<0||seed>0xffffffff)throw RangeError('seed must be a uint32');
  if(energy!==undefined&&(!Number.isFinite(energy)||energy<0||energy>1))throw RangeError('energy must be within 0..1');
  if(typeof pawTransport!=='boolean')throw TypeError('pawTransport must be boolean');
  if(!ART_PROFILES.includes(artProfile))throw RangeError('artProfile must be original or q5');
+ if(!FETCH_RETURN_STYLES.includes(returnStyle))throw RangeError('returnStyle must be auto, brake, trot or run-trot');
  let lease=await acquireAssets(loadAsset,artProfile),data=lease.data;
  const release=lease.release;lease=null;
  let {cache,info,meta}=data;const assets={...data.assets};data=null;
@@ -108,8 +111,8 @@ export async function createPet({loadAsset=defaultLoadAsset,seed,energy,pawTrans
  try{
   if(!assets.actions.info.clips?.['lie-down']||!assets.actions.info.clips?.['lie-up'])throw Error('v9 action cache lacks lie-down/lie-up clips');
   animal=createPaperBody();
-  actor=createPaperActor(animal,info,{manualTricks:true,trickTimings:createSnappyTrickTimings(assets.actions.info),comfortTimings:createPaperComfortTimings(assets.actions.info),walkTransitions:true});
-  life=createCompanionLife(actor,{seed,...energy===undefined?{}:{energy}});
+  actor=createPaperActor(animal,info,{manualTricks:true,trickTimings:createSnappyTrickTimings(assets.actions.info),comfortTimings:createPaperComfortTimings(assets.actions.info),walkTransitions:true,scrambleSeconds:assets.comfort.info.scramble?.duration??0,fetchMotions:assets.comfort.info.version>=4?assets.comfort.info:null});
+  life=createCompanionLife(actor,{seed,returnStyle,...energy===undefined?{}:{energy}});
  }catch(e){animal?.dispose?.();release();throw e;}
  let paint=null,paintKey='',time=0,acc=0,disposed=false;
  const alive=()=>{if(disposed)throw Error('Pet is disposed');};
@@ -135,13 +138,15 @@ export async function createPet({loadAsset=defaultLoadAsset,seed,energy,pawTrans
    const projection=createPaperProjection({viewportWidth,viewportHeight,rect:camera?.rect??{left:0,top:0,width:viewportWidth,height:viewportHeight},width,height});
    const state=actor.sample(time,{poseFps}),report=life.report;
    if(report.gesture)state.interactionPose=report.gesture;
-   const placement=projection.placement(state.x,state.z),pixels=paint(state,{...placement,contactEnabled:!!contactEnabled});
+   const placement=projection.placement(state.x,state.z,state.bodyLift??0),pixels=paint(state,{...placement,contactEnabled:!!contactEnabled});
    paintCompanionObjects(pixels,width,height,projection,report,state,paint.lastMouth);
    const {text}=rgbaToBraille(pixels,width,height,{method:'stable',brightness:1.18,contrast:1.1});
    return {text,columns,rows,pixels,state,report,placement,projection,artProfile,mouth:paint.lastMouth,contacts:paint.report()};
   },
   // 'ball' | 'treat' | 'tug'. False when busy or cooling down; unknown kinds throw.
   interact(kind){alive();if(!INTERACTIONS.includes(kind))throw TypeError(`Unknown interaction: ${kind}`);return life.interact(kind);},
+  // Applies to the next ball throw; never rewrites a fetch already in motion.
+  setReturnStyle(style){alive();return life.setReturnStyle(style);},
   get disposed(){return disposed;},
   dispose(){
    if(disposed)return;disposed=true;

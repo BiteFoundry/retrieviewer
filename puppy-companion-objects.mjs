@@ -47,10 +47,12 @@ export function paintCompanionObjects(pixels,width,height,projection,report,stat
    const up=projection.project(o.x,(o.height??0)+o.radius,o.z);ry=Math.abs(up.y-p.y)*height;
   }
   if(![cx,cy,rx,ry].every(Number.isFinite)||rx<=0||ry<=0)continue;
+  const spin=o.spin??0,cos=Math.cos(spin),sin=Math.sin(spin);
   for(let y=Math.max(0,Math.floor(cy-ry));y<Math.min(height,Math.ceil(cy+ry));y++)
    for(let x=Math.max(0,Math.floor(cx-rx));x<Math.min(width,Math.ceil(cx+rx));x++){
     const u=(x+.5-cx)/rx,v=(y+.5-cy)/ry;if(u*u+v*v>1)continue;
-    const tone=o.kind==='treat'?((x+y)%3?190:85):Math.abs(v+.25*u)<.18?85:225;
+    const stripe=(v*cos+u*sin)+.25*(u*cos-v*sin);
+    const tone=o.kind==='treat'?((x+y)%3?190:85):Math.abs(stripe)<.18?85:225;
     const j=(y*width+x)*4;pixels[j]=pixels[j+1]=pixels[j+2]=tone;
    }
  }

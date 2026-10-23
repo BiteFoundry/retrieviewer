@@ -38,6 +38,13 @@ Node.js/npm이 없다면 [먼저 설치](PREREQUISITES.md)해 주세요.
 `retrieviewer desktop --ink dark`를 쓰세요. 실행 중이라면 먼저 종료하고 다시
 실행하세요. 배경을 캡처하지 않고, 같은 도트에 색만 바꿉니다.
 
+0.0.10부터 `--return-style auto|brake|trot|run-trot`로 귀환도
+고를 수 있어요. 기본 `auto`는 기존 제동·총총·달리다 총총을 섞고 같은 동작이
+연달아 나오지 않게 합니다. 기존 제동만 쓰려면
+`retrieviewer desktop --return-style brake`. 실행 중인 강아지는 직접 종료한 뒤
+다시 실행하세요. import해서 쓸 때는 `createPet({returnStyle:'auto'})` 또는
+`pet.setReturnStyle('brake')`로 고릅니다. 바꾸면 다음 공놀이부터 적용돼요.
+
 > **Cursor / VS Code Remote SSH 사용자:** 원격 서버의 터미널이 아닌,
 > Cursor 화면이 떠 있는 **로컬 PC의 PowerShell/터미널**에 설치하세요.
 > 서버의 `DISPLAY=:1`은 서버 쪽 X11 화면을 뜻합니다. VNC로 그 화면을 보고
