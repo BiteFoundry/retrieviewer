@@ -245,11 +245,19 @@ button:active:not(:disabled) {
   line-height: 2;
   letter-spacing: 0;
   white-space: pre;
-  color: var(--ink);
+  color: var(--pet-ink, var(--ink));
   user-select: none;
   margin: 0;
   flex: none;
 }
+.dog-stage[data-ink="gold"] { --pet-ink: #e7b867; }
+.dog-stage[data-ink="dark"] { --pet-ink: #433018; background: #f8f6f0; }
+.dog-stage[data-ink="dark"] .preview-fallback { color: #433018; }
+.preview-options { display:flex; flex-wrap:wrap; justify-content:center; gap:12px; }
+.preview-options label { display:grid; gap:4px; color:var(--muted); font-size:12px; }
+.preview-options select { max-width:100%; min-height:44px; padding:8px; font:inherit; color:var(--ink); background:var(--surface); border:1px solid var(--line); border-radius:8px; }
+.preview-options select:focus-visible { outline:2px solid var(--leaf); outline-offset:3px; }
+.ink-command { text-align:center; font-size:12px; color:var(--muted); overflow-wrap:anywhere; }
 .preview-fallback {
   position: absolute;
   color: var(--muted);

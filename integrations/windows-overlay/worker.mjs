@@ -61,6 +61,6 @@ try{
  const {createPet}=await import('../../retrieviewer.mjs');const pet=await createPet();
  if(stopping)pet.dispose();else{
   pump=createFramePump({pet,send:write});if(pendingViewport)pump.viewport(pendingViewport);
-  write({type:'loaded'});timer=setInterval(()=>{try{pump.tick();}catch(error){write({type:'error',message:error.message});stop();}},1000/spec.fps);
+  write({type:'loaded',ink:process.env.RETRIEVIEWER_INK??'cream'});timer=setInterval(()=>{try{pump.tick();}catch(error){write({type:'error',message:error.message});stop();}},1000/spec.fps);
  }
 }catch(error){sendParent({error:error.message});await stop();}

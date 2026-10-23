@@ -13,7 +13,7 @@ Usage:
   retrieviewer doctor [--agent ID] [--json]
   retrieviewer agents [--json]
   retrieviewer preview [--original]
-  retrieviewer desktop
+  retrieviewer desktop [--ink cream|gold|dark]
   retrieviewer desktop-status [--json]
   retrieviewer desktop-stop
   retrieviewer desktop-clean --yes
@@ -32,15 +32,17 @@ export function parseArguments(args){
  const [command='help',...rest]=args,options={};
  for(let i=0;i<rest.length;i++){
   const token=rest[i];
-  if(token==='--agent'){
-   if(options.agent||!rest[i+1]||rest[i+1].startsWith('-'))throw Error('--agent requires one ID');
-   options.agent=rest[++i];
+  if(token==='--agent'||token==='--ink'){
+   const key=token.slice(2);
+   if(options[key]||!rest[i+1]||rest[i+1].startsWith('-'))throw Error(token+' requires one value');
+   options[key]=rest[++i];
   }else if(['--yes','--json','--dry-run','--original'].includes(token))options[token.slice(2)]=true;
   else throw Error('Unknown argument: '+token);
  }
  if(options.agent&&!AGENTS.some(a=>a.id===options.agent))throw Error('Unknown agent: '+options.agent);
+ if(options.ink&&!['cream','gold','dark'].includes(options.ink))throw Error('--ink must be cream, gold or dark');
  if(!['help','--help','-h','enable','disable','disconnect','status','doctor','agents','preview','desktop','desktop-status','desktop-stop','desktop-clean','desktop-remove'].includes(command))throw Error('Unknown command: '+command);
- const allowed={enable:['agent','yes','json','dry-run'],disconnect:['agent','yes','json','dry-run'],disable:['agent','json'],status:['agent','json'],doctor:['agent','json'],agents:['json'],preview:['original'],'desktop-status':['json'],'desktop-clean':['yes'],'desktop-remove':['yes']};
+ const allowed={desktop:['ink'],enable:['agent','yes','json','dry-run'],disconnect:['agent','yes','json','dry-run'],disable:['agent','json'],status:['agent','json'],doctor:['agent','json'],agents:['json'],preview:['original'],'desktop-status':['json'],'desktop-clean':['yes'],'desktop-remove':['yes']};
  for(const key of Object.keys(options))if(!(allowed[command]??[]).includes(key))throw Error(`--${key} is not supported by ${command}`);
  return {command,options};
 }
@@ -51,7 +53,7 @@ export async function runCli(args,{input=process.stdin,output=process.stdout,err
   if(['desktop-clean','desktop-remove'].includes(command)&&!options.yes)throw Error('Use '+command+' --yes to remove only the companion cache.');
   const api=desktop??await import('./integrations/windows-overlay/desktop.mjs');
   const action={'desktop':'startDesktop','desktop-status':'desktopStatus','desktop-stop':'stopDesktop','desktop-clean':'cleanDesktop','desktop-remove':'removeDesktop'}[command];
-  emit(await api[action]());return 0;
+  emit(await api[action](options.ink?{ink:options.ink}:{}));return 0;
  }
  if(command==='preview'){await import('./examples/live.mjs');return 0;}
  if(['status','doctor','agents'].includes(command)){

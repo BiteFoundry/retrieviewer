@@ -1,4 +1,13 @@
-# Retrieviewer 0.0.4 release process
+# Retrieviewer 0.0.5 release process
+
+Current target: `@bitefoundry/retrieviewer@0.0.5`, public `latest`. The owner
+explicitly requested npm publication and homepage update of the approved sleep
+studies and mirrored side on2026-10-23. This also includes manual ink presets,
+sleep pressure independent of energy, shared gesture scratch and5fps sleep paint.
+Preserve0.0.4 registry bytes; never republish them. Run all checks below and publish
+only the exact tested0.0.5 tarball. Four new approved keys stay under the existing
+CC BY-SA4.0 artwork terms; see COMFORT-ART.md. The historical scope below describes
+0.0.4, not current verification results.
 
 Target: `@bitefoundry/retrieviewer@0.0.4`, public npm registry, `latest` tag.
 The npm organization `bitefoundry` uses the free public-packages plan; account

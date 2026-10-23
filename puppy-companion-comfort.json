@@ -1,16 +1,17 @@
 {
-  "version": 1,
+  "version": 2,
   "width": 320,
   "height": 320,
-  "frames": 9,
+  "frames": 13,
   "clips": [
-    "tug"
+    "tug",
+    "sleep"
   ],
-  "gzipBytes": 103549,
-  "residentPixelBytes": 291337,
+  "gzipBytes": 129148,
+  "residentPixelBytes": 341139,
   "sourceSheetSha256": "10fde9dacca5cb45acd68f387e7ed3bcf88cd72cf0f9c4220d31d819db91731e",
   "neutralSha256": "19f89a8bcb5a937e528593a8f36db846a0d45a5ee398f1b0873c056e5be2fa0a",
-  "encodedSha256": "e046e214da585ffda65e8d2c1a86c589af589325b792634f128ab8b71f6dbf3a",
+  "encodedSha256": "35327cc103b1f7ac2ff1b09ed98658fd8ff1dcef322de9c9b18071a4358b7b87",
   "method": "Built-in imagegen authored tug keys. One fixed scale, ground/center translation only. Exact existing Q5 seat first/last. No expanded tween film or live body deformation.",
   "registration": {
     "sheetSize": [
@@ -73,5 +74,67 @@
         "dy": 74
       }
     ]
+  },
+  "sleep": {
+    "side": 9,
+    "belly": 10,
+    "curl": 11,
+    "chin": 12
+  },
+  "sleepRegistration": [
+    {
+      "key": "side",
+      "sourceBounds": [
+        26,
+        461,
+        1234,
+        873
+      ],
+      "width": 254,
+      "scale": 0.21026490066225165,
+      "ground": 300
+    },
+    {
+      "key": "belly",
+      "sourceBounds": [
+        28,
+        413,
+        1239,
+        881
+      ],
+      "width": 224,
+      "scale": 0.18497109826589594,
+      "ground": 300
+    },
+    {
+      "key": "curl",
+      "sourceBounds": [
+        44,
+        373,
+        1213,
+        992
+      ],
+      "width": 216,
+      "scale": 0.1847733105218135,
+      "ground": 300
+    },
+    {
+      "key": "chin",
+      "sourceBounds": [
+        116,
+        435,
+        1218,
+        953
+      ],
+      "width": 198,
+      "scale": 0.17967332123411978,
+      "ground": 300
+    }
+  ],
+  "sleepSourceHashes": {
+    "side": "85c567eb0958a213ee5b93d0a8592639489f5f29dded35e0d1d22e920ed1fe9f",
+    "belly": "e1967d9156a119d04e25fd6428fe5dcdbd2156c5e4eba0347217847874006109",
+    "curl": "10c9a85701af3587c48c1d8158972a07026e79a18a2375d86108538eda05aae7",
+    "chin": "e971eaa6861b597f0dba3a487403cee5f120cba0a9f9584d831b5634d096dee7"
   }
 }

@@ -238,7 +238,7 @@ function createCore(io, options) {
     if (s.quitting) return;
     if (!m || typeof m !== 'object') throw new Error('Invalid overlay message');
     if (m.type === 'quit') { quit(); return; }
-    if (m.type === 'loaded') { s.loaded = true; io.status(TEXT.playing); io.loaded(); return; }
+    if (m.type === 'loaded') { var palette = {cream:[248,242,232,245],gold:[231,184,103,245],dark:[67,48,24,245]}; var ink = m.ink || 'cream'; if (!Object.prototype.hasOwnProperty.call(palette,ink)) throw new Error('Invalid ink'); INK=palette[ink]; s.loaded = true; io.status(TEXT.playing); io.loaded(); return; }
     if (m.type === 'interaction') { io.status(m.accepted === true ? TEXT.accepted : TEXT.busy); return; }
     if (m.type === 'error') { io.status(TEXT.engineError); quit(); return; }
     if (m.type === 'frame') {

@@ -37,11 +37,13 @@ export function paperActionPose(name,progress,info){
  if(!Number.isFinite(blend))throw Error('Invalid paper action: blend');
  return{pair:list[index],blend};
 }
-export function createPaperActionSampler(bytes,info){
+export function createPaperActionSampler(bytes,info,output){
  if(!isGrayFrameSource(bytes))throw Error('Invalid action cache: bytes');
  validatePaperActionInfo(info,bytes.byteLength);
  const stride=info.width*info.height,pairs=info.pairs,frames=grayFrameReader(bytes,info.width,info.height,pairs*9);
- const out=new Uint8ClampedArray(stride*4);for(let i=3;i<out.length;i+=4)out[i]=255;
+ const out=output??new Uint8ClampedArray(stride*4);
+ if(!(out instanceof Uint8ClampedArray)||out.length!==stride*4)throw Error('Invalid action output');
+ for(let i=3;i<out.length;i+=4)out[i]=255;
  return state=>{const p=paperActionPose(state.actionName,state.actionProgress,info),sample=Math.round(p.blend*8);
   if(p.pair>=pairs||sample<0||sample>8)throw Error('Invalid paper action: sample out of range');
   const frame=frames.getFrame(p.pair*9+sample);for(let i=0,j=0;i<stride;i++,j+=4)out[j]=out[j+1]=out[j+2]=frame[i];return out;};

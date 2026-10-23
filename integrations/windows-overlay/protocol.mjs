@@ -20,23 +20,25 @@ export function cropFrame(frame,revision){
 
 // Request/ack rendering: never queue obsolete frames behind a slow native painter.
 export function createFramePump({pet,send,now=()=>performance.now()}){
- let viewport=null,inFlight=false,last=null,lastFrame=null,revision=0,paused=false,disposed=false;
+ let viewport=null,inFlight=false,last=null,lastFrame=null,revision=0,paused=false,disposed=false,nextPaint=0;
  const alive=()=>{if(disposed)throw Error('Overlay pump is disposed');};
  return {
-  viewport(message){alive();const next=viewportOf(message);revision=message.revision;viewport=next;last=null;lastFrame=null;},
-  pause(value){alive();paused=!!value;last=null;lastFrame=null;},
+  viewport(message){alive();const next=viewportOf(message);revision=message.revision;viewport=next;last=null;lastFrame=null;nextPaint=0;},
+  pause(value){alive();paused=!!value;last=null;lastFrame=null;nextPaint=0;},
   ack(){alive();inFlight=false;},
   tick(){
    alive();if(inFlight||!viewport||paused)return false;
    const t=now(),dt=last===null?0:Math.max(0,(t-last)/1000);last=t;
-   pet.step(dt);const frame=cropFrame(pet.frame(viewport),revision);
+   pet.step(dt);if(t<nextPaint)return false;
+   const source=pet.frame(viewport),frame=cropFrame(source,revision);
+   nextPaint=source.state?.state==='sleep'?t+200:0;
    // A held seat/down pose can be byte-identical for seconds. Advance the life
    // clock normally but avoid JSON, IPC, bitmap allocation and native repaint.
    if(lastFrame&&frame.x===lastFrame.x&&frame.y===lastFrame.y&&frame.columns===lastFrame.columns&&frame.rows===lastFrame.rows&&frame.text===lastFrame.text)return false;
    inFlight=true;
    try{send(frame);lastFrame=frame;}catch(error){inFlight=false;throw error;}return true;
   },
-  interact(kind){alive();if(!['ball','treat','tug'].includes(kind))throw Error('Invalid overlay interaction');const accepted=pet.interact(kind);if(accepted)lastFrame=null;return accepted;},
+  interact(kind){alive();if(!['ball','treat','tug'].includes(kind))throw Error('Invalid overlay interaction');const accepted=pet.interact(kind);if(accepted){lastFrame=null;nextPaint=0;}return accepted;},
   get hidden(){return !viewport||paused;},
   dispose(){if(!disposed){disposed=true;viewport=lastFrame=null;pet.dispose();}},
  };

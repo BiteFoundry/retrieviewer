@@ -40,7 +40,7 @@ export function createPaperActor(animal,info,{manualTricks=false,trickTimings=nu
  let straight=false,seatProgress=0,seatVariant='default',travel=null,approachPlan=null,travelAge=0,travelDistance=0,motionSpeed=0,motionStage='rest',completed=false;
  let watchSide='left',restProgress=0,idleHold=2.5;
  let pendingAction=null,activeAction=null,actionDone=null,deferred=null,movementMode='run',stayDown=false,manualDown=false,spinReady=false;
- let comfort=null,comfortSeconds=0;
+ let comfort=null,comfortSeconds=0,sleepLook=null,nextSleepLook={variant:'side',right:false};
  const director=createPaperDirector();
  const points=[[.12,PAPER_GROUND.away]];
  const enter=s=>{state=s;age=0;};
@@ -99,7 +99,7 @@ export function createPaperActor(animal,info,{manualTricks=false,trickTimings=nu
   pendingAction=null;
   if(name==='sit'){enter('idle');return;}
   if(name==='belly'){const seconds=comfortSeconds;playAction('lie-down',()=>startBelly(seconds),.65);return;}
-  if(name==='sleep'){stayDown=false;comfort={kind:'sleep',seconds:comfortSeconds};enter('recline');return;}
+  if(name==='sleep'){stayDown=false;sleepLook={...nextSleepLook};comfort={kind:'sleep',seconds:comfortSeconds};enter('recline');return;}
   if(name==='tug'){stop();comfort={kind:'tug',seconds:comfortSeconds};enter('tug');return;}
   if(name==='lie'){
    if(manualTricks){playAction('lie-down',()=>{manualDown=true;enter('down');drain();},.65);}
@@ -160,7 +160,7 @@ export function createPaperActor(animal,info,{manualTricks=false,trickTimings=nu
   lie(){const name=manualDown||activeAction?.name==='lie-down'||restProgress>0?'sit':'lie';return dispatch(()=>requestAction(name));},
   // Comfort poses: bounded finite seconds; same dispatch safety as tricks.
   belly(seconds=6){comfortDuration('belly',seconds);return dispatch(()=>{comfortSeconds=seconds;return requestAction('belly');},{keepDown:true});},
-  sleep(seconds=25){comfortDuration('sleep',seconds);return dispatch(()=>{comfortSeconds=seconds;return requestAction('sleep');});},
+  sleep(seconds=25,variant='side',right=false){comfortDuration('sleep',seconds);if(!['side','belly','curl','chin'].includes(variant)||typeof right!=='boolean')throw Error('Invalid sleep pose');return dispatch(()=>{comfortSeconds=seconds;nextSleepLook={variant,right};return requestAction('sleep');});},
   tug(seconds=6){comfortDuration('tug',seconds);return dispatch(()=>{comfortSeconds=seconds;return requestAction('tug');});},
   rest(){return dispatch(()=>{route=false;target=null;waypoints=[];pendingAction=null;stayDown=false;comfort=null;stop();if(restProgress>0){enter('wake');}else if(state==='watch'||state==='arrival-exit'){/* finish shared return */}else if(seatProgress>0||state==='rise'||state==='sit-down')enter('sit-down');else if(!['idle','view-turn','turn'].includes(state))enter('finish');});},
   update(dt){
@@ -209,7 +209,8 @@ export function createPaperActor(animal,info,{manualTricks=false,trickTimings=nu
    if(![12,24,30].includes(poseFps))throw Error('Invalid pose cadence');
    let pair=20,blend=0,kind=state,rearPair=null,approachPair=null;
    let seat=state==='sit-down'||state==='rise'||seatProgress>0?Math.round(seatProgress*48)/48:null;
-   let behavior=null,behaviorProgress=0,comfortPose=state==='tug'?{clip:'tug',progress:tugProgress()}:null;
+   if(restProgress===0&&state!=='recline')sleepLook=null;
+   let behavior=null,behaviorProgress=0,comfortPose=state==='tug'?{clip:'tug',progress:tugProgress()}:sleepLook&&restProgress>.72?{clip:'sleep',...sleepLook,blend:comfortEase((restProgress-.72)/.28)}:null;
    if(activeAction?.comfort)kind=activeAction.comfort;
    let actionName=activeAction?.name??(state==='run'&&movementMode==='walk'?'walk':null),actionProgress=activeAction?(activeAction.timing?activeAction.timing.progressAt(age):Math.min(1,age/activeAction.duration)):phase;
    if(manualDown&&state==='down'){actionName='lie-down';actionProgress=1;}
@@ -251,14 +252,20 @@ export function createPaperRenderer(cache,info,meta,width,height,{rear,approach,
  if(![width,height].every(Number.isInteger)||width<2||height<2||width*height>1_000_000)throw Error('Invalid paper grid');
  const tween=createCachedTween(cache,info),renderMeta={...meta,pairs:info.pair_map,run_sequence:info.run_sequence};
  const out=new Uint8ClampedArray(width*height*4),area=createPaperAreaSampler();
- const rearSample=rear?createRearSampler(rear.bytes,rear.info):null,lock=createPaperFootLock({maxImageStretch:pawTransport?1.45:Infinity});
- const approachSample=approach?createRearSampler(approach.bytes,approach.info):null;
- const seatSample=seat?createPaperSeatSampler(seat.bytes,seat.info):null;
- const arrivalSeatSample=arrivalSeat?createPaperSeatSampler(arrivalSeat.bytes,arrivalSeat.info):null;
- const behaviorSample=behaviors?createPaperBehaviorSampler(behaviors.bytes,behaviors.info):null;
- const interactionSample=interactions?createCompanionSpriteSampler(interactions.bytes,interactions.info):null;
- const comfortSample=comfort?createComfortSpriteSampler(comfort.bytes,comfort.info):null;
- const actionSample=actions?createPaperActionSampler(actions.bytes,actions.info):null,actionArea=actions?createPaperAreaSampler(actions.info.width):null;
+ // Only one authored source is drawn at a time. Small samplers borrow a view of
+ // the action-sized scratch. A sleep blend reads each base pixel before writing
+ // that same pixel, so it needs no second image or per-frame temporary buffer.
+ const actionScratch=new Uint8ClampedArray(Math.max(320*320,(actions?.info.width??320)*(actions?.info.height??320))*4);
+ const spriteScratch=actionScratch.subarray(0,320*320*4);
+ for(let i=3;i<actionScratch.length;i+=4)actionScratch[i]=255;
+ const rearSample=rear?createRearSampler(rear.bytes,rear.info,spriteScratch):null,lock=createPaperFootLock({maxImageStretch:pawTransport?1.45:Infinity});
+ const approachSample=approach?createRearSampler(approach.bytes,approach.info,spriteScratch):null;
+ const seatSample=seat?createPaperSeatSampler(seat.bytes,seat.info,spriteScratch):null;
+ const arrivalSeatSample=arrivalSeat?createPaperSeatSampler(arrivalSeat.bytes,arrivalSeat.info,spriteScratch):null;
+ const behaviorSample=behaviors?createPaperBehaviorSampler(behaviors.bytes,behaviors.info,spriteScratch):null;
+ const interactionSample=interactions?createCompanionSpriteSampler(interactions.bytes,interactions.info,spriteScratch):null;
+ const comfortSample=comfort?createComfortSpriteSampler(comfort.bytes,comfort.info,spriteScratch):null;
+ const actionSample=actions?createPaperActionSampler(actions.bytes,actions.info,actionScratch.subarray(0,actions.info.width*actions.info.height*4)):null,actionArea=actions?createPaperAreaSampler(actions.info.width):null;
  const walkEpisodes=actions?createPaperSupportEpisodes(actions.info.feet,actions.info.clips.walk,9):null;
  const sourceEpisodes=rear?{
   front:createPaperSupportEpisodes(rear.info.frontFeet,[0,1,2,3,4,5,6,7],17),
@@ -276,7 +283,7 @@ export function createPaperRenderer(cache,info,meta,width,height,{rear,approach,
   const isInteraction=isComfort||state.interactionPose&&interactionSample;
   const isBehavior=!isInteraction&&state.behavior&&behaviorSample;
   const isAction=!isInteraction&&state.actionName&&actionSample,sourceN=isAction?actions.info.width:320,originX=(sourceN-320)/2,originY=(sourceN/320-1)*300;
-  const image=isComfort?comfortSample(state.comfortPose):isInteraction?interactionSample(state.interactionPose):isAction?actionSample(state):isBehavior?behaviorSample(state):isSeat?(state.seatVariant==='arrival'&&arrivalSeatSample?arrivalSeatSample:seatSample)(state.seatProgress):isApproach?approachSample(state.approachPair,state.blend):isRear?rearSample(state.rearPair,state.blend):tween(state),side=height*size,sideX=side/pixelAspect;
+  const image=isComfort?comfortSample({...state.comfortPose,...state.comfortPose.clip==='sleep'&&state.comfortPose.blend<1&&behaviorSample?{base:behaviorSample({behavior:'rest',behaviorProgress:state.behaviorProgress})}:{}}):isInteraction?interactionSample(state.interactionPose):isAction?actionSample(state):isBehavior?behaviorSample(state):isSeat?(state.seatVariant==='arrival'&&arrivalSeatSample?arrivalSeatSample:seatSample)(state.seatProgress):isApproach?approachSample(state.approachPair,state.blend):isRear?rearSample(state.rearPair,state.blend):tween(state),side=height*size,sideX=side/pixelAspect;
   // Quantize source lookup only, never the projected rectangle. Rounding side,
   // left and top first introduced whole-body scale/position jumps at thresholds.
   const left=width*x-sideX/2,floor=isInteraction||isAction||isBehavior||isSeat||isRear||isApproach?0:cleanGroundOffset(state,renderMeta),top=height*y-(300-floor)/320*side;

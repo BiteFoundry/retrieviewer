@@ -61,6 +61,7 @@ class QuietWindow : Form {
 sealed class PetWindow : QuietWindow {
     protected override CreateParams CreateParams {get{CreateParams p=base.CreateParams;p.ExStyle|=0x80000|0x20;return p;}} // LAYERED + TRANSPARENT
     internal int PaintedDots;
+    internal Color Ink=Color.FromArgb(245,248,242,232);
     internal Bitmap PaintFrame(Dictionary<string,object> m,int cell,Rectangle canvas){
         int cols=Program.Int(m,"columns"),rows=Program.Int(m,"rows"),cx=Program.Int(m,"x"),cy=Program.Int(m,"y");
         string text=Program.Str(m,"text");
@@ -69,7 +70,7 @@ sealed class PetWindow : QuietWindow {
         string[] lines=text.Split('\n');if(lines.Length!=rows)throw new Exception("Invalid overlay row count");
         Bitmap image=new Bitmap(cols*cell,rows*cell*2,PixelFormat.Format32bppPArgb);
         try{
-            using(Graphics g=Graphics.FromImage(image))using(Brush ink=new SolidBrush(Color.FromArgb(245,248,242,232))){
+            using(Graphics g=Graphics.FromImage(image))using(Brush ink=new SolidBrush(Ink)){
                 g.Clear(Color.Transparent);g.SmoothingMode=System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
                 int[] dx={0,0,0,1,1,1,0,1},dy={0,1,2,0,1,2,3,3};float step=cell/2f,diameter=Math.Max(1.1f,step*.48f);PaintedDots=0;
                 for(int y=0;y<rows;y++){
@@ -149,7 +150,7 @@ sealed class Companion : ApplicationContext {
             for(;;){Dictionary<string,object> m;lock(inputLock){if(messages.Count==0)break;m=messages.Dequeue();}
                 string type=Program.Str(m,"type");
                 if(type=="quit"){Quit();return;}
-                if(type=="loaded"){loaded=true;status.Text="함께 노는 중";if(testMode)((Button)bar.Controls[0]).PerformClick();continue;}
+                if(type=="loaded"){string ink=m.ContainsKey("ink")?Program.Str(m,"ink"):"cream";if(ink!="cream"&&ink!="gold"&&ink!="dark")throw new Exception("Invalid ink");pet.Ink=ink=="gold"?Color.FromArgb(245,231,184,103):ink=="dark"?Color.FromArgb(245,67,48,24):Color.FromArgb(245,248,242,232);loaded=true;status.Text="함께 노는 중";if(testMode)((Button)bar.Controls[0]).PerformClick();continue;}
                 if(type=="interaction"){status.Text=Program.Bool(m,"accepted")?"좋아!":"잠깐 기다려";continue;}
                 if(type=="error"){status.Text="엔진 오류";Quit();return;}
                 if(type=="frame"){

@@ -35,6 +35,11 @@ must be checked again for the final release bytes.
 
 ## Remaining limits
 
+0.0.5 extends that ninth licensed archive with four sleeping studies generated
+from the same existing puppy identity/pose references, approved by the owner in
+this conversation. COMFORT-ART.md and the comfort metadata record preparation,
+source hashes and size changes. No new downloaded photo/video input is introduced.
+
 Later source candidate: belly/sleep reuse existing licensed roll/rest frames.
 Tug adds eight built-in imagegen keys referenced only from the existing generated
 puppy sheet, not new photographs. COMFORT-ART.md records the prompt, source hash

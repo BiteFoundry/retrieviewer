@@ -40,6 +40,10 @@ click-through native overlay—not a patched app, shell wrapper or injected MCP
 widget. It follows a whole app window, not a tab, and hides when that window is
 inactive or minimized. No automatic startup entry is installed.
 
+Choose the dot color at launch: `retrieviewer desktop --ink gold`, or
+`retrieviewer desktop --ink dark` for light backgrounds. Default: `cream`.
+Quit a running companion first. Colors reuse the same artwork; no screen capture.
+
 > **Cursor / VS Code Remote SSH:** run those commands in your **local** computer's
 > terminal, not the remote server's terminal. The puppy belongs where the window
 > is displayed. A server's `DISPLAY=:1` refers to that server's X11 display, which

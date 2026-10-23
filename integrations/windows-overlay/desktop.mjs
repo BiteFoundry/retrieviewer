@@ -93,13 +93,14 @@ export async function desktopHelper(options={}){
  throw Error('Linux desktop needs system Python3.6+ (AlmaLinux8 platform-python is supported). No packages or system settings were installed.');
 }
 export async function startDesktop(options={}){
+ const ink=options.ink??'cream';if(!['cream','gold','dark'].includes(ink))throw Error('Invalid desktop ink');
  // Fail before creating any cache/session on unsupported desktops (e.g. Wayland).
  desktopPlatform(options);
  const status=await desktopStatus(options);if(status.running)return {...status,alreadyRunning:true};
  if(status.stale)await stopDesktop(options);
  const helper=await desktopHelper(options);
  return new Promise((resolve,reject)=>{
-  const child=spawn(process.execPath,[fileURLToPath(new URL('./worker.mjs',import.meta.url)),'--helper-spec',JSON.stringify(helper)],{detached:true,windowsHide:true,stdio:['ignore','ignore','ignore','ipc'],env:{...process.env,RETRIEVIEWER_HOME:getConfigPaths(options).root}});
+  const child=spawn(process.execPath,[fileURLToPath(new URL('./worker.mjs',import.meta.url)),'--helper-spec',JSON.stringify(helper)],{detached:true,windowsHide:true,stdio:['ignore','ignore','ignore','ipc'],env:{...process.env,RETRIEVIEWER_HOME:getConfigPaths(options).root,RETRIEVIEWER_INK:ink}});
   let settled=false;const finish=(error,message)=>{if(settled)return;settled=true;clearTimeout(timer);if(child.connected)child.disconnect();child.unref();error?reject(error):resolve(message);};
   const timer=setTimeout(()=>{if(child.connected)child.send({command:'abort'});finish(Error('Desktop startup timed out; no agent settings changed'));},20000);
   child.on('error',error=>finish(error));child.on('message',message=>message.error?finish(Error(message.error)):finish(null,message));child.on('exit',code=>finish(Error('Desktop exited during startup ('+code+')')));

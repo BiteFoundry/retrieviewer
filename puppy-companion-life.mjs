@@ -39,10 +39,10 @@ export function createCompanionLife(actor,{seed=731,energy=.8}={}){
  if(!Number.isFinite(energy)||energy<0||energy>1)throw RangeError('energy must be within 0..1');
 
  const rand=mulberry32(seed),range=(a,b)=>a+(b-a)*rand(),side=()=>rand()<.5?'left':'right';
- const needs={energy,social:.5,curiosity:.5};
+ const needs={energy,social:.5,curiosity:.5,drowsiness:0};
  const cooldowns={ball:0,treat:0,tug:0};
  const episodeCooldowns={roll:0,play:0,belly:0,sleep:0};
- let clock=0,decisions=0,lastEpisode=null;
+ let clock=0,decisions=0,lastEpisode=null,quiet=0;
  let queue=[],hold=0,holdIntent=null,waiting=null,gesture=null;
  let intent='start',label=LABEL.start,pending=null,active=null,ball=null,treat=null;
 
@@ -72,7 +72,7 @@ export function createCompanionLife(actor,{seed=731,energy=.8}={}){
   checkin:()=>[home(),sit('sit'),cmd('look',[side()],'look'),wait(range(5,10),'checkin'),fx(()=>{needs.social-=.4;})],
   play:()=>[cmd('spin',[],'play'),wait(range(1,2),'pause'),sit('sit'),wait(range(2,4),'watch'),fx(()=>{needs.energy-=.12;needs.curiosity-=.2;})],
   belly:()=>[cmd('belly',[range(5,9)],'belly'),wait(range(2,4),'watch'),fx(()=>{needs.energy+=.08;needs.curiosity-=.15;})],
-  sleep:()=>[cmd('sleep',[range(22,38)],'sleep'),wait(range(2,4),'recover'),fx(()=>{needs.energy+=.3;})],
+  sleep:()=>[cmd('sleep',[range(65,110),['side','curl','chin','belly'][Math.floor(rand()*4)],rand()<.5],'sleep'),wait(range(2,4),'recover'),fx(()=>{needs.energy+=.3;})],
  };
  const weights=()=>{
   const {energy:e,social:s,curiosity:c}=needs;
@@ -87,6 +87,9 @@ export function createCompanionLife(actor,{seed=731,energy=.8}={}){
   const w=weights();if(lastEpisode)w[lastEpisode]=0;
   const kinds=Object.keys(w),total=kinds.reduce((sum,k)=>sum+w[k],0);
   let pick=rand()*total,kind=kinds.find(k=>(pick-=w[k])<0)??'observe';
+  // Quiet-time sleep pressure is independent of energy restored by sitting.
+  // Wait for the current coherent episode to end; never yank a running puppy.
+  if(quiet>=120&&needs.drowsiness>=.35&&episodeCooldowns.sleep===0&&lastEpisode!=='sleep'&&typeof actor.sleep==='function')kind='sleep';
   lastEpisode=kind;decisions++;
   if(kind==='roll')episodeCooldowns.roll=90;
   if(kind==='play')episodeCooldowns.play=120;
@@ -123,6 +126,9 @@ export function createCompanionLife(actor,{seed=731,energy=.8}={}){
  function drift(dt){
   const resting=holdIntent==='rest'||holdIntent==='recover'||actor.state==='sleep'||intent==='belly';
   needs.energy+=resting?.04*dt:-.004*dt;
+  const asleep=actor.state==='sleep';
+  needs.drowsiness+=asleep?-dt/60:dt/240;
+  quiet=active||pending||asleep?0:quiet+dt;
   if(!active){needs.curiosity+=.01*dt;needs.social+=.008*dt;}
   for(const k in needs)needs[k]=clamp(needs[k],0,1);
  }
@@ -168,6 +174,7 @@ export function createCompanionLife(actor,{seed=731,energy=.8}={}){
   if(!['ball','treat','tug'].includes(kind))return false;
   if(kind==='tug'&&typeof actor.tug!=='function')return false;
   if(pending||active||cooldowns[kind]>0)return false;
+  quiet=0;
   if(kind==='treat'||kind==='tug'){
    pending=kind;
    // The pet wakes through its authored recovery, not after a long sleep timer.
@@ -206,7 +213,7 @@ export function createCompanionLife(actor,{seed=731,energy=.8}={}){
    return {
     intent,label:pending?`${label} · ${PENDING_LABEL[pending]}`:label,episode:lastEpisode,interaction,busy:interaction!==null,
     ball:ballReport(),treat:treatReport(),tug:actor.state==='tug'?{progress:actor.sample(clock).comfortPose?.progress??0,grip:1}:null,
-    snore:actor.state==='sleep'?((clock%3.6)/3.6):null,energy:needs.energy,decisions,cooldowns:{...cooldowns},
+    snore:actor.state==='sleep'?((clock%3.6)/3.6):null,energy:needs.energy,drowsiness:needs.drowsiness,decisions,cooldowns:{...cooldowns},
     // Local hold clock only: progress freezes between updates; null outside the stationary hold.
     gesture:gesture&&SAFE.has(actor.state)?{clip:gesture.clip,progress:clamp(gesture.elapsed/gesture.duration,0,1)}:null
    };

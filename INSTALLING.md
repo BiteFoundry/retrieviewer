@@ -6,6 +6,10 @@ Desktop setup (Node20+; [OS requirements and verification](DESKTOP-PLATFORMS.md)
 2. `retrieviewer desktop` — select the app window in the picker.
 
 No agent configuration is needed for this separate transparent companion.
+Choose the dot ink at launch: `retrieviewer desktop --ink gold`, or
+`retrieviewer desktop --ink dark` on light backgrounds. Default: `cream`.
+Exit an existing companion before changing ink. Presets reuse the same Braille
+mask and native painter, without new color sprites or screen capture.
 Windows and AlmaLinux8/GLIBC2.28 X11 have live test evidence. macOS support is
 experimental and not runtime verified; native Wayland is unsupported. Linux needs
 system Python3.6+, X11/Xrender/Xext and a compositor; Windows needs the .NET

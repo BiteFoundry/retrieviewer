@@ -180,6 +180,12 @@ class Companion(object):
         if kind == 'quit':
             self.quit()
         elif kind == 'loaded':
+            palette = {'cream': (248, 242, 232), 'gold': (231, 184, 103), 'dark': (67, 48, 24)}
+            ink = message.get('ink', 'cream')
+            if ink not in palette:
+                raise OverlayError('Invalid ink')
+            self.tiles.ink = palette[ink]
+            self.tiles.cache.clear()
             self.loaded = True
             self.set_status('playing')
             if self.test_mode:

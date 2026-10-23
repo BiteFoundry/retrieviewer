@@ -42,7 +42,7 @@ test('five new autonomous episodes use existing real action/behavior clips',()=>
 test('autonomy is deterministic, repeats no adjacent episode, and spaces tricks out',()=>{
  const a=make(4),b=make(4),seen=new Set(),lastTrick={roll:-Infinity,play:-Infinity,belly:-Infinity,sleep:-Infinity};
  let previous=null,decisions=0;
- for(let i=0;i<72000;i++){
+ for(let i=0;i<180000;i++){
   const x=a.step(),y=b.step();
   if(i%30===0)assert.deepEqual(x,y);
   if(x.report.decisions!==decisions){

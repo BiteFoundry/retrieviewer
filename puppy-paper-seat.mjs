@@ -1,9 +1,11 @@
 import {grayFrameReader,isGrayFrameSource} from './puppy-frame-store.mjs';
 // Exact cached samples; no live crossfade. Reverse the same path to stand up.
-export function createPaperSeatSampler(bytes,info){
+export function createPaperSeatSampler(bytes,info,output){
  const stride=320*320;
  if(!isGrayFrameSource(bytes)||info.width!==320||info.height!==320||info.pairs!==3||info.samples!==17||bytes.byteLength!==3*17*stride)throw Error('Invalid paper sitting cache');
- const frames=grayFrameReader(bytes,320,320,3*17),out=new Uint8ClampedArray(stride*4);for(let i=3;i<out.length;i+=4)out[i]=255;
+ const frames=grayFrameReader(bytes,320,320,3*17),out=output??new Uint8ClampedArray(stride*4);
+ if(!(out instanceof Uint8ClampedArray)||out.length!==stride*4)throw Error('Invalid seat output');
+ for(let i=3;i<out.length;i+=4)out[i]=255;
  return progress=>{
   if(!Number.isFinite(progress)||progress<0||progress>1)throw Error('Invalid paper sitting progress');
   const q=progress*3,pair=Math.min(2,Math.floor(q)),sample=Math.round((q-pair)*16),frame=frames.getFrame(pair*17+sample);

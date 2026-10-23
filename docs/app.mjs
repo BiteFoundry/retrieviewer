@@ -23,6 +23,18 @@ const ko = {
   ball: "공 던져주기",
   treat: "간식 주기",
   tug: "터그 놀이",
+  inkLabel: "도트 색",
+  cream: "크림색",
+  gold: "골드색",
+  darkInk: "짙은 갈색 / 밝은 배경",
+  poseLabel: "수면 그림 · 정지 미리보기",
+  livePose: "움직이는 강아지",
+  sidePose: "왼쪽으로 옆잠",
+  rightPose: "오른쪽으로 옆잠",
+  bellyPose: "발라당",
+  curlPose: "몸 말고 자기",
+  chinPose: "앞발에 턱 괴기",
+  sleepStudy: "수면 그림 미리보기예요. 움직이는 강아지를 선택하면 다시 이어집니다.",
   pause: "잠깐 쉬기",
   resume: "다시 놀기",
   demoNote: "같은 그림, 같은 움직임 엔진. 놀기를 누르면 약19MB를 불러와요.",
@@ -32,7 +44,7 @@ const ko = {
   playLabel: "강아지와 놀기",
   lifeTitle: "강아지는 강아지답게.",
   lifeBody:
-    "스스로 걷고, 뛰고, 주변을 살피다가 쉬어요. 모든 발걸음을 지시하지 않아도 괜찮아요. 함께 놀고 싶을 때만 살짝 끼어들면 돼요.",
+    "스스로 걷고 뛰다가 잠들어요. 양쪽으로 눕기도, 몸을 말거나 발라당 자기도 해요. 함께 놀고 싶을 때만 끼어들면 돼요.",
   mechanism:
     "별도의 투명 네이티브 창으로 동작해요. 일반 클릭은 통과하고, 다른 창으로 옮겨가면 숨습니다. 에디터·터미널·에이전트를 개조하지 않아요.",
   installTitle: "명령 두 줄이면,<br>작은 친구가 생겨요.",
@@ -67,7 +79,7 @@ const ko = {
   wayland:
     "네이티브 Wayland·화면 없는 서버는 미지원이에요. 원격 X11/VNC는 그 원격 화면에서 동작하며 로컬 IDE와는 별개예요.",
   resource:
-    "Linux는 16px 셀·15fps, Windows는 8px 셀·30fps라 점 크기가 달라요. 패키지는 약19MB예요. 이전0.0.3 Alma8 테스트의 Node RSS는 약180MiB였고 헬퍼는 별도예요. 이 값은0.0.4 메모리 상한은 아니에요.",
+    "Linux는 16px 셀·15fps, Windows는 8px 셀·30fps라 점 크기가 달라요. 패키지는 약19MB예요. 이전0.0.3 Alma8 테스트의 Node RSS는 약180MiB였고 헬퍼는 별도예요. 이 값은0.0.5 메모리 상한은 아니에요.",
   supportLink: "필요 조건과 실제 검증 범위 보기 ↗",
   goodbyeTitle: "헤어질 때도, 간단하게.",
   goodbyeBody:
@@ -94,6 +106,7 @@ const ko = {
   busy: "아직 놀고 있거나 쉬는 중이에요. 잠시 뒤 다시 해주세요.",
 };
 const enExtra = {
+  sleepStudy: "Sleeping artwork, still preview. Choose Live puppy to continue.",
   resume: "Resume",
   copied: "Command copied.",
   copyFailed: "Could not copy. Select and copy the command above.",
@@ -116,7 +129,7 @@ let language = "en",
   timer = null,
   last = 0,
   statusKey = "demoNote",
-  snapshot = "";
+  snapshot = "", study = null, studyRequest = 0;
 const columns = 144,
   rows = 60,
   stage = $(".dog-stage"),
@@ -180,20 +193,22 @@ function fit() {
   const ratio = context.measureText("⣿").width / 100 || 0.6;
   // An intentionally cropped close view, not an OS/agent screenshot. All motion
   // and projection still come from the existing public core; no CSS dog animation.
-  const cell = Math.min(width / columns, height / (rows * 2)) * 1.8;
+  const c=study?160:columns,r=study?art.textContent.split('\n').length:rows;
+  const cell = Math.min(width / c, height / (r * 2)) * (study?1:1.8);
   art.style.fontSize = cell / ratio + "px";
   art.style.lineHeight = cell * 2 + "px";
-  art.style.width = columns * cell + "px";
-  art.style.height = rows * cell * 2 + "px";
+  art.style.width = c * cell + "px";
+  art.style.height = r * cell * 2 + "px";
 }
 function syncControls() {
+  $("#sleep-pose").disabled=loading;
   $("#play").disabled = loading;
-  $("#play").hidden = !!pet;
-  pauseButton.disabled = !pet;
+  $("#play").hidden = !!pet || !!study;
+  pauseButton.disabled = !pet || !!study;
   pauseButton.setAttribute("aria-pressed", String(!!pet && !playing));
   pauseButton.textContent = t(pet && !playing ? "resume" : "pause");
   for (const kind of ["ball", "treat", "tug"])
-    $("#" + kind).disabled = !pet || !playing;
+    $("#" + kind).disabled = !pet || !playing || !!study;
 }
 function paint() {
   if (!pet) return;
@@ -269,6 +284,26 @@ async function load() {
     syncControls();
   }
 }
+$("#ink").addEventListener("change",()=>{
+  const ink=$("#ink").value;stage.dataset.ink=ink;
+  $("#ink-command").textContent="retrieviewer desktop --ink "+ink;
+});
+$("#sleep-pose").addEventListener("change",async()=>{
+  const key=$("#sleep-pose").value,request=++studyRequest;
+  if(key==='live'){
+    study=null;playing=!!pet;art.textContent=pet?'':snapshot;
+    fit();syncControls();status(pet?'running':'demoNote');
+    if(pet){paint();schedule();}return;
+  }
+  study=key;playing=false;cancelLoop();syncControls();status('previewLoading');
+  try{
+    const response=await fetch('./sleep-'+key+'.txt?v=0.0.5');
+    if(!response.ok)throw Error('Sleep preview HTTP '+response.status);
+    const text=await response.text();if(request!==studyRequest||closed)return;
+    art.textContent=text.replace(/^(?:\u2800*\n)+/,'').replace(/(?:\n\u2800*)+$/,'');
+    $("#preview-fallback").hidden=true;fit();status('sleepStudy');
+  }catch{if(request===studyRequest)status('snapshotFailed');}
+});
 $("#play").addEventListener("click", load);
 $("#retry").addEventListener("click", load);
 pauseButton.addEventListener("click", () => {
@@ -300,7 +335,7 @@ try {
   const response = await fetch("./preview.txt");
   if (!response.ok) throw Error("snapshot HTTP " + response.status);
   snapshot = await response.text();
-  if (!pet) {
+  if (!pet && !study) {
     art.textContent = snapshot;
     $("#preview-fallback").hidden = true;
     fit();

@@ -17,7 +17,7 @@ test('tiny tug keys share the exact original seat endpoint and bounded source ca
  const bytes=readPackedFrames(gunzipSync(readFileSync(new URL('./puppy-companion-comfort-q5.bin.gz',import.meta.url))));
  const seat=readPackedFrames(gunzipSync(readFileSync(new URL('./puppy-paper-seat-q5.bin.gz',import.meta.url))));
  const sample=createComfortSpriteSampler(bytes,json('./puppy-companion-comfort.json'));
- assert.ok(bytes.residentPixelBytes<300_000);
+ assert.ok(bytes.residentPixelBytes<350_000);
  const neutral=Uint8Array.from(sample({clip:'tug',progress:0}).filter((_,i)=>i%4===0));
  assert.deepEqual(neutral,seat.getFrame(50));
  for(let i=0;i<181;i++){const rgba=sample({clip:'tug',progress:i/180});assert.equal(rgba.length,320*320*4);}

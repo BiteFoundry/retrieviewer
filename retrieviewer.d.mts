@@ -42,6 +42,8 @@ export interface LifeReport {
   interaction: 'ball' | 'treat' | 'tug' | null;
   busy: boolean;
   energy: number;
+  /** Awake-time sleep pressure; ordinary sitting does not erase it. */
+  drowsiness: number;
   decisions: number;
   cooldowns: {ball: number; treat: number; tug: number};
   gesture: {clip: string; progress: number} | null;

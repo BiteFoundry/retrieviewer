@@ -29,7 +29,7 @@
     <meta name="twitter:card" content="summary_large_image" />
     <link rel="canonical" href="https://bitefoundry.github.io/retrieviewer/" />
     <link rel="icon" href="./assets/icon.svg" type="image/svg+xml" />
-    <link rel="stylesheet" href="./style.css?v=0.0.4" />
+    <link rel="stylesheet" href="./style.css?v=0.0.5" />
     <link
       rel="preload"
       href="./assets/fonts/Manrope.ttf"
@@ -44,7 +44,7 @@
       type="font/woff2"
       crossorigin
     />
-    <script type="module" src="./app.mjs?v=0.0.4"></script>
+    <script type="module" src="./app.mjs?v=0.0.5"></script>
   </head>
   <body>
     <a class="skip" href="#main" data-i18n="skip">Skip to content</a>
@@ -167,6 +167,15 @@
               Pause
             </button>
           </div>
+          <div class="preview-options">
+            <label><span data-i18n="inkLabel">Dots</span>
+              <select id="ink"><option value="cream" data-i18n="cream">Cream</option><option value="gold" data-i18n="gold">Gold</option><option value="dark" data-i18n="darkInk">Dark / light background</option></select>
+            </label>
+            <label><span data-i18n="poseLabel">Sleeping artwork · still preview</span>
+              <select id="sleep-pose"><option value="live" data-i18n="livePose">Live puppy</option><option value="side" data-i18n="sidePose">Left-side nap</option><option value="right" data-i18n="rightPose">Right-side nap</option><option value="belly" data-i18n="bellyPose">Belly up</option><option value="curl" data-i18n="curlPose">Curled up</option><option value="chin" data-i18n="chinPose">Chin on paws</option></select>
+            </label>
+          </div>
+          <p class="ink-command"><code id="ink-command">retrieviewer desktop --ink cream</code></p>
           <p
             class="demo-status"
             id="demo-status"
@@ -194,7 +203,8 @@
         <h2 id="life-title" data-i18n="lifeTitle">Let it be a dog.</h2>
         <div class="life-copy">
           <p data-i18n="lifeBody">
-            It wanders, runs, watches and takes a breather on its own. You don't
+            It wanders, runs, watches and naps on its own. Left side, right side,
+            curled up or belly up. You don't
             direct every step—just join in when you feel like it.
           </p>
           <p class="muted" data-i18n="mechanism">
@@ -216,7 +226,7 @@
           <a
             href="https://www.npmjs.com/package/@bitefoundry/retrieviewer"
             class="text-link"
-            >npm · v0.0.4 <span aria-hidden="true">↗</span></a
+            >npm · v0.0.5 <span aria-hidden="true">↗</span></a
           >
         </div>
         <p class="install-location" data-i18n="installLocation">
@@ -370,7 +380,7 @@
           Linux currently uses coarser 16px cells / 15fps to favor lower load;
           Windows defaults to 8px / 30fps. Same Q5 art. The package is about 19
           MB. An earlier0.0.3 Alma8 run used about180 MiB Node RSS, plus its helper;
-          that is not a0.0.4 memory budget or a new Linux GUI check.
+          that is not a0.0.5 memory budget or a new Linux GUI check.
         </p>
         <a
           class="text-link"

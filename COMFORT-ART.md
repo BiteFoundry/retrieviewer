@@ -1,5 +1,35 @@
 # Comfort extension art record
 
+## 0.0.5 sleeping studies
+
+Four owner-approved built-in imagegen originals (side, belly, curl, chin), using
+the existing `puppy-behaviors16-sheet.png` identity and `puppy-roll16-v4-sheet.png`
+pose references, extend the same CC BY-SA4.0 comfort archive. No new external
+photo or video input. Source PNGs remain local; metadata records SHA-256 hashes.
+Preparation: `node tools/prepare-sleep-art.mjs` with the preserved local studies.
+It keeps the nine existing tug keys pixel-identical and registers four new static
+keys to ground y=300. There are no duplicated right-facing images: source sampling
+reverses x. The pose is selected once per nap, not switched during a sleeping hold.
+A short rest-to-sleep/rest recovery blend uses existing scratch; the sleeping body
+itself is held, without scale pulsing. The z cue is silent.
+
+The archive grows from103549 to129148 bytes (+25599). Packed resident pixels grow
+from291337 to341139 (+49802 bytes). The renderer's mutually exclusive authored
+samplers now share one action-sized RGBA scratch, with320px subviews for smaller
+poses, replacing their separate buffers (2457600 bytes less before tug playback).
+Sleep display is capped at5fps in the desktop pump, while simulation advances
+normally and accepted interactions invalidate the next paint immediately.
+Ink presets only change the native painter color; no RGB sprite families or
+background capture are introduced. Actual RSS depends on host and allocator.
+
+The four prompts share: one complete naturally proportioned pale fluffy retriever,
+same bandana, closed eyes, grayscale fine fur on pure black, fixed slightly elevated
+camera, no text/bed/toy/background. Pose clauses: relaxed side sleep; belly-up with
+loosely bent paws and tiny tongue; loose curl with tail near muzzle; chin resting
+on forepaws. Source prompts and PNGs are preserved locally with the approved studies.
+
+The following section records the earlier0.0.4 preparation, not the new sleep keys.
+
 Source code MIT; generated puppy art and frame data CC BY-SA4.0, retaining the
 credits in ATTRIBUTION.md. This is a development-source record, not new legal
 clearance. No external photograph, YouTube frame or downloaded rig was introduced.

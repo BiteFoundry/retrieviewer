@@ -12,14 +12,22 @@ export function comfortFrameIndex(progress,info){
  return loop[Math.floor((seconds-.65)/.28)%loop.length];
 }
 
-export function createComfortSpriteSampler(bytes,info){
- if(!isGrayFrameSource(bytes)||info?.version!==1||info.width!==320||info.height!==320||info.frames!==9)throw Error('Invalid comfort sprites');
- const frames=grayFrameReader(bytes,320,320,info.frames);let rgba=null;
+export function createComfortSpriteSampler(bytes,info,output){
+ if(!isGrayFrameSource(bytes)||![1,2].includes(info?.version)||info.width!==320||info.height!==320||info.frames!==(info.version===2?13:9))throw Error('Invalid comfort sprites');
+ if(output!==undefined&&(!(output instanceof Uint8ClampedArray)||output.length!==320*320*4))throw Error('Invalid comfort output');
+ const frames=grayFrameReader(bytes,320,320,info.frames);let rgba=output??null;
+ if(rgba)for(let i=3;i<rgba.length;i+=4)rgba[i]=255;
  return pose=>{
-  if(pose?.clip!=='tug')throw Error('Invalid comfort clip');
+  if(!['tug','sleep'].includes(pose?.clip))throw Error('Invalid comfort clip');
   if(!rgba){rgba=new Uint8ClampedArray(320*320*4);for(let i=3;i<rgba.length;i+=4)rgba[i]=255;}
-  const index=comfortFrameIndex(pose.progress,info),frame=frames.getFrame(index);
-  for(let i=0,j=0;i<frame.length;i++,j+=4)rgba[j]=rgba[j+1]=rgba[j+2]=frame[i];
+  const index=pose.clip==='sleep'?info.sleep?.[pose.variant]:comfortFrameIndex(pose.progress,info);
+  if(!Number.isInteger(index))throw Error('Invalid sleep variant');
+  const frame=frames.getFrame(index),base=pose.base,blend=pose.blend??1;
+  if(!Number.isFinite(blend)||blend<0||blend>1)throw Error('Invalid sleep blend');
+  for(let i=0,j=0;i<frame.length;i++,j+=4){
+   const v=frame[pose.right?Math.floor(i/320)*320+319-i%320:i];
+   rgba[j]=rgba[j+1]=rgba[j+2]=base&&blend<1?Math.round(base[j]+(v-base[j])*blend):v;
+  }
   return rgba;
  };
 }

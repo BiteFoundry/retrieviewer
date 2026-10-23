@@ -80,7 +80,7 @@ test('sleep: shared rest clip to eyes-closed endpoint, holds, wakes back to seat
  const {s:end}=p.until(s=>{
   assert.equal(s.x,start.x);assert.equal(s.z,start.z);assert.equal(s.speed,0);
   if(s.behavior==='rest')maxRest=Math.max(maxRest,s.behaviorProgress);
-  if(s.state==='sleep'){sleepFrames++;assert.equal(s.behavior,'rest');assert.equal(s.behaviorProgress,1);assert.equal(s.comfortPose,undefined);}
+  if(s.state==='sleep'){sleepFrames++;assert.equal(s.behavior,'rest');assert.equal(s.behaviorProgress,1);assert.deepEqual(s.comfortPose,{clip:'sleep',variant:'side',right:false,blend:1});}
   return p.seated(s);
  });
  assert.equal(maxRest,1);assert.ok(Math.abs(sleepFrames-180)<=2,`slept ${sleepFrames}`);

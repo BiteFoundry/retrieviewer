@@ -4,7 +4,8 @@
 <p align="center"><a href="https://bitefoundry.github.io/retrieviewer/?lang=ko">직접 만나 보기</a> · <a href="README.md">English</a> · <a href="https://www.npmjs.com/package/@bitefoundry/retrieviewer">npm</a> · <a href="https://github.com/BiteFoundry/retrieviewer/issues">피드백</a></p>
 
 앱 창 위에서 혼자 걷고, 뛰고, 앉아서 쉬는 보송한 점자 도트 리트리버예요.
-발라당 누워 쉬거나 눈을 감고 잠들기도 해요. 가끔 공·간식·터그로 놀아주세요.
+옆잠, 발라당, 몸 말기, 앞발에 턱 괴기. 조용하면 양쪽으로 누워 잠들어요.
+가끔 공·간식·터그로 놀아주세요.
 나머지 시간에는 각자의 일을 하면 돼요.
 [BiteFoundry](https://github.com/BiteFoundry)가 만듭니다.
 런타임에는 계정, 모델 API, 텔레메트리가 필요하지 않아요.
@@ -30,6 +31,11 @@ Node.js/npm이 없다면 [먼저 설치](PREREQUISITES.md)해 주세요.
 그림을 주입하지 않아요. 별도의 투명 네이티브 창으로 따라다니며 일반 클릭은
 통과시킵니다. 앱 창 단위로 동작하고, 대상 창이 비활성화·최소화되면 숨습니다.
 자동 시작이나 셸 래퍼는 등록하지 않아요.
+
+도트 색은 실행할 때 고를 수 있어요. 기본은 크림색이고, 골드색은
+`retrieviewer desktop --ink gold`, 밝은 배경에는
+`retrieviewer desktop --ink dark`를 쓰세요. 실행 중이라면 먼저 종료하고 다시
+실행하세요. 배경을 캡처하지 않고, 같은 도트에 색만 바꿉니다.
 
 > **Cursor / VS Code Remote SSH 사용자:** 원격 서버의 터미널이 아닌,
 > Cursor 화면이 떠 있는 **로컬 PC의 PowerShell/터미널**에 설치하세요.
