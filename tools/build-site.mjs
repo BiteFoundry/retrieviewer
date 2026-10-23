@@ -9,9 +9,9 @@ import {readPackedFrames} from '../puppy-frame-store.mjs';
 import {createComfortSpriteSampler} from '../puppy-comfort-sprites.mjs';
 import {rgbaToBraille} from '../braille.mjs';
 const root = fileURLToPath(new URL("../", import.meta.url));
-const out = join(root, "site-dist"),
-  runtime = join(out, "runtime");
 const pkg = JSON.parse(await readFile(join(root, "package.json"), "utf8"));
+const out = join(root, "site-dist"),
+  runtime = join(out, "runtime", pkg.version);
 await mkdir(runtime, { recursive: true });
 await cp(join(root, "docs"), out, { recursive: true });
 for (const name of [...pkg.files, "package.json"]) {

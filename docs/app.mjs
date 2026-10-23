@@ -262,7 +262,7 @@ async function load() {
   playing = false;
   cancelLoop();
   try {
-    const { createPet } = await import("./runtime/retrieviewer.mjs");
+    const { createPet } = await import("./runtime/0.0.5/retrieviewer.mjs");
     const next = await createPet({ seed: 731 });
     if (closed) {
       next.dispose();
