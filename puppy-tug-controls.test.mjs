@@ -26,10 +26,10 @@ const noOverlap=(buttons,statusX,width)=>{
 
 test('Windows toolbar: ball stays first, tug follows treat, nothing clips',()=>{
  const cs=read('./integrations/windows-overlay/Overlay.cs');
- const buttons=[...cs.matchAll(/MakeButton\("([^"]+)",(\d+),(.*?)\)\);/g)].map(m=>[m[1],Number(m[2]),m[1]==='간식'||m[1]==='터그'?46:40,m[3]]);
- assert.deepEqual(buttons.map(b=>b[0]),['공','간식','터그','창','쉼','종료']);
+ const buttons=[...cs.matchAll(/MakeButton\("([^"]+)",(\d+),(.*?)\)\);/g)].map(m=>[m[1],Number(m[2]),64,m[3]]);
+ assert.deepEqual(buttons.map(b=>b[0]),['Ball','Treat','Tug','Window','Pause','Quit']);
  assert.match(buttons[2][3],/Interact\("tug"\)/);
- assert.match(cs,/b\.Size=new Size\(title=="간식"\|\|title=="터그"\?46:40,28\)/);
+ assert.match(cs,/b\.Size=new Size\(64,28\)/);
  assert.match(cs,/\(\(Button\)bar\.Controls\[0\]\)\.PerformClick\(\)/,'diagnostic first-ball click unchanged');
  const width=Number(cs.match(/bar\.Size=new Size\((\d+),40\)/)[1]),status=cs.match(/status\.Location=new Point\((\d+),12\);status\.Size=new Size\((\d+),22\)/);
  noOverlap(buttons,Number(status[1]),width);assert.ok(Number(status[1])+Number(status[2])<=width);
@@ -40,9 +40,19 @@ test('macOS toolbar: tug selector, ASCII label escape and layout inside BAR_WIDT
  assert.match(jxa,/'onTug:': guarded\('onTug'\)/);assert.match(jxa,/shell\.onTug = function \(\) \{ core\.interact\('tug'\); \};/);
  const buttons=[...jxa.matchAll(/makeButton\('([^']+)', \{ x: (\d+), y: 6, width: (\d+), height: 28 \}, '(on\w+):'\)/g)].map(m=>[m[4],Number(m[2]),Number(m[3]),m[1]]);
  assert.deepEqual(buttons.map(b=>b[0]),['onBall','onTreat','onTug','onPick','onPause','onQuit']);
- assert.equal(buttons[2][3],'\\uD130\\uADF8');
+ assert.equal(buttons[2][3],'Tug');
  const width=Number(jxa.match(/var BAR_WIDTH = (\d+),/)[1]),status=jxa.match(/makeLabel\(TEXT\.preparing, \{ x: (\d+), y: 10, width: (\d+)/);
  noOverlap(buttons,Number(status[1]),width);assert.ok(Number(status[1])+Number(status[2])<=width);
+});
+
+test('desktop-owned picker, controls, tray and status copy are English on every platform',()=>{
+ for(const path of ['./integrations/windows-overlay/Overlay.cs','./integrations/macos-overlay/overlay.jxa','./integrations/linux-overlay/overlay.py']){
+  const text=read(path).replace(/\\u([0-9a-f]{4})/gi,(_,h)=>String.fromCharCode(parseInt(h,16)));
+  assert.doesNotMatch(text,/[가-힣]/,path);
+ }
+ const cs=read('./integrations/windows-overlay/Overlay.cs');
+ for(const label of ['Choose an app window for Retrieviewer.','Refresh','Attach','Cancel'])assert.ok(cs.includes(label));
+ assert.doesNotMatch(cs,/Codex를|Codex terminal/);
 });
 
 const PYTHON=(process.platform==='win32'?['python','python3']:['python3','python']).find(cmd=>{
@@ -69,7 +79,7 @@ test('browser preview: third tug button, EN/KO copy, cooldown loops and cache-bu
  const html=read('./docs/index.html'),app=read('./docs/app.mjs');
  assert.match(html,/id="tug"\s+disabled\s+data-i18n="tug"\s*>\s*Play tug\s*</);
  assert.ok(html.indexOf('id="treat"')<html.indexOf('id="tug"')&&html.indexOf('id="tug"')<html.indexOf('id="pause"'));
- assert.match(html,/app\.mjs\?v=0\.0\.7"/);
+ assert.match(html,/app\.mjs\?v=0\.0\.8"/);
  assert.match(app,/ {2}tug: "터그 놀이",/);assert.match(app,/tugSent: "터그 놀이를 시작했어요!"/);assert.match(app,/tugSent: "Tug of war started!"/);
  assert.equal(app.match(/for \(const kind of \["ball", "treat", "tug"\]\)/g).length,3);
  assert.doesNotMatch(app,/\["ball", "treat"\]/);assert.match(app,/kind \+ "Sent"/);

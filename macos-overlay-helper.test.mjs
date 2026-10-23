@@ -116,7 +116,7 @@ test('picker lists ordinary foreign windows and falls back to app name plus wind
  const items=api.pickerTargets([info(10,50,'Safari','Docs'),info(11,60,'Terminal',''),info(12,99,'osascript','pet'),info(13,61,'Dock','',{kCGWindowLayer:20}),
   info(14,62,'Tiny','',{kCGWindowBounds:{X:0,Y:0,Width:100,Height:80}}),info(15,63,'iTerm2','codex'),{bogus:true}],99);
  assert.deepEqual(items.map(i=>i.id),[11,15,10]);
- assert.equal(items[0].title,'[\ud130\ubbf8\ub110] Terminal \u00b7 \ucc3d #11');assert.equal(items[2].title,'Docs \u00b7 Safari #10');
+ assert.equal(items[0].title,'[Terminal] Terminal - Window #11');assert.equal(items[2].title,'Docs \u00b7 Safari #10');
  const target={id:11,pid:60};
  assert.equal(api.coveredBySameApp([info(30,60,'Terminal','other')],target),true);
  assert.equal(api.coveredBySameApp([info(31,70,'Other',''),info(32,60,'Terminal','',{kCGWindowLayer:3}),info(11,60,'Terminal','')],target),false);

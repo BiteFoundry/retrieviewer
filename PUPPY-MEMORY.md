@@ -1,5 +1,24 @@
 # Runtime weight and performance
 
+## Single-source watch registration and English desktop UI (0.0.8)
+
+The0.0.7 neck fix still joined a different torso to the lower legs. This pass
+removes that compositing entirely. Each watch sample uses one original drawing,
+with a smooth inverse-coordinate field below y230 registering four paw patches
+and the ground plane. Resampling always reads the original, never a previously
+warped image. Head/jaw/neck/bandana pixels through y229 remain exact; endpoints
+share the seated key. All36 watch samples have four-paw residual checks (<=2
+source pixels) and a common floor test, in addition to the original neck digest.
+Pillow/NumPy are offline authoring tools only. The shipped runtime has no new
+dependency, warp pass, image buffer, frame count or process. The behavior archive
+is9,369 compressed bytes smaller than0.0.7.
+
+Desktop picker, controls, tray/menu and statuses use English. Windows/macOS
+toolbars have64px buttons for English labels; existing Linux labels remain.
+Windows native IPC/lifecycle tests and source-label WinForms layout checks at
+100%/200% cover this change. macOS has syntax/core/layout checks, not a real Mac
+GUI test. Website EN/KO selection and user-supplied window titles are unchanged.
+
 ## Watch neck seam repair (0.0.7)
 
 The0.0.6 watch registration moved the entire head/neck8px and dissolved it into

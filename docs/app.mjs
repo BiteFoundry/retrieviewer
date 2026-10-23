@@ -262,7 +262,7 @@ async function load() {
   playing = false;
   cancelLoop();
   try {
-    const { createPet } = await import("./runtime/0.0.7/retrieviewer.mjs");
+    const { createPet } = await import("./runtime/0.0.8/retrieviewer.mjs");
     const next = await createPet({ seed: 731 });
     if (closed) {
       next.dispose();
@@ -297,7 +297,7 @@ $("#sleep-pose").addEventListener("change",async()=>{
   }
   study=key;playing=false;cancelLoop();syncControls();status('previewLoading');
   try{
-    const response=await fetch('./sleep-'+key+'.txt?v=0.0.7');
+    const response=await fetch('./sleep-'+key+'.txt?v=0.0.8');
     if(!response.ok)throw Error('Sleep preview HTTP '+response.status);
     const text=await response.text();if(request!==studyRequest||closed)return;
     art.textContent=text.replace(/^(?:\u2800*\n)+/,'').replace(/(?:\n\u2800*)+$/,'');

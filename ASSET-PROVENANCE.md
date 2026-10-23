@@ -35,6 +35,12 @@ must be checked again for the final release bytes.
 
 ## Remaining limits
 
+0.0.8 replaces the watch-body joins with offline coordinate registration of
+the same single source drawing per sample. Four paw patches and a shared ground
+plane constrain the lower-body warp; original head/neck pixels remain exact.
+No new image, photograph or video reference is introduced; CC BY-SA4.0 and
+existing attribution remain unchanged.
+
 0.0.6 re-registers only the36 watch samples of the existing behavior archive.
 The existing seated body/paws stay fixed while the authored head turns; no new
 image/photo/video reference is introduced. The offline preparation and source

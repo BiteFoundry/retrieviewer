@@ -14,12 +14,12 @@ var MIN_WIDTH = 160, MIN_HEIGHT = 120;
 var INK = [248, 242, 232, 245];
 var TERMINAL_OWNERS = ['Terminal', 'iTerm2', 'iTerm', 'WezTerm', 'wezterm-gui', 'Alacritty', 'kitty', 'Ghostty', 'Warp', 'Hyper', 'Tabby'];
 var TEXT = {
-  preparing: '\uC900\uBE44 \uC911',
-  playing: '\uD568\uAED8 \uB178\uB294 \uC911',
-  accepted: '\uC88B\uC544!',
-  busy: '\uC7A0\uAE50 \uAE30\uB2E4\uB824',
-  engineError: '\uC5D4\uC9C4 \uC624\uB958',
-  chooseFromMenu: '\uBA54\uB274 \uB9C9\uB300\uC5D0\uC11C \uCC3D \uC120\uD0DD'
+  preparing: 'Loading...',
+  playing: 'Playing',
+  accepted: 'Ready!',
+  busy: 'Please wait',
+  engineError: 'Engine error',
+  chooseFromMenu: 'Choose a window'
 };
 
 // Low profile: 12pt cells, or 16pt when a large window would exceed 20000 cells.
@@ -194,7 +194,7 @@ function pickerTargets(infos, ownPid) {
     var w = windowRecord(infos[i]);
     if (!w || w.pid === ownPid || w.layer !== 0 || w.alpha <= 0 || w.bounds.width < MIN_WIDTH || w.bounds.height < MIN_HEIGHT) continue;
     var terminal = TERMINAL_OWNERS.indexOf(w.owner) >= 0;
-    var label = (terminal ? '[\uD130\uBBF8\uB110] ' : '') + (w.name ? w.name + ' \u00B7 ' + w.owner : w.owner + ' \u00B7 \uCC3D') + ' #' + w.id;
+    var label = (terminal ? '[Terminal] ' : '') + (w.name ? w.name + ' \u00B7 ' + w.owner : w.owner + ' - Window') + ' #' + w.id;
     result.push({ id: w.id, pid: w.pid, owner: w.owner, title: label, terminal: terminal });
   }
   result.sort(function (a, b) { return a.terminal === b.terminal ? (a.title < b.title ? -1 : a.title > b.title ? 1 : 0) : a.terminal ? -1 : 1; });
@@ -265,7 +265,7 @@ var STYLE_BORDERLESS = 0, STYLE_TITLED = 1, STYLE_CLOSABLE = 2, STYLE_NONACTIVAT
 var BACKING_BUFFERED = 2, FLOATING_LEVEL = 3, ACTIVATION_ACCESSORY = 1, ANIMATION_NONE = 2;
 // canJoinAllSpaces | stationary | ignoresCycle | fullScreenAuxiliary
 var OVERLAY_SPACES = 1 | 16 | 64 | 256;
-var BAR_WIDTH = 404, BAR_HEIGHT = 40;
+var BAR_WIDTH = 538, BAR_HEIGHT = 40;
 
 var shell = null;
 
@@ -409,14 +409,14 @@ function startCompanion(testMode) {
   bar.setBackgroundColor($.NSColor.colorWithCalibratedRedGreenBlueAlpha(28 / 255, 30 / 255, 34 / 255, 0.94));
   bar.setFloatingPanel(true); bar.setBecomesKeyOnlyIfNeeded(true); bar.setLevel(FLOATING_LEVEL); bar.setCollectionBehavior(OVERLAY_SPACES);
   var content = bar.contentView;
-  ballButton = makeButton('\uACF5', { x: 8, y: 6, width: 40, height: 28 }, 'onBall:');
+  ballButton = makeButton('Ball', { x: 8, y: 6, width: 64, height: 28 }, 'onBall:');
   content.addSubview(ballButton);
-  content.addSubview(makeButton('\uAC04\uC2DD', { x: 52, y: 6, width: 46, height: 28 }, 'onTreat:'));
-  content.addSubview(makeButton('\uD130\uADF8', { x: 102, y: 6, width: 46, height: 28 }, 'onTug:'));
-  content.addSubview(makeButton('\uCC3D', { x: 152, y: 6, width: 40, height: 28 }, 'onPick:'));
-  content.addSubview(makeButton('\uC27C', { x: 196, y: 6, width: 40, height: 28 }, 'onPause:'));
-  content.addSubview(makeButton('\uC885\uB8CC', { x: 240, y: 6, width: 46, height: 28 }, 'onQuit:'));
-  statusLabel = makeLabel(TEXT.preparing, { x: 292, y: 10, width: 108, height: 20 }, $.NSColor.whiteColor);
+  content.addSubview(makeButton('Treat', { x: 76, y: 6, width: 64, height: 28 }, 'onTreat:'));
+  content.addSubview(makeButton('Tug', { x: 144, y: 6, width: 64, height: 28 }, 'onTug:'));
+  content.addSubview(makeButton('Window', { x: 212, y: 6, width: 64, height: 28 }, 'onPick:'));
+  content.addSubview(makeButton('Pause', { x: 280, y: 6, width: 64, height: 28 }, 'onPause:'));
+  content.addSubview(makeButton('Quit', { x: 348, y: 6, width: 64, height: 28 }, 'onQuit:'));
+  statusLabel = makeLabel(TEXT.preparing, { x: 422, y: 10, width: 112, height: 20 }, $.NSColor.whiteColor);
   content.addSubview(statusLabel);
 
   // Menu bar item: the macOS counterpart of the Windows tray icon.
@@ -424,7 +424,7 @@ function startCompanion(testMode) {
   statusItem.button.setTitle($('\u28BF'));
   statusItem.button.setToolTip($('Retrieviewer'));
   var menu = $.NSMenu.alloc.initWithTitle($('Retrieviewer'));
-  [['\uB2E4\uB978 \uCC3D \uC120\uD0DD', 'onPick:'], ['\uC228\uAE30\uAE30 / \uB2E4\uC2DC \uD45C\uC2DC', 'onPause:'], ['\uC885\uB8CC', 'onQuit:']].forEach(function (entry) {
+  [['Choose window', 'onPick:'], ['Hide / resume', 'onPause:'], ['Quit', 'onQuit:']].forEach(function (entry) {
     var item = $.NSMenuItem.alloc.initWithTitleActionKeyEquivalent($(entry[0]), entry[1], $(''));
     item.target = shell.controller;
     menu.addItem(item);
@@ -474,19 +474,19 @@ function startCompanion(testMode) {
     if (picker || core.state.quitting) return;
     core.setPicking(true); core.track(true);
     picker = makePanel({ x: 0, y: 0, width: 650, height: 230 }, STYLE_TITLED | STYLE_CLOSABLE);
-    picker.setTitle($('Retrieviewer \u00B7 \uD568\uAED8 \uC788\uC744 \uCC3D'));
+    picker.setTitle($('Retrieviewer - Choose a window'));
     picker.setLevel(FLOATING_LEVEL);
     picker.setDelegate(shell.controller);
     var view = picker.contentView;
-    view.addSubview(makeLabel('Codex\uB97C \uC0AC\uC6A9\uD558\uB294 \uD130\uBBF8\uB110 \uCC3D\uC744 \uC120\uD0DD\uD558\uC138\uC694.\n' +
-      '\uB0B4\uC6A9\uC744 \uC77D\uC9C0 \uC54A\uACE0 \uCC3D\uC758 \uC704\uCE58\u00B7\uD06C\uAE30\uB9CC \uB530\uB77C\uAC11\uB2C8\uB2E4. \uD0ED\uC740 \uAD6C\uBCC4\uD558\uC9C0 \uC54A\uC2B5\uB2C8\uB2E4.\n' +
-      '\uD654\uBA74 \uAE30\uB85D \uAD8C\uD55C\uC774 \uC5C6\uC73C\uBA74 \uC81C\uBAA9 \uB300\uC2E0 \uC571 \uC774\uB984\uACFC \uCC3D \uBC88\uD638\uAC00 \uBCF4\uC785\uB2C8\uB2E4.',
+    view.addSubview(makeLabel('Choose an app window for Retrieviewer.\n' +
+      'Only its position and size are followed. Contents are never read.\n' +
+      'Without Screen Recording permission, app names and window IDs replace titles.',
       { x: 18, y: 150, width: 614, height: 64 }, null));
     pickerList = $.NSPopUpButton.alloc.initWithFramePullsDown($.NSMakeRect(18, 106, 600, 28), false);
     view.addSubview(pickerList);
-    view.addSubview(makeButton('\uC0C8\uB85C \uACE0\uCE68', { x: 18, y: 24, width: 100, height: 34 }, 'onRefresh:'));
-    view.addSubview(makeButton('\uC774 \uCC3D\uC5D0 \uBD99\uC774\uAE30', { x: 378, y: 24, width: 140, height: 34 }, 'onAttach:'));
-    view.addSubview(makeButton('\uCDE8\uC18C', { x: 528, y: 24, width: 90, height: 34 }, 'onCancel:'));
+    view.addSubview(makeButton('Refresh', { x: 18, y: 24, width: 100, height: 34 }, 'onRefresh:'));
+    view.addSubview(makeButton('Attach', { x: 378, y: 24, width: 140, height: 34 }, 'onAttach:'));
+    view.addSubview(makeButton('Cancel', { x: 528, y: 24, width: 90, height: 34 }, 'onCancel:'));
     refreshPicker();
     picker.center;
     app.activateIgnoringOtherApps(true);
@@ -499,7 +499,7 @@ function startCompanion(testMode) {
     emit({ type: 'picker', visible: false });
     if (core.state.quitting) return;
     if (!core.state.target) statusLabel.setStringValue($(TEXT.chooseFromMenu));
-    statusItem.button.setToolTip($(core.state.target ? 'Retrieviewer \u00B7 \uCC3D\uC5D0 \uBD99\uC5B4 \uC788\uC74C' : 'Retrieviewer \u00B7 \uCC3D \uC120\uD0DD'));
+    statusItem.button.setToolTip($(core.state.target ? 'Retrieviewer - Attached' : 'Retrieviewer - Choose window'));
     // Hand focus back: to the window the user just chose, otherwise to whoever had it.
     var chosen = attachedPid ? $.NSRunningApplication.runningApplicationWithProcessIdentifier(attachedPid) : null;
     attachedPid = 0;

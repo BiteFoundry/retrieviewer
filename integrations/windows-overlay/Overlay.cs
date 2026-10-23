@@ -112,12 +112,12 @@ sealed class Companion : ApplicationContext {
     TargetItem target;Form pickerWindow;QuietWindow testTarget;readonly bool testMode;Rectangle canvas;int revision=0,cell=8;bool visible=false,paused=false,loaded=false,quitting=false,picking=false,announced=false;
     Label status=new Label();Mutex mutex;
     internal Companion(Mutex single,bool diagnostic){
-        mutex=single;testMode=diagnostic;bar.Text="Retrieviewer controls";bar.Size=new Size(404,40);bar.BackColor=Color.FromArgb(28,30,34);bar.ForeColor=Color.White;
-        bar.Font=new Font("Segoe UI",9);bar.Controls.Add(MakeButton("공",8,()=>Interact("ball")));bar.Controls.Add(MakeButton("간식",52,()=>Interact("treat")));
-        bar.Controls.Add(MakeButton("터그",102,()=>Interact("tug")));bar.Controls.Add(MakeButton("창",152,ChooseTarget));bar.Controls.Add(MakeButton("쉼",196,TogglePause));bar.Controls.Add(MakeButton("종료",240,Quit));
-        status.AutoSize=false;status.Location=new Point(290,12);status.Size=new Size(110,22);status.Text="준비 중";bar.Controls.Add(status);
-        ContextMenuStrip menu=new ContextMenuStrip();menu.Items.Add("다른 창 선택",null,(s,e)=>ChooseTarget());menu.Items.Add("숨기기 / 다시 표시",null,(s,e)=>TogglePause());menu.Items.Add("종료",null,(s,e)=>Quit());
-        tray.Icon=SystemIcons.Application;tray.Text="Retrieviewer · 창 선택";tray.ContextMenuStrip=menu;tray.Visible=true;tray.DoubleClick+=(s,e)=>ChooseTarget();
+        mutex=single;testMode=diagnostic;bar.Text="Retrieviewer controls";bar.Size=new Size(538,40);bar.BackColor=Color.FromArgb(28,30,34);bar.ForeColor=Color.White;
+        bar.Font=new Font("Segoe UI",9);bar.Controls.Add(MakeButton("Ball",8,()=>Interact("ball")));bar.Controls.Add(MakeButton("Treat",76,()=>Interact("treat")));
+        bar.Controls.Add(MakeButton("Tug",144,()=>Interact("tug")));bar.Controls.Add(MakeButton("Window",212,ChooseTarget));bar.Controls.Add(MakeButton("Pause",280,TogglePause));bar.Controls.Add(MakeButton("Quit",348,Quit));
+        status.AutoSize=false;status.Location=new Point(422,12);status.Size=new Size(112,22);status.Text="Loading...";bar.Controls.Add(status);
+        ContextMenuStrip menu=new ContextMenuStrip();menu.Items.Add("Choose window",null,(s,e)=>ChooseTarget());menu.Items.Add("Hide / resume",null,(s,e)=>TogglePause());menu.Items.Add("Quit",null,(s,e)=>Quit());
+        tray.Icon=SystemIcons.Application;tray.Text="Retrieviewer · Choose window";tray.ContextMenuStrip=menu;tray.Visible=true;tray.DoubleClick+=(s,e)=>ChooseTarget();
         // Handles are created on the UI thread before the reader can signal EOF.
         IntPtr unused=bar.Handle;unused=pet.Handle;
         Thread reader=new Thread(ReadInput);reader.IsBackground=true;reader.Start();
@@ -128,7 +128,7 @@ sealed class Companion : ApplicationContext {
         }
     }
     Button MakeButton(string title,int x,Action action){
-        Button b=new Button();b.Text=title;b.TabStop=false;b.Size=new Size(title=="간식"||title=="터그"?46:40,28);b.Location=new Point(x,6);b.FlatStyle=FlatStyle.Flat;b.FlatAppearance.BorderSize=0;b.BackColor=Color.FromArgb(48,51,58);b.ForeColor=Color.White;b.Click+=(s,e)=>action();return b;
+        Button b=new Button();b.Text=title;b.TabStop=false;b.Size=new Size(64,28);b.Location=new Point(x,6);b.FlatStyle=FlatStyle.Flat;b.FlatAppearance.BorderSize=0;b.BackColor=Color.FromArgb(48,51,58);b.ForeColor=Color.White;b.Click+=(s,e)=>action();return b;
     }
     void ReadInput(){
         try{
@@ -150,9 +150,9 @@ sealed class Companion : ApplicationContext {
             for(;;){Dictionary<string,object> m;lock(inputLock){if(messages.Count==0)break;m=messages.Dequeue();}
                 string type=Program.Str(m,"type");
                 if(type=="quit"){Quit();return;}
-                if(type=="loaded"){string ink=m.ContainsKey("ink")?Program.Str(m,"ink"):"cream";if(ink!="cream"&&ink!="gold"&&ink!="dark")throw new Exception("Invalid ink");pet.Ink=ink=="gold"?Color.FromArgb(245,231,184,103):ink=="dark"?Color.FromArgb(245,67,48,24):Color.FromArgb(245,248,242,232);loaded=true;status.Text="함께 노는 중";if(testMode)((Button)bar.Controls[0]).PerformClick();continue;}
-                if(type=="interaction"){status.Text=Program.Bool(m,"accepted")?"좋아!":"잠깐 기다려";continue;}
-                if(type=="error"){status.Text="엔진 오류";Quit();return;}
+                if(type=="loaded"){string ink=m.ContainsKey("ink")?Program.Str(m,"ink"):"cream";if(ink!="cream"&&ink!="gold"&&ink!="dark")throw new Exception("Invalid ink");pet.Ink=ink=="gold"?Color.FromArgb(245,231,184,103):ink=="dark"?Color.FromArgb(245,67,48,24):Color.FromArgb(245,248,242,232);loaded=true;status.Text="Playing";if(testMode)((Button)bar.Controls[0]).PerformClick();continue;}
+                if(type=="interaction"){status.Text=Program.Bool(m,"accepted")?"Ready!":"Please wait";continue;}
+                if(type=="error"){status.Text="Engine error";Quit();return;}
                 if(type=="frame"){
                     // Always acknowledge discarded frames too, otherwise resizing can deadlock the sender.
                     bool painted=visible&&!paused&&Program.Int(m,"revision")==revision;
@@ -187,7 +187,7 @@ sealed class Companion : ApplicationContext {
             StringBuilder name=new StringBuilder(512);Native.GetWindowText(hwnd,name,name.Capacity);if(name.Length==0)return true;
             string process="";try{using(Process p=Process.GetProcessById((int)pid)){process=p.ProcessName;}}catch{}
             bool terminal=process.Equals("WindowsTerminal",StringComparison.OrdinalIgnoreCase)||process.IndexOf("wezterm",StringComparison.OrdinalIgnoreCase)>=0||process=="OpenConsole"||process=="conhost"||process=="mintty";
-            result.Add(new TargetItem{Window=hwnd,Process=pid,Title=(terminal?"[터미널] ":"")+name.ToString()+" · "+process,Terminal=terminal});return true;
+            result.Add(new TargetItem{Window=hwnd,Process=pid,Title=(terminal?"[Terminal] ":"")+name.ToString()+" · "+process,Terminal=terminal});return true;
         },IntPtr.Zero);
         result.Sort((a,b)=>a.Terminal==b.Terminal?String.Compare(a.Title,b.Title,StringComparison.CurrentCulture):a.Terminal?-1:1);return result;
     }
@@ -195,15 +195,15 @@ sealed class Companion : ApplicationContext {
         if(picking||quitting)return;picking=true;Track(true);
         Form picker=new Form();pickerWindow=picker;
         {
-            picker.Text="Retrieviewer · 함께 있을 창";picker.Size=new Size(650,230);picker.StartPosition=FormStartPosition.CenterScreen;picker.FormBorderStyle=FormBorderStyle.FixedDialog;picker.MaximizeBox=false;picker.MinimizeBox=false;picker.Font=new Font("Segoe UI",10);
+            picker.Text="Retrieviewer · Choose a window";picker.Size=new Size(650,230);picker.StartPosition=FormStartPosition.CenterScreen;picker.FormBorderStyle=FormBorderStyle.FixedDialog;picker.MaximizeBox=false;picker.MinimizeBox=false;picker.Font=new Font("Segoe UI",10);
             picker.ShowInTaskbar=true;picker.TopMost=true;
-            Label hint=new Label();hint.Text="Codex를 사용하는 터미널 창을 선택하세요.\n내용을 읽지 않고 창의 위치·크기만 따라갑니다. 탭은 구별하지 않습니다.";hint.SetBounds(18,16,610,50);
+            Label hint=new Label();hint.Text="Choose an app window for Retrieviewer.\nOnly its position and size are followed. Contents are never read.";hint.SetBounds(18,16,610,50);
             ComboBox list=new ComboBox();list.DropDownStyle=ComboBoxStyle.DropDownList;list.SetBounds(18,76,600,28);foreach(TargetItem item in Targets())list.Items.Add(item);if(list.Items.Count>0)list.SelectedIndex=0;
-            Button refresh=new Button();refresh.Text="새로 고침";refresh.SetBounds(18,124,100,34);refresh.Click+=(s,e)=>{list.Items.Clear();foreach(TargetItem item in Targets())list.Items.Add(item);if(list.Items.Count>0)list.SelectedIndex=0;};
-            Button attach=new Button();attach.Text="이 창에 붙이기";attach.SetBounds(378,124,140,34);attach.Click+=(s,e)=>{if(list.SelectedItem!=null){target=(TargetItem)list.SelectedItem;paused=false;Program.Emit(new {type="pause",paused=false});picker.Close();}};
-            Button cancel=new Button();cancel.Text="취소";cancel.SetBounds(528,124,90,34);cancel.Click+=(s,e)=>picker.Close();
+            Button refresh=new Button();refresh.Text="Refresh";refresh.SetBounds(18,124,100,34);refresh.Click+=(s,e)=>{list.Items.Clear();foreach(TargetItem item in Targets())list.Items.Add(item);if(list.Items.Count>0)list.SelectedIndex=0;};
+            Button attach=new Button();attach.Text="Attach";attach.SetBounds(378,124,140,34);attach.Click+=(s,e)=>{if(list.SelectedItem!=null){target=(TargetItem)list.SelectedItem;paused=false;Program.Emit(new {type="pause",paused=false});picker.Close();}};
+            Button cancel=new Button();cancel.Text="Cancel";cancel.SetBounds(528,124,90,34);cancel.Click+=(s,e)=>picker.Close();
             picker.Controls.AddRange(new Control[]{hint,list,refresh,attach,cancel});
-            picker.FormClosed+=(s,e)=>{pickerWindow=null;picking=false;Program.Emit(new {type="picker",visible=false});if(!quitting){if(target==null)status.Text="트레이에서 창 선택";tray.Text=target==null?"Retrieviewer · 창 선택":"Retrieviewer · 창에 붙어 있음";Track(true);}picker.Dispose();};
+            picker.FormClosed+=(s,e)=>{pickerWindow=null;picking=false;Program.Emit(new {type="picker",visible=false});if(!quitting){if(target==null)status.Text="Choose a window";tray.Text=target==null?"Retrieviewer · Choose window":"Retrieviewer · Attached";Track(true);}picker.Dispose();};
             picker.Show();Native.ShowWindow(picker.Handle,5);Program.Emit(new {type="picker",visible=Native.IsWindowVisible(picker.Handle)});
         }
     }
