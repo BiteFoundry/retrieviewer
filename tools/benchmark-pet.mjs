@@ -5,10 +5,12 @@ import {pathToFileURL} from 'node:url';
 import {resolve} from 'node:path';
 import {writeFile} from 'node:fs/promises';
 const {createPet}=await import(process.argv[2]?pathToFileURL(resolve(process.argv[2])):new URL('../retrieviewer.mjs',import.meta.url));
-const memory=()=>{globalThis.gc?.();const m=process.memoryUsage();return {rss:m.rss,heapUsed:m.heapUsed,arrayBuffers:m.arrayBuffers};};
-const imported=memory(),loadStart=performance.now();
+// zlib closes native handles on the following event-loop turns. Sampling in the
+// same microtask incorrectly counts their already-dead input/output buffers.
+const memory=async()=>{await new Promise(setImmediate);globalThis.gc?.();await new Promise(setImmediate);globalThis.gc?.();const m=process.memoryUsage();return {rss:m.rss,heapUsed:m.heapUsed,arrayBuffers:m.arrayBuffers};};
+const imported=await memory(),loadStart=performance.now();
 const pet=await createPet({seed:731});
-const loadMs=performance.now()-loadStart,loaded=memory();
+const loadMs=performance.now()-loadStart,loaded=await memory();
 const stepStart=performance.now(),stepCpu=process.cpuUsage();
 for(let i=0;i<1800;i++)pet.step(1/60);
 const stepCpuTime=process.cpuUsage(stepCpu),stepMs=performance.now()-stepStart;
@@ -23,8 +25,8 @@ for(let i=0;i<450;i++) {
  if(i%30===0)trajectory.push({frame:i,x:f.state.x,z:f.state.z,state:f.state.state,view:f.state.view,intent:f.report.intent});
  moving.step(1/30);
 }
-const frameCpuTime=process.cpuUsage(frameCpu),frameMs=performance.now()-frameStart,rendered=memory();
-moving.dispose();await new Promise(setImmediate);const disposed=memory();
+const frameCpuTime=process.cpuUsage(frameCpu),frameMs=performance.now()-frameStart,rendered=await memory();
+moving.dispose();const disposed=await memory();
 timings.sort((a,b)=>a-b);
 const result={loadMs,step1800Ms:stepMs,stepCpuMs:(stepCpuTime.user+stepCpuTime.system)/1000,frame450Ms:frameMs,frameCpuMs:(frameCpuTime.user+frameCpuTime.system)/1000,
  frameMeanMs:timings.reduce((a,b)=>a+b,0)/timings.length,frameP95Ms:timings[Math.floor(timings.length*.95)],

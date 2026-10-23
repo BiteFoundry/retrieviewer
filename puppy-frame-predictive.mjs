@@ -10,8 +10,9 @@
 //  20 u32[logicalFrameCount] logical -> unique index
 //  then uniqueCount records of u32 x,y,w,h,offset,length (length = h*(w+1))
 //  then the filtered rows of every unique crop, contiguous in order.
-// At load every crop is unfiltered once and kept as 5-bit packed indices; the
-// filtered input is not retained. Full frames are rebuilt on demand (LRU of 2).
+// At load every crop is validated. The portable store keeps 5-bit packed indices;
+// an optional host codec compresses each filtered crop instead (Node zlib).
+// Neither retains the input archive. Full frames rebuild on demand (LRU of 2).
 const MAGIC=[0x52,0x56,0x51,0x35],RVF1=[0x52,0x56,0x46,0x31],HEADER=20,RECORD=24,MAX_SIDE=16384,BITS=5;
 
 export const quantize5=v=>Math.round(v*31/255);
@@ -80,7 +81,8 @@ function unfilterRow(type,src,at,cur,prev,w){
 
 // Validate and unfilter. Only the returned typed arrays survive; `bytes` is
 // not referenced by the store built from them.
-function decode(bytes,{frameIndices}={}){
+function decode(bytes,{frameIndices,codec}={}){
+ if(codec&&(typeof codec.compress!=='function'||typeof codec.expand!=='function'))fail('codec');
  if(!(bytes instanceof Uint8Array))fail('bytes');
  if(!isPredictiveFrames(bytes)||bytes.length<HEADER)fail('magic');
  const view=new DataView(bytes.buffer,bytes.byteOffset,bytes.byteLength),u32=at=>view.getUint32(at,true);
@@ -107,27 +109,30 @@ function decode(bytes,{frameIndices}={}){
  }
  if(bytes.length!==data+total)fail('pixel length');
  if(pixels*BITS>0xffffffff)fail('pixel count');
- const packed=new Uint8Array(Math.ceil(pixels*BITS/8));
+ const packed=codec?null:new Uint8Array(Math.ceil(pixels*BITS/8)),chunks=codec?new Array(unique):null;
  let cur=new Uint8Array(width),prev=new Uint8Array(width),at=data,pos=0;
  for(let u=0;u<unique;u++){
-  const w=rects[u*5+2],h=rects[u*5+3];prev.fill(0);
+  const w=rects[u*5+2],h=rects[u*5+3],start=at;prev.fill(0);
   for(let y=0;y<h;y++){
    unfilterRow(bytes[at],bytes,at+1,cur,prev,w);at+=w+1;
    for(let x=0;x<w;x++){
-    const q=cur[x];if(q>31)fail('quantized value');if(needed&&!needed[u])continue;
+    const q=cur[x];if(q>31)fail('quantized value');if(codec||(needed&&!needed[u]))continue;
     const i=pos>>>3,s=pos&7;packed[i]|=(q<<s)&255;if(s>3)packed[i+1]|=q>>(8-s);pos+=BITS;
    }
    const t=prev;prev=cur;cur=t;
   }
+  if(codec&&h&&(!needed||needed[u]))chunks[u]=Uint8Array.from(codec.compress(bytes.subarray(start,at)));
  }
- return{width,height,frameCount,unique,map,rects,packed,retained};
+ return{width,height,frameCount,unique,map,rects,packed,retained,chunks,codec};
 }
 
-function createStore({width,height,frameCount,unique,map,rects,packed,retained}){
+function createStore({width,height,frameCount,unique,map,rects,packed,retained,chunks,codec}){
  const n=width*height,slots=[{unique:-1,frame:null},{unique:-1,frame:null}];let decodes=0,hits=0;
+ const pixelBytes=packed?.byteLength??chunks.reduce((sum,c)=>sum+(c?.byteLength??0),0);
+ const cur=codec?new Uint8Array(width):null,prev=codec?new Uint8Array(width):null;
  return Object.freeze({
-  width,height,frameCount,uniqueCount:unique,byteLength:n*frameCount,residentPixelBytes:packed.byteLength,
-  get residentBytes(){return packed.byteLength+map.byteLength+rects.byteLength+(retained?.byteLength??0)+slots.reduce((s,e)=>s+(e.frame?.byteLength??0),0);},
+  width,height,frameCount,uniqueCount:unique,byteLength:n*frameCount,residentPixelBytes:pixelBytes,
+  get residentBytes(){return pixelBytes+map.byteLength+rects.byteLength+(cur?.byteLength??0)+(prev?.byteLength??0)+(retained?.byteLength??0)+slots.reduce((s,e)=>s+(e.frame?.byteLength??0),0);},
   stats(){return{decodes,hits,cachedFrames:slots.filter(e=>e.frame).length};},
   getFrame(index){
    if(!Number.isInteger(index)||index<0||index>=frameCount)fail('frame index');
@@ -138,6 +143,18 @@ function createStore({width,height,frameCount,unique,map,rects,packed,retained})
    const slot=slots.pop();slots.unshift(slot);decodes++;
    const frame=slot.frame??=new Uint8Array(n),k=u*5,x=rects[k],y=rects[k+1],w=rects[k+2],h=rects[k+3];
    frame.fill(0);slot.unique=u;
+   if(codec){
+    if(!h)return frame;
+    const rows=codec.expand(chunks[u],h*(w+1));
+    if(rows.length!==h*(w+1))fail('expanded length');
+    prev.fill(0);
+    for(let r=0,at=0;r<h;r++,at+=w+1){
+     unfilterRow(rows[at],rows,at+1,cur,prev,w);
+     for(let c=0;c<w;c++)frame[(y+r)*width+x+c]=DISPLAY[cur[c]];
+     prev.set(cur.subarray(0,w));
+    }
+    return frame;
+   }
    let pos=rects[k+4]*BITS;
    for(let r=0;r<h;r++){
     const row=(y+r)*width+x;

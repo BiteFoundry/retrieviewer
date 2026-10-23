@@ -7,6 +7,22 @@ export function paintCompanionObjects(pixels,width,height,projection,report,stat
  // Interaction drawings already include the toy/food. Never paint a second
  // floating ball over the baked mouth, or a biscuit through the puppy's chest.
  if(report.gesture)return pixels;
+ // Tiny procedural butterfly: two paired wings and a body. World-space size,
+ // same fixed camera and palette as the pet; no image/cache or extra render pass.
+ if(report.butterfly){
+  const b=report.butterfly,p=projection.project(b.x,b.height,b.z);
+  const edge=projection.project(b.x+.04,b.height,b.z),up=projection.project(b.x,b.height+.035,b.z);
+  const cx=p.x*width,cy=p.y*height,rx=Math.abs(edge.x-p.x)*width,ry=Math.abs(up.y-p.y)*height;
+  const opening=.22+.78*Math.abs(Math.sin(b.phase*Math.PI)),tone=Math.round(235*b.opacity);
+  if([cx,cy,rx,ry,opening,tone].every(Number.isFinite)&&rx>0&&ry>0&&tone>0)
+   for(let y=Math.max(0,Math.floor(cy-ry));y<Math.min(height,Math.ceil(cy+ry));y++)
+    for(let x=Math.max(0,Math.floor(cx-rx));x<Math.min(width,Math.ceil(cx+rx));x++){
+     const u=(x+.5-cx)/rx,v=(y+.5-cy)/ry,a=Math.abs(u)/opening;
+     const wing=((a-.5)/.44)**2+((v+.28)/.56)**2<1||((a-.36)/.29)**2+((v-.43)/.37)**2<1;
+     const body=Math.abs(u)<.1&&Math.abs(v)<.7;
+     if(wing||body){const j=(y*width+x)*4;pixels[j]=pixels[j+1]=pixels[j+2]=Math.max(pixels[j],body?tone:Math.round(tone*(.65+.35*a)));}
+    }
+ }
  // A quiet, tiny rising "z" suggests snoring. The sleeping dog itself remains
  // the original eyes-closed source pose: no chest/body zoom or squashing.
  if(Number.isFinite(report.snore)&&state.state==='sleep'){

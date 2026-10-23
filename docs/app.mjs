@@ -44,7 +44,7 @@ const ko = {
   playLabel: "강아지와 놀기",
   lifeTitle: "강아지는 강아지답게.",
   lifeBody:
-    "스스로 걷고 뛰다가 잠들어요. 양쪽으로 눕기도, 몸을 말거나 발라당 자기도 해요. 함께 놀고 싶을 때만 끼어들면 돼요.",
+    "스스로 걷고 뛰다가 잠들어요. 가끔 나비를 쫓기도 해요. 함께 놀고 싶을 때만 끼어들면 돼요.",
   mechanism:
     "별도의 투명 네이티브 창으로 동작해요. 일반 클릭은 통과하고, 다른 창으로 옮겨가면 숨습니다. 에디터·터미널·에이전트를 개조하지 않아요.",
   installTitle: "명령 두 줄이면,<br>작은 친구가 생겨요.",
@@ -79,7 +79,7 @@ const ko = {
   wayland:
     "네이티브 Wayland·화면 없는 서버는 미지원이에요. 원격 X11/VNC는 그 원격 화면에서 동작하며 로컬 IDE와는 별개예요.",
   resource:
-    "Linux는 16px 셀·15fps, Windows는 8px 셀·30fps라 점 크기가 달라요. 패키지는 약19MB예요. 이전0.0.3 Alma8 테스트의 Node RSS는 약180MiB였고 헬퍼는 별도예요. 이 값은0.0.5 메모리 상한은 아니에요.",
+    "Linux는 16px 셀·15fps, Windows는 8px 셀·30fps예요. 패키지는 약19MB. 0.0.6 Windows 오버레이 검사에서 Node RSS는 약96~106MiB였고 헬퍼는 별도예요. 사용량은 화면 크기와 동작에 따라 달라져요. 이번 버전은 Linux GUI에서 재측정하지 않았어요.",
   supportLink: "필요 조건과 실제 검증 범위 보기 ↗",
   goodbyeTitle: "헤어질 때도, 간단하게.",
   goodbyeBody:
@@ -262,7 +262,7 @@ async function load() {
   playing = false;
   cancelLoop();
   try {
-    const { createPet } = await import("./runtime/0.0.5/retrieviewer.mjs");
+    const { createPet } = await import("./runtime/0.0.6/retrieviewer.mjs");
     const next = await createPet({ seed: 731 });
     if (closed) {
       next.dispose();
@@ -297,7 +297,7 @@ $("#sleep-pose").addEventListener("change",async()=>{
   }
   study=key;playing=false;cancelLoop();syncControls();status('previewLoading');
   try{
-    const response=await fetch('./sleep-'+key+'.txt?v=0.0.5');
+    const response=await fetch('./sleep-'+key+'.txt?v=0.0.6');
     if(!response.ok)throw Error('Sleep preview HTTP '+response.status);
     const text=await response.text();if(request!==studyRequest||closed)return;
     art.textContent=text.replace(/^(?:\u2800*\n)+/,'').replace(/(?:\n\u2800*)+$/,'');

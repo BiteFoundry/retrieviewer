@@ -28,6 +28,13 @@ export function createPaperComfortTimings(actionInfo,{key=PAPER_COMFORT_TIMINGS.
 }
 const comfortDuration=(name,seconds)=>{if(typeof seconds!=='number'||!Number.isFinite(seconds)||seconds<=0||seconds>PAPER_COMFORT_LIMITS[name])throw Error(`Invalid ${name} duration`);};
 const comfortEase=u=>u<=0?0:u>=1?1:u*u*(3-2*u);
+// Turn, hold the gaze, then return. Progress addresses the two authored edges;
+// the paws and torso are registered to the same seated source in both edges.
+export const PAPER_WATCH_TIMING=Object.freeze({turn:.6,hold:.65,back:.65,total:1.9});
+export function paperWatchProgress(age){
+ const {turn,hold,back}=PAPER_WATCH_TIMING;
+ return age<turn?.5*comfortEase(age/turn):age<turn+hold?.5:.5+.5*comfortEase((age-turn-hold)/back);
+}
 
 // Original artwork only. Physics supplies ground travel; no procedural dog is drawn.
 export function createPaperActor(animal,info,{manualTricks=false,trickTimings=null,walkTransitions=false,comfortTimings=PAPER_COMFORT_TIMINGS}={}){
@@ -196,7 +203,7 @@ export function createPaperActor(animal,info,{manualTricks=false,trickTimings=nu
    else if(state==='sit-down'){seatProgress=Math.min(1,seatProgress+dt/(snappyPreparation()?.35:.95));if(seatProgress===1){seatVariant='default';enter('idle');if(pendingAction)prepareDirection();}}
    else if(state==='rise'){seatProgress=Math.max(0,seatProgress-prepareDt/(snappyPreparation()?.28:.65));if(seatProgress===0){if(seatVariant==='arrival')enter('arrival-exit');else prepareDirection();}}
    else if(state==='arrival-exit'&&age>=.22){seatVariant='default';prepareDirection();}
-   else if(state==='watch'&&age>=1.4){if(pendingAction)prepareDirection();else if(target)enter('rise');else enter('idle');}
+   else if(state==='watch'&&age>=PAPER_WATCH_TIMING.total){if(pendingAction)prepareDirection();else if(target)enter('rise');else enter('idle');}
    else if(state==='recline'){const end=stayDown?.25:1;restProgress=Math.min(end,restProgress+dt/1.8);if(restProgress===end)enter(stayDown?'down':comfort?.kind==='sleep'?'sleep':'nap');}
    else if(state==='sleep'&&age>=comfort.seconds){comfort=null;enter('wake');}
    else if(state==='tug'&&tugProgress()>=1){comfort=null;enter('idle');drain();}
@@ -222,7 +229,7 @@ export function createPaperActor(animal,info,{manualTricks=false,trickTimings=nu
    if(walkTransitions&&state==='turn'){actionName='walk-turn';actionProgress=Math.min(1,age/turnSeconds());}
    if(view==='approach'&&approachPlan&&(state==='run'||(state==='finish'&&completed))){const p=approachPlan.at(travelDistance);if(state==='finish'){behavior='brake';behaviorProgress=1;}else if(p.clip!=='run'){behavior=p.clip;behaviorProgress=p.progress;}}
    if(state==='arrival-exit'){behavior='finish';behaviorProgress=Math.min(1,age/.22);}
-   if(state==='watch'){behavior=`watch-${watchSide}`;behaviorProgress=Math.min(1,age/1.4);}
+   if(state==='watch'){behavior=`watch-${watchSide}`;behaviorProgress=paperWatchProgress(age);}
    if(restProgress>0||state==='recline'||state==='wake'||state==='nap'){behavior='rest';behaviorProgress=restProgress;}
    if(state==='run'||state==='finish'){
     const p=state==='finish'?phase+(Math.ceil(phase)-phase)*Math.min(1,age/.22):phase;

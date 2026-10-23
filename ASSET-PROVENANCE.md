@@ -35,6 +35,13 @@ must be checked again for the final release bytes.
 
 ## Remaining limits
 
+0.0.6 re-registers only the36 watch samples of the existing behavior archive.
+The existing seated body/paws stay fixed while the authored head turns; no new
+image/photo/video reference is introduced. The offline preparation and source
+digest are in tools/prepare-watch-art.* and pet-q5-manifest.json. Butterfly wings
+are small geometric marks, using the same existing output buffer; dog poses
+reuse licensed gallop art. Existing attribution and CC BY-SA4.0 terms remain.
+
 0.0.5 extends that ninth licensed archive with four sleeping studies generated
 from the same existing puppy identity/pose references, approved by the owner in
 this conversation. COMFORT-ART.md and the comfort metadata record preparation,

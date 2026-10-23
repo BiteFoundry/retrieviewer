@@ -13,12 +13,15 @@ const OFFER={x:0,z:.3};
 const TREAT_OFFSET={z:.08,height:.25};
 const COOLDOWN={ball:6,treat:15,tug:20};
 const FLIGHT=.65,BALL_PEAK=.75,CARRY_HEIGHT=.19,SETTLE_FALLBACK=.6,MAX_DT=.25,ARRIVE=.05;
+// Active simulation seconds, never a wall-clock timer that wakes a hidden pet.
+export const BUTTERFLY_RULES=Object.freeze({firstMin:240,firstSpread:240,cooldownMin:720,cooldownSpread:480,maxVisible:18});
 const LABEL={
  start:'기다리는 중',pause:'잠시 느긋하게 둘러보는 중',lie:'엎드리는 중',rest:'엎드려 쉬는 중',recover:'앉아서 기운 차리는 중',
  sit:'앉는 중',watch:'앉아서 지켜보는 중',look:'고개를 돌려 살피는 중',observe:'가만히 주변 관찰 중',
  stroll:'옆으로 살짝 걸어가는 중',sniff:'잠깐 멈춰 주변을 살피는 중',dash:'저 멀리 달려가는 중',far:'멀리서 둘러보는 중',home:'제자리로 돌아오는 중',
  patrol:'주변을 왕복 산책하는 중',scan:'양쪽을 번갈아 살피는 중',roll:'느긋하게 뒹구는 중',play:'신나서 한 바퀴 도는 중',checkin:'가까이 와서 함께 쉬는 중',
  belly:'배를 보이고 발라당 쉬는 중',sleep:'새근새근 잠자는 중',tug:'장난감을 물고 당기는 중',
+ butterflyNotice:'나비를 발견하고 귀를 쫑긋하는 중',butterfly:'나비를 폴짝폴짝 쫓는 중',butterflyBye:'날아가는 나비를 바라보는 중',
  fetch:'공을 쫓아가는 중',pickup:'공을 무는 중',carry:'공을 물고 돌아오는 중',drop:'공을 내려놓는 중',offer:'공을 내려놓고 기다리는 중',
  treatSit:'간식 앞에 앉는 중',chew:'간식 먹는 중'
 };
@@ -39,6 +42,9 @@ export function createCompanionLife(actor,{seed=731,energy=.8}={}){
  if(!Number.isFinite(energy)||energy<0||energy>1)throw RangeError('energy must be within 0..1');
 
  const rand=mulberry32(seed),range=(a,b)=>a+(b-a)*rand(),side=()=>rand()<.5?'left':'right';
+ // Separate stream: the rare encounter does not perturb ordinary episodes/gaits.
+ const encounterRand=mulberry32(seed^0x4bf17a93),encounterRange=(a,b)=>a+(b-a)*encounterRand();
+ let nextButterfly=BUTTERFLY_RULES.firstMin+encounterRange(0,BUTTERFLY_RULES.firstSpread),butterfly=null;
  const needs={energy,social:.5,curiosity:.5,drowsiness:0};
  const cooldowns={ball:0,treat:0,tug:0};
  const episodeCooldowns={roll:0,play:0,belly:0,sleep:0};
@@ -58,6 +64,32 @@ export function createCompanionLife(actor,{seed=731,energy=.8}={}){
  const sit=step=>cmd('sit',[],step,()=>!seatedAnyVariant());
  const lie=()=>cmd('lie',[],'lie',()=>actor.state!=='down');
  const walkTo=x=>cmd('walk',()=>{const dx=x-actor.sample(clock).x;return [dx<0?'left':'right',Math.abs(dx)];},'patrol',()=>Math.abs(x-actor.sample(clock).x)>.002);
+ const butterflyPoint=()=>{
+  if(!butterfly)return null;
+  const elapsed=clock-butterfly.since,p=clamp(elapsed/.65,0,1),ease=p*p*(3-2*p);
+  const leaving=butterfly.leaving?clamp((clock-butterfly.leaving)/1.1,0,1):0;
+  return {x:butterfly.from.x+(butterfly.to.x-butterfly.from.x)*ease+.025*Math.sin(elapsed*5)+leaving*.2*butterfly.side,
+   z:butterfly.from.z+(butterfly.to.z-butterfly.from.z)*ease,
+   height:.45+.045*Math.sin((clock-butterfly.start)*6)+leaving*.35,
+   phase:((clock-butterfly.start)*5)%1,opacity:1-leaving};
+ };
+ const butterflyEpisode=()=>{
+  const s=actor.sample(clock),direction=encounterRand()<.5?-1:1;
+  const targets=[clamp(s.x+direction*.36,-.5,.5),clamp(s.x-direction*.38,-.5,.5),clamp(s.x+direction*.24,-.5,.5)];
+  const z=s.z;
+  const moveFly=x=>fx(()=>{
+   const from=butterflyPoint()??{x:s.x-direction*.28,z};
+   const heading=x<actor.sample(clock).x?-1:1;
+   // The dog root is its body center, NOT its nose. Keep the visitor ahead of
+   // the muzzle on each leg, rather than hovering behind the running face.
+   butterfly={start:butterfly?.start??clock,since:clock,from:{x:from.x,z:from.z},to:{x:x+heading*.23,z},side:heading,leaving:0};
+  });
+  // Look names are dog-relative: its left is the viewer's right.
+  return [sit('butterflyNotice'),moveFly(targets[0]),cmd('look',[direction<0?'right':'left'],'butterflyNotice'),wait(.8,'butterflyNotice'),
+   ...targets.flatMap((x,i)=>[...(i?[moveFly(x)]:[]),cmd(typeof actor.chase==='function'?'chase':'go',[x,z],'butterfly'),wait(.3,'butterfly')]),
+   fx(()=>{if(butterfly)butterfly.leaving=clock;}),wait(1.1,'butterflyBye'),fx(()=>{butterfly=null;needs.energy-=.12;needs.curiosity-=.25;}),
+   home(),sit('recover'),wait(range(3,6),'recover')];
+ };
 
  // Each episode is a short coherent plan; a pause always leads in so autonomy never stalls.
  const EPISODES={
@@ -73,6 +105,7 @@ export function createCompanionLife(actor,{seed=731,energy=.8}={}){
   play:()=>[cmd('spin',[],'play'),wait(range(1,2),'pause'),sit('sit'),wait(range(2,4),'watch'),fx(()=>{needs.energy-=.12;needs.curiosity-=.2;})],
   belly:()=>[cmd('belly',[range(5,9)],'belly'),wait(range(2,4),'watch'),fx(()=>{needs.energy+=.08;needs.curiosity-=.15;})],
   sleep:()=>[cmd('sleep',[range(65,110),['side','curl','chin','belly'][Math.floor(rand()*4)],rand()<.5],'sleep'),wait(range(2,4),'recover'),fx(()=>{needs.energy+=.3;})],
+  butterfly:butterflyEpisode,
  };
  const weights=()=>{
   const {energy:e,social:s,curiosity:c}=needs;
@@ -90,6 +123,10 @@ export function createCompanionLife(actor,{seed=731,energy=.8}={}){
   // Quiet-time sleep pressure is independent of energy restored by sitting.
   // Wait for the current coherent episode to end; never yank a running puppy.
   if(quiet>=120&&needs.drowsiness>=.35&&episodeCooldowns.sleep===0&&lastEpisode!=='sleep'&&typeof actor.sleep==='function')kind='sleep';
+  const position=actor.sample(clock);
+  if(kind!=='sleep'&&clock>=nextButterfly&&quiet>=15&&needs.energy>.6&&needs.drowsiness<.35&&position.z> -1.2){
+   kind='butterfly';nextButterfly=clock+BUTTERFLY_RULES.cooldownMin+encounterRange(0,BUTTERFLY_RULES.cooldownSpread);
+  }
   lastEpisode=kind;decisions++;
   if(kind==='roll')episodeCooldowns.roll=90;
   if(kind==='play')episodeCooldowns.play=120;
@@ -139,6 +176,10 @@ export function createCompanionLife(actor,{seed=731,energy=.8}={}){
   for(const k in cooldowns)cooldowns[k]=Math.max(0,cooldowns[k]-dt);
   for(const k in episodeCooldowns)episodeCooldowns[k]=Math.max(0,episodeCooldowns[k]-dt);
   drift(dt);
+  // A stalled or externally substituted actor must not leave a permanent insect.
+  if(butterfly&&clock-butterfly.start>BUTTERFLY_RULES.maxVisible){
+   butterfly=null;queue=[sit('recover'),wait(3,'recover')];hold=0;holdIntent=null;gesture=null;waiting=null;actor.rest();
+  }
   const safe=SAFE.has(actor.state);
   if(waiting){
    waiting.age+=dt;if(!safe)waiting.left=true;
@@ -175,6 +216,10 @@ export function createCompanionLife(actor,{seed=731,energy=.8}={}){
   if(kind==='tug'&&typeof actor.tug!=='function')return false;
   if(pending||active||cooldowns[kind]>0)return false;
   quiet=0;
+  if(butterfly||lastEpisode==='butterfly'){
+   butterfly=null;queue=[];hold=0;holdIntent=null;gesture=null;waiting=null;
+   if(kind!=='ball')actor.sit();
+  }
   if(kind==='treat'||kind==='tug'){
    pending=kind;
    // The pet wakes through its authored recovery, not after a long sleep timer.
@@ -212,7 +257,7 @@ export function createCompanionLife(actor,{seed=731,energy=.8}={}){
    const interaction=active??pending;
    return {
     intent,label:pending?`${label} · ${PENDING_LABEL[pending]}`:label,episode:lastEpisode,interaction,busy:interaction!==null,
-    ball:ballReport(),treat:treatReport(),tug:actor.state==='tug'?{progress:actor.sample(clock).comfortPose?.progress??0,grip:1}:null,
+    ball:ballReport(),treat:treatReport(),butterfly:butterflyPoint(),tug:actor.state==='tug'?{progress:actor.sample(clock).comfortPose?.progress??0,grip:1}:null,
     snore:actor.state==='sleep'?((clock%3.6)/3.6):null,energy:needs.energy,drowsiness:needs.drowsiness,decisions,cooldowns:{...cooldowns},
     // Local hold clock only: progress freezes between updates; null outside the stationary hold.
     gesture:gesture&&SAFE.has(actor.state)?{clip:gesture.clip,progress:clamp(gesture.elapsed/gesture.duration,0,1)}:null

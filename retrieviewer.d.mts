@@ -48,6 +48,8 @@ export interface LifeReport {
   cooldowns: {ball: number; treat: number; tug: number};
   gesture: {clip: string; progress: number} | null;
   ball: {x: number; z: number; height: number; carried: boolean} | null;
+  /** Rare autonomous visitor; absent during direct user interactions. */
+  butterfly: {x: number; z: number; height: number; phase: number; opacity: number} | null;
   treat: {x: number; z: number; height: number} | null;
   /** Tug-of-war state while a tug interaction is active. */
   tug: {progress: number; grip: number} | null;

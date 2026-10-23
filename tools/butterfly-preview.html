@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="ko"><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Retrieviewer · 나비 쫓기 검수</title>
+<style>
+@font-face{font-family:JuliaMono;src:url('./assets/fonts/JuliaMono-Regular.woff2') format('woff2');font-display:swap}
+*{box-sizing:border-box}body{margin:0;background:#080a09;color:#e7b867;font:14px system-ui,sans-serif;min-height:100vh;display:grid;grid-template-rows:auto 1fr auto}
+header,footer{padding:16px 24px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}header p,footer p{margin:0;color:#b7b9b5}main{position:relative;min-height:320px;overflow:hidden}
+#stage{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%)}pre{position:absolute;margin:0;font-family:JuliaMono,monospace;font-weight:400;letter-spacing:0;white-space:pre;user-select:none}
+button{font:inherit;min-height:44px;padding:8px 16px;border:1px solid #4b5048;background:#111512;color:#f0f2ed;border-radius:8px}button:focus-visible{outline:2px solid #c9e7b9;outline-offset:3px}button:disabled{opacity:.5}
+</style>
+<header><p>Retrieviewer · 가끔 찾아오는 나비</p><p>실제 엔진으로 만든 14초 재생본 · 새 강아지 그림 0장</p></header>
+<main role="img" aria-label="귀가 펄럭이는 리트리버가 작은 나비를 양쪽으로 쫓아갑니다"><div id="stage"><pre id="pet" aria-hidden="true"></pre></div></main>
+<footer><p id="status" role="status">불러오는 중</p><div><button id="again" disabled>다시 보기</button> <button id="pause" disabled>멈추기</button></div></footer>
+<script type="module">
+const stage=document.querySelector('#stage'),art=document.querySelector('#pet'),status=document.querySelector('#status'),pause=document.querySelector('#pause'),again=document.querySelector('#again');
+let data=null,cell=3,index=-1,elapsed=0,last=0,raf=0,playing=!matchMedia('(prefers-reduced-motion: reduce)').matches;
+const labels={butterflyNotice:'나비 발견',butterfly:'폴짝폴짝 쫓는 중',butterflyBye:'나비가 날아가는 중',home:'다시 돌아오는 중',recover:'잠깐 쉬는 중'};
+function fit(){if(!data)return;const r=document.querySelector('main').getBoundingClientRect();cell=Math.min(r.width/data.columns,r.height/(data.rows*2));const c=document.createElement('canvas').getContext('2d');c.font='100px JuliaMono';const ratio=c.measureText('⣿').width/100||.6;stage.style.width=data.columns*cell+'px';stage.style.height=data.rows*cell*2+'px';art.style.fontSize=cell/ratio+'px';art.style.lineHeight=cell*2+'px';draw(index<0?0:index);}
+function draw(i){if(!data)return;const f=data.frames[i];art.style.left=f.x*cell+'px';art.style.top=f.y*cell*2+'px';art.textContent=f.text;status.textContent=(labels[f.intent]??f.intent)+' · '+(i/data.fps).toFixed(1)+'초';index=i;}
+function stop(){cancelAnimationFrame(raf);raf=0;last=0;}
+function tick(now){raf=0;if(!playing||document.hidden)return;elapsed+=last?Math.min(.15,(now-last)/1000):0;last=now;const i=Math.min(data.frames.length-1,Math.floor(elapsed*data.fps));if(index!==i)draw(i);if(i===data.frames.length-1){playing=false;pause.textContent='다시 재생';last=0;return;}raf=requestAnimationFrame(tick);}
+function start(){stop();if(playing&&!document.hidden)raf=requestAnimationFrame(tick);}
+again.onclick=()=>{elapsed=0;index=-1;playing=true;pause.textContent='멈추기';draw(0);start();};
+pause.onclick=()=>{if(index===data.frames.length-1){again.click();return;}playing=!playing;pause.textContent=playing?'멈추기':'계속 보기';start();};
+document.addEventListener('visibilitychange',()=>document.hidden?stop():start());window.addEventListener('pagehide',stop);new ResizeObserver(fit).observe(document.querySelector('main'));
+try{const r=await fetch('./butterfly-preview.json');if(!r.ok)throw Error(r.status);data=await r.json();await document.fonts.load('12px JuliaMono');fit();pause.disabled=again.disabled=false;pause.textContent=playing?'멈추기':'계속 보기';start();}catch(error){status.textContent='미리보기를 불러오지 못했어요. 새로고침해 주세요.';console.error(error);}
+</script></html>

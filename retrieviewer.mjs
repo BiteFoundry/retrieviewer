@@ -60,9 +60,16 @@ async function gunzip(bytes){
 // life, renderer and output. Last dispose drops the shared lease, not other pets.
 const sharedAssets=new Map();
 async function loadPetAssets(loadAsset,artProfile){
+ // Node keeps filtered crops compressed; only the existing two-frame LRU is
+ // expanded. Browser bundles retain the portable bit-packed implementation.
+ let codec;
+ if(typeof process!=='undefined'&&process.versions?.node){
+  const {deflateRawSync,inflateRawSync}=await import('node:zlib');
+  codec={compress:bytes=>deflateRawSync(bytes,{level:1}),expand:(bytes,size)=>inflateRawSync(bytes,{maxOutputLength:size})};
+ }
  const load=async name=>bytesOf(name,await loadAsset(name));
  const json=async name=>JSON.parse(new TextDecoder().decode(await load(name)));
- const frames=async (name,options)=>readPackedFrames(await gunzip(await load(name)),options);
+ const frames=async (name,options)=>readPackedFrames(await gunzip(await load(name)),{...options,codec});
  // One family at a time: never inflate all eight legacy-sized buffers together.
  const data={assets:{}};
  data.info=await json(PET_ASSETS.strideInfo);data.meta=await json(PET_ASSETS.stableInfo);

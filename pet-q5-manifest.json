@@ -80,11 +80,20 @@
    "uniqueFrames": 142,
    "sourceSha256": "7918261fb64c57a91739729841fd84c6dd53891196c7fb76ee9c27712ab6ef5d",
    "sourcePackedSha256": "7785ef65b8a2a5bf6f7ce600fe9957a60d9af82066ff49275bba061eac5392d1",
-   "encodedBytes": 7031343,
-   "gzipBytes": 1450156,
-   "residentPixelBytes": 4373034,
-   "encodedSha256": "38cfdfcee9c857c56a14f0a9734cb3301b4a04cb8e1ae3fb2e2b2ffe3666240f",
-   "quantizedSha256": "3c8f40416d2fff1c1031d3ad8917ea885998a786126d5973dfee4102893a0a53"
+   "encodedBytes": 6185813,
+   "gzipBytes": 1434734,
+   "residentPixelBytes": 3845581,
+   "encodedSha256": "8e4811c4c72337d094770596b2b73e2f468f92884e6de2e14880ce9b9ad6f351",
+   "quantizedSha256": "500dcc9b5edbadf97159fc9256e9d942578e13e36f14c6fecda649a97214318b",
+   "watchRegistration": {
+    "sourceVersion": "0.0.5",
+    "sourceEncodedSha256": "38cfdfcee9c857c56a14f0a9734cb3301b4a04cb8e1ae3fb2e2b2ffe3666240f",
+    "canonicalSeat": 50,
+    "bodyFromY": 210,
+    "neckBlendFromY": 180,
+    "headTranslateY": 8,
+    "unchangedOtherFrames": true
+   }
   },
   "puppy-paper-actions-v9": {
    "file": "puppy-paper-actions-v9-q5.bin.gz",

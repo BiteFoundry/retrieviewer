@@ -1,5 +1,37 @@
 # Runtime weight and performance
 
+## Node compressed crops (0.0.6)
+
+Node now stores each validated Q5 crop as a small DEFLATE block, using built-in
+`node:zlib`; only the existing two-frame LRU is expanded. The original archive
+buffer is released. Browser hosts keep the portable bit-packed implementation.
+No added runtime dependency, process, timer, lower resolution or lost pose.
+
+Same Windows host, fresh processes, same450-frame ball sequence:
+
+| Metric | 0.0.5 | 0.0.6 |
+| --- | ---: | ---: |
+| Loaded ArrayBuffers, after native close callbacks + diagnostic GC | 59.7 MiB | 21.4 MiB |
+| Rendered ArrayBuffers | 67.3 MiB | 29.0 MiB |
+| Mean frame time | 3.39 ms | 3.39 ms |
+| P95 frame time | 6.11 ms | 6.27 ms |
+| Initial load | 653 ms | 910 ms |
+| Actual Windows overlay worker RSS, short owned-window checks | 130 MiB | 96–106 MiB |
+
+The450-frame output hash is unchanged. `puppy-node-cache.test.mjs` compares every
+packaged source frame in both stores, including the separately repaired watch
+art. These samples are not a RAM ceiling: V8, allocator retention, viewport and
+activity change RSS. The helper is separate. The large off-screen benchmark
+peaked at267/238 MiB; do not substitute the short96–106 MiB samples for that peak.
+Evidence: tools/benchmark-pet.mjs, local dist/006-paired-{before,after}.json and
+dist/006-native-{before,source}.log. Diagnostic GC is never enabled in the pet.
+Shrinking V8's young generation was tested but increased rendering cost, so no
+global or embedded-host V8 flags are imposed.
+
+Watch repair adds no frame count; its archive is15,422 bytes smaller. Butterfly
+chasing adds no dog images or persistent image buffer; see BUTTERFLY.md. Existing
+sleep, colors, wake-on-interaction and5fps sleeping repaint remain unchanged.
+
 ## Comfort behaviors (0.0.4)
 
 Belly-up flopping and eyes-closed sleeping reuse the existing action/rest art.

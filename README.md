@@ -12,7 +12,8 @@
 </p>
 
 A fluffy, autonomous Braille-art retriever that hangs out above an app window.
-It wanders, runs, flops belly-up and naps. Toss a ball, offer a treat or play tug.
+It wanders, runs, flops belly-up and naps. Occasionally it chases a butterfly.
+Toss a ball, offer a treat or play tug.
 Get back to your thing.
 
 Made by [BiteFoundry](https://github.com/BiteFoundry). No model API, account or
