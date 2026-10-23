@@ -1,6 +1,5 @@
-import {makeLabAnimal} from './locomotion-core.mjs';
 import {createPaperActor,createPaperRenderer} from './puppy-paper.mjs';
-import {createPaperProjection} from './puppy-paper-world.mjs';
+import {createPaperProjection,createPaperBody} from './puppy-paper-world.mjs';
 import {rgbaToBraille} from './braille.mjs';
 import {createSnappyTrickTimings} from './puppy-paper-trick-timing.mjs';
 import {createCompanionLife} from './puppy-companion-life.mjs';
@@ -17,6 +16,7 @@ export const DEFAULT_ART_PROFILE='q5';
 export const ART_PROFILES=Object.freeze(['original','q5']);
 // Current companion runtime: v9 tricks + interactions-v3, same as puppy-paper.html.
 export const PET_ASSETS=Object.freeze({
+ // Kept as a legacy identifier only; createPet/getPetAssetFiles no longer load it.
  animal:'locomotion-puppy.animal',
  stride:'puppy-stride-tweens-q5.bin.gz',strideInfo:'puppy-stride-meta.json',stableInfo:'puppy-stable-meta.json',
  rear:'puppy-paper-rear-gallop',approach:'puppy-paper-approach',seat:'puppy-paper-seat',arrivalSeat:'puppy-paper-arrival-seat',
@@ -28,7 +28,7 @@ const frameFile=(base,profile)=>base+(profile==='q5'?'-q5.bin.gz':'-compact.bin.
 export function getPetAssetFiles(artProfile=DEFAULT_ART_PROFILE){
  if(!ART_PROFILES.includes(artProfile))throw RangeError('artProfile must be original or q5');
  return Object.freeze([PET_ASSETS.strideInfo,PET_ASSETS.stableInfo,frameFile('puppy-stride-tweens',artProfile),
-  ...BUNDLES.flatMap(key=>[PET_ASSETS[key]+'.json',frameFile(PET_ASSETS[key],artProfile)]),PET_ASSETS.animal]);
+  ...BUNDLES.flatMap(key=>[PET_ASSETS[key]+'.json',frameFile(PET_ASSETS[key],artProfile)])]);
 }
 
 // Relative to this module, never the process cwd: file: URLs in Node, HTTP in browsers.
@@ -68,7 +68,6 @@ async function loadPetAssets(loadAsset,artProfile){
  data.info=await json(PET_ASSETS.strideInfo);data.meta=await json(PET_ASSETS.stableInfo);
  data.cache=await frames(frameFile('puppy-stride-tweens',artProfile));
  for(const key of BUNDLES){const base=PET_ASSETS[key];data.assets[key]={info:await json(base+'.json'),bytes:await frames(frameFile(base,artProfile))};}
- data.baked=await load(PET_ASSETS.animal);
  return data;
 }
 async function acquireAssets(loadAsset,artProfile){
@@ -90,11 +89,11 @@ export async function createPet({loadAsset=defaultLoadAsset,seed,energy,pawTrans
  if(!ART_PROFILES.includes(artProfile))throw RangeError('artProfile must be original or q5');
  let lease=await acquireAssets(loadAsset,artProfile),data=lease.data;
  const release=lease.release;lease=null;
- let {cache,info,meta,baked}=data;const assets={...data.assets};data=null;
+ let {cache,info,meta}=data;const assets={...data.assets};data=null;
  let animal,actor,life;
  try{
   if(!assets.actions.info.clips?.['lie-down']||!assets.actions.info.clips?.['lie-up'])throw Error('v9 action cache lacks lie-down/lie-up clips');
-  animal=await makeLabAnimal({baked:baked.buffer.slice(baked.byteOffset,baked.byteOffset+baked.byteLength)});baked=null;
+  animal=createPaperBody();
   actor=createPaperActor(animal,info,{manualTricks:true,trickTimings:createSnappyTrickTimings(assets.actions.info),walkTransitions:true});
   life=createCompanionLife(actor,{seed,...energy===undefined?{}:{energy}});
  }catch(e){animal?.dispose?.();release();throw e;}

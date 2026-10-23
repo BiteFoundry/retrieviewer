@@ -27,7 +27,7 @@ const probe=`
 import assert from 'node:assert/strict';
 import {createPet,getPetAssetFiles,DEFAULT_ART_PROFILE} from '@bitefoundry/retrieviewer';
 import {createPetPlugin} from '@bitefoundry/retrieviewer/plugin';
-assert.equal(DEFAULT_ART_PROFILE,'q5');assert.equal(getPetAssetFiles().length,18);
+assert.equal(DEFAULT_ART_PROFILE,'q5');assert.equal(getPetAssetFiles().length,17);
 const a=await createPet({seed:731});let count=0,clears=0,frame;
 const plugin=await createPetPlugin({host:{getSize:()=>({columns:40,rows:12}),render:f=>{frame=f;count++;},clear:()=>clears++},petOptions:{seed:731}});
 try {

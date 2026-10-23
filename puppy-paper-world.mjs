@@ -1,6 +1,20 @@
 // Design calibration, not a measurement of the user's current head position.
 // Sources: OpenCV pinhole model; PsychoPy viewtools physical-screen frustums.
 const diagonal=.0254*32;
+// The paper actor already integrates its own calibrated travel profile and foot
+// contacts. Its old 3D Animal.follow() merely copied that root's x/z, then also
+// updated an invisible skinned mesh, IK, fur and materials. Keep just the follow
+// contract here; speed/stride/projection remain owned by the existing planner.
+export function createPaperBody(){
+ const position={x:0,y:0,z:0};let target=null,disposed=false;
+ const alive=()=>{if(disposed)throw Error('Paper body is disposed');};
+ return{
+  position,
+  follow(point){alive();if(!point||![point.x,point.y,point.z].every(Number.isFinite))throw Error('Invalid paper body position');target={x:point.x,y:point.y,z:point.z};},
+  update(dt){alive();if(!Number.isFinite(dt)||dt<0||dt>.1)throw Error('Invalid paper body step');if(target){position.x=target.x;position.z=target.z;}},
+  dispose(){disposed=true;target=null;},
+ };
+}
 export const PAPER_SCREEN=Object.freeze({widthMeters:diagonal*16/Math.hypot(16,9),heightMeters:diagonal*9/Math.hypot(16,9),viewDistance:.70});
 const eyeHeight=.45,eyeZ=1.65,pitch=9*Math.PI/180;
 export const PAPER_CAMERA=Object.freeze({fov:2*Math.atan(PAPER_SCREEN.heightMeters/(2*PAPER_SCREEN.viewDistance))*180/Math.PI,aspect:16/9,position:Object.freeze([0,eyeHeight,eyeZ]),target:Object.freeze([0,.12,eyeZ-(eyeHeight-.12)/Math.tan(pitch)]),canvasMeters:.64});

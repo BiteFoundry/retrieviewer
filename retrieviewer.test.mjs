@@ -40,7 +40,7 @@ test('concurrent default pets share art, survive another disposal and release th
  b.dispose();const c=await createPet({seed:3});const reloaded=reads;c.dispose();
  console.log(JSON.stringify({loaded,reloaded,visible}));`;
  const out=JSON.parse(execFileSync(process.execPath,['--input-type=module','-e',probe],{encoding:'utf8',timeout:20000}).trim());
- assert.equal(out.loaded,18,'only one load across concurrent pets');assert.equal(out.reloaded,36,'last disposal releases cached assets');assert.equal(out.visible,true);
+ assert.equal(out.loaded,17,'only one load across concurrent pets, no invisible 3D bake');assert.equal(out.reloaded,34,'last disposal releases cached assets');assert.equal(out.visible,true);
 });
 
 test('embedded pet: loading, frames, resize, stepping, interaction, independence and disposal',async t=>{

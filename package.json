@@ -92,8 +92,6 @@
     "examples/live.mjs",
     "examples/plugin.mjs",
     "examples/bridge.py",
-    "locomotion-core.mjs",
-    "locomotion-puppy.animal",
     "braille.mjs",
     "puppy-frame-store.mjs",
     "puppy-frame-predictive.mjs",
@@ -136,9 +134,7 @@
     "puppy-paper-actions-v9.json",
     "puppy-companion-interactions-v3-q5.bin.gz",
     "puppy-companion-interactions-v3.json",
-    "vendor/procedural-animals/src",
-    "vendor/procedural-animals/LICENSE",
-    "vendor/procedural-animals/package.json"
+    "vendor/procedural-animals/LICENSE"
   ],
   "scripts": {
     "start": "node tools/preview-site.mjs",
@@ -151,10 +147,10 @@
     "prepublishOnly": "npm run release:check"
   },
   "dependencies": {
-    "jsonc-parser": "3.3.1",
-    "three": "0.186.1"
+    "jsonc-parser": "3.3.1"
   },
   "devDependencies": {
-    "playwright": "1.64.1"
+    "playwright": "1.64.1",
+    "three": "0.186.1"
   }
 }

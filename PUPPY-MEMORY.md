@@ -1,4 +1,65 @@
-# Lossless runtime cache reduction
+# Runtime weight and performance
+
+## Current source optimization (unpublished candidate)
+
+The dot-art actor already integrates its own travel, stride and perspective. Its
+former Three.js animal only supplied a position copied from that actor's target;
+mesh deformation and inverse kinematics were not used by the dot renderer. The
+runtime now uses a small position adapter instead. The original 3D implementation
+remains in the working tree for comparison, but is excluded from the npm package;
+Three.js is a development dependency only.
+
+Stable Braille conversion skips black/transparent background pixels and packs cell
+masks directly, preserving the original Float32 luminance rounding and thresholds.
+The native frame pump also skips identical output frames while continuing the
+simulation clock. Art, palette, camera and frame rate are unchanged.
+
+Median of three paired fresh-process measurements on Windows, Node24.19.0:
+
+| Metric | Before | After |
+| --- | ---: | ---: |
+| Asset load | 706.4 ms | 667.8 ms |
+| 1,800 simulation steps | 114.3 ms | 3.2 ms |
+| Mean render time per frame | 7.13 ms | 3.29 ms |
+| Render time p95 | 9.93 ms | 5.77 ms |
+| Peak benchmark-process RSS | 304.8 MiB | 263.3 MiB |
+
+The rendering workload is450 frames at480×135 Braille cells (native4K output
+with8px cells), seed731 and the same ball interaction. All six runs produced the
+same SHA-256 text-frame hash:
+`3a296d0a737eaa1d9a5923e3496e8c62b2d5e99fbe871806b907429515597a3d`.
+The independent original-3D/body comparison also matches4,000 actor steps exactly.
+Additional autonomous episodes reuse existing art: scanning, a same-depth patrol,
+rolling, returning to the viewer and occasional playful turning. They are not part
+of the fixed interactive benchmark trajectory.
+
+Installed production files, including dependencies, decreased from45,188,203 to
+19,423,382 bytes. Tarball size decreased from20,615,763 to18,788,415 bytes. These
+are different measures: installation shrank about57%, the tarball about9%.
+
+These are local test-process samples, not desktop memory budgets or guarantees.
+RSS includes loading transients, two sequential pet instances and allocator/GC
+behavior. Browser, macOS and Linux performance were not measured in this pass.
+The decoded Q5 art still occupies about66.5 MB; this change does not reduce that
+resident art. The public npm release has not been updated with this candidate.
+
+Reproduce from the development checkout:
+
+```sh
+node --expose-gc tools/benchmark-pet.mjs ./retrieviewer.mjs ./dist/performance/current.json
+npm test
+npm run test:package
+```
+
+The benchmark also accepts the absolute path to an installed older
+`retrieviewer.mjs` as its first argument. It renders off-screen without changing
+desktop settings. Paired results are retained under `dist/performance/` locally.
+
+## Earlier lossless runtime cache reduction
+
+The measurements below describe the earlier RVF1 lossless pass, before Q5 art
+and the current optimization. They are retained as historical comparisons, not
+current package or memory figures. See `PUPPY-Q5-COMPARISON.md` for the palette pass.
 
 The weight came from 2,341 full-size grayscale frames stored as concatenated
 320² or 480² rasters, including exact duplicates and black padding. These are

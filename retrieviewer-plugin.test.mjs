@@ -4,11 +4,12 @@ import {readFileSync} from 'node:fs';
 import {execFileSync} from 'node:child_process';
 import {tmpdir} from 'node:os';
 import {createPetPlugin} from './retrieviewer-plugin.mjs';
+import {getPetAssetFiles} from './retrieviewer.mjs';
 
 const moduleUrl=new URL('./retrieviewer-plugin.mjs',import.meta.url).href;
 const files=new Map();let loads=0;
 const loadAsset=async name=>{loads++;if(!files.has(name))files.set(name,readFileSync(new URL(name,import.meta.url)));return files.get(name);};
-const PET_LOADS=18;
+const PET_LOADS=getPetAssetFiles().length;
 const plain=(text,columns,rows)=>{
  const lines=text.split('\n');assert.equal(lines.length,rows);
  for(const line of lines){const cells=[...line];assert.equal(cells.length,columns);assert.ok(cells.every(c=>c.codePointAt(0)>=0x2800&&c.codePointAt(0)<=0x28ff),'plain Braille only');}

@@ -17,18 +17,6 @@ for (const name of [...pkg.files, "package.json"]) {
   await mkdir(resolve(target, ".."), { recursive: true });
   await cp(join(root, name), target, { recursive: true });
 }
-await cp(
-  join(root, "node_modules/three/build/three.module.js"),
-  join(runtime, "three.module.js"),
-);
-await cp(
-  join(root, "node_modules/three/build/three.core.js"),
-  join(runtime, "three.core.js"),
-);
-await cp(
-  join(root, "node_modules/three/LICENSE"),
-  join(runtime, "THREE-LICENSE"),
-);
 const puppy = await createPet({ seed: 731 });
 try {
   await writeFile(
@@ -44,7 +32,6 @@ for (const file of [
   "style.css",
   "app.mjs",
   "preview.txt",
-  "runtime/three.core.js",
 ])
   if (!(await stat(join(out, file))).isFile())
     throw Error("Missing site file " + file);

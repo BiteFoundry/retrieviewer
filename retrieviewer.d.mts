@@ -35,6 +35,8 @@ export interface PetState {
   [key: string]: unknown;
 }
 export interface LifeReport {
+  /** Last selected autonomous episode; null before the first decision. */
+  episode: string | null;
   intent: string;
   label: string;
   interaction: 'ball' | 'treat' | null;

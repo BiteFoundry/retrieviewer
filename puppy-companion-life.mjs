@@ -17,6 +17,7 @@ const LABEL={
  start:'기다리는 중',pause:'잠시 느긋하게 둘러보는 중',lie:'엎드리는 중',rest:'엎드려 쉬는 중',recover:'앉아서 기운 차리는 중',
  sit:'앉는 중',watch:'앉아서 지켜보는 중',look:'고개를 돌려 살피는 중',observe:'가만히 주변 관찰 중',
  stroll:'옆으로 살짝 걸어가는 중',sniff:'잠깐 멈춰 주변을 살피는 중',dash:'저 멀리 달려가는 중',far:'멀리서 둘러보는 중',home:'제자리로 돌아오는 중',
+ patrol:'주변을 왕복 산책하는 중',scan:'양쪽을 번갈아 살피는 중',roll:'느긋하게 뒹구는 중',play:'신나서 한 바퀴 도는 중',checkin:'가까이 와서 함께 쉬는 중',
  fetch:'공을 쫓아가는 중',pickup:'공을 무는 중',carry:'공을 물고 돌아오는 중',drop:'공을 내려놓는 중',offer:'공을 내려놓고 기다리는 중',
  treatSit:'간식 앞에 앉는 중',chew:'간식 먹는 중'
 };
@@ -39,6 +40,7 @@ export function createCompanionLife(actor,{seed=731,energy=.8}={}){
  const rand=mulberry32(seed),range=(a,b)=>a+(b-a)*rand(),side=()=>rand()<.5?'left':'right';
  const needs={energy,social:.5,curiosity:.5};
  const cooldowns={ball:0,treat:0};
+ const episodeCooldowns={roll:0,play:0};
  let clock=0,decisions=0,lastEpisode=null;
  let queue=[],hold=0,holdIntent=null,waiting=null,gesture=null;
  let intent='start',label=LABEL.start,pending=null,active=null,ball=null,treat=null;
@@ -51,25 +53,38 @@ export function createCompanionLife(actor,{seed=731,energy=.8}={}){
  // Treats accept any seat variant at the front-seated endpoint: the hand comes to the puppy.
  const seatedAnyVariant=()=>{const s=actor.sample(clock);return actor.state==='idle'&&s.seatProgress===1&&s.view==='approach';};
  const fx=fn=>({fx:fn});
- const home=()=>cmd('go',[HOME.x,HOME.z],'home');
+ const home=()=>cmd('go',[HOME.x,HOME.z],'home',()=>{const s=actor.sample(clock);return Math.hypot(s.x-HOME.x,s.z-HOME.z)>ARRIVE;});
+ const sit=step=>cmd('sit',[],step,()=>!seatedAnyVariant());
+ const lie=()=>cmd('lie',[],'lie',()=>actor.state!=='down');
+ const walkTo=x=>cmd('walk',()=>{const dx=x-actor.sample(clock).x;return [dx<0?'left':'right',Math.abs(dx)];},'patrol',()=>Math.abs(x-actor.sample(clock).x)>.002);
 
  // Each episode is a short coherent plan; a pause always leads in so autonomy never stalls.
  const EPISODES={
-  rest:()=>[cmd('lie',[],'lie'),wait(range(10,18),'rest'),cmd('sit',[],'recover'),wait(range(3,6),'recover')],
-  watch:()=>[cmd('sit',[],'sit'),cmd('look',[side()],'look'),wait(range(3,9),'watch'),fx(()=>{needs.social-=.3;needs.curiosity+=.1;})],
-  observe:()=>[cmd('look',[side()],'look'),wait(range(3,9),'observe'),fx(()=>{needs.curiosity-=.15;})],
+  rest:()=>[lie(),wait(range(10,18),'rest'),sit('recover'),wait(range(3,6),'recover')],
+  watch:()=>[sit('sit'),cmd('look',[side()],'look'),wait(range(3,9),'watch'),fx(()=>{needs.social-=.3;needs.curiosity+=.1;})],
+  observe:()=>[sit('sit'),cmd('look',[side()],'look'),wait(range(3,9),'observe'),fx(()=>{needs.curiosity-=.15;})],
   stroll:()=>[cmd('walk',[side(),range(.08,.18)],'stroll'),wait(range(2,4),'sniff'),home(),fx(()=>{needs.energy-=.08;needs.curiosity-=.2;})],
-  dash:()=>[cmd('go',[(rand()*2-1)*.18,-range(3,8)],'dash'),wait(range(1.5,3),'far'),home(),fx(()=>{needs.energy-=.3;needs.curiosity-=.4;})]
+  dash:()=>[cmd('go',[(rand()*2-1)*.18,-range(3,8)],'dash'),wait(range(1.5,3),'far'),home(),fx(()=>{needs.energy-=.3;needs.curiosity-=.4;})],
+  scan:()=>[sit('sit'),cmd('look',['left'],'scan'),wait(range(.5,1.5),'scan'),cmd('look',['right'],'scan'),wait(range(2,4),'observe'),fx(()=>{needs.curiosity-=.25;})],
+  patrol:()=>{const x=actor.sample(clock).x,d=range(.16,.3)*(rand()<.5?-1:1);return [walkTo(x+d),wait(range(.6,1.2),'sniff'),walkTo(x-d),wait(range(.6,1.2),'sniff'),walkTo(x),wait(range(1,3),'observe'),fx(()=>{needs.energy-=.1;needs.curiosity-=.25;})];},
+  roll:()=>[lie(),wait(range(.7,1.5),'rest'),cmd('roll',[],'roll'),wait(range(2,5),'watch'),fx(()=>{needs.energy-=.08;needs.curiosity-=.15;})],
+  checkin:()=>[home(),sit('sit'),cmd('look',[side()],'look'),wait(range(5,10),'checkin'),fx(()=>{needs.social-=.4;})],
+  play:()=>[cmd('spin',[],'play'),wait(range(1,2),'pause'),sit('sit'),wait(range(2,4),'watch'),fx(()=>{needs.energy-=.12;needs.curiosity-=.2;})],
  };
  const weights=()=>{
   const {energy:e,social:s,curiosity:c}=needs;
-  return {rest:e<.35?6:(1-e)*1.2,watch:.8+s,observe:.6+c*.6,stroll:1.2*c*e,dash:e>.55?1.2*e*c:0};
+  return {rest:e<.35?6:(1-e)*1.2,watch:.8+s,observe:.6+c*.6,stroll:1.2*c*e,dash:e>.55?1.2*e*c:0,
+   scan:.35+c*.4,patrol:e>.25?.7*c*e:0,checkin:.25+s*.7,
+   roll:episodeCooldowns.roll===0&&e>.45?.35*e:0,
+   play:episodeCooldowns.play===0&&e>.6&&typeof actor.spin==='function'?.25*e*c:0};
  };
  function decide(){
   const w=weights();if(lastEpisode)w[lastEpisode]=0;
   const kinds=Object.keys(w),total=kinds.reduce((sum,k)=>sum+w[k],0);
   let pick=rand()*total,kind=kinds.find(k=>(pick-=w[k])<0)??'observe';
   lastEpisode=kind;decisions++;
+  if(kind==='roll')episodeCooldowns.roll=90;
+  if(kind==='play')episodeCooldowns.play=120;
   queue=[wait(range(3,9),'pause'),...EPISODES[kind]()];
  }
 
@@ -106,6 +121,7 @@ export function createCompanionLife(actor,{seed=731,energy=.8}={}){
   if(typeof dt!=='number'||!Number.isFinite(dt)||dt<0)throw RangeError('dt must be a finite non-negative number');
   dt=Math.min(dt,MAX_DT);clock+=dt;
   for(const k in cooldowns)cooldowns[k]=Math.max(0,cooldowns[k]-dt);
+  for(const k in episodeCooldowns)episodeCooldowns[k]=Math.max(0,episodeCooldowns[k]-dt);
   drift(dt);
   const safe=SAFE.has(actor.state);
   if(waiting){
@@ -133,7 +149,7 @@ export function createCompanionLife(actor,{seed=731,energy=.8}={}){
    if(step.when&&!step.when())continue;
    intent=step.intent;label=step.label;
    if(step.hold!==undefined){hold=step.hold;holdIntent=step.intent;if(step.gesture)gesture={clip:step.gesture,duration:step.hold,elapsed:0};return;}
-   if(actor[step.cmd](...step.args)!==false)waiting={age:0,left:false};
+   if(actor[step.cmd](...(typeof step.args==='function'?step.args():step.args))!==false)waiting={age:0,left:false};
    return;
   }
  }
@@ -172,7 +188,7 @@ export function createCompanionLife(actor,{seed=731,energy=.8}={}){
   get report(){
    const interaction=active??pending;
    return {
-    intent,label:pending?`${label} · ${PENDING_LABEL[pending]}`:label,interaction,busy:interaction!==null,
+    intent,label:pending?`${label} · ${PENDING_LABEL[pending]}`:label,episode:lastEpisode,interaction,busy:interaction!==null,
     ball:ballReport(),treat:treatReport(),energy:needs.energy,decisions,cooldowns:{...cooldowns},
     // Local hold clock only: progress freezes between updates; null outside the stationary hold.
     gesture:gesture&&SAFE.has(actor.state)?{clip:gesture.clip,progress:clamp(gesture.elapsed/gesture.duration,0,1)}:null

@@ -1,11 +1,13 @@
 # Third-party notices
 
 - **procedural-animals 0.1.0** — MIT, Copyright (c) 2026 Majid Manzarpour and
-  procedural-animals contributors. Source is vendored under
-  `vendor/procedural-animals/src`; the full notice is retained at
+  procedural-animals contributors. The original development source is retained
+  under `vendor/procedural-animals/src` for motion parity tests; it is no longer
+  executed or shipped in the dot-art runtime. The full notice is retained at
   `vendor/procedural-animals/LICENSE`.
   Upstream: https://github.com/majidmanzarpour/threejs-procedural-animals
-- **three 0.186.1** — MIT; installed as a pinned npm dependency. Its distribution
+- **three 0.186.1** — MIT; development-only dependency for original 3D parity
+  tests. Not installed by the production package. Its development distribution
   includes its own `LICENSE`. https://github.com/mrdoob/three.js
 - **jsonc-parser 3.3.1** — MIT; installed as a pinned npm dependency. Its
   distribution includes `LICENSE.md`. https://github.com/microsoft/node-jsonc-parser

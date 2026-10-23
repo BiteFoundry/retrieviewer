@@ -37,7 +37,11 @@ test('local package includes transitive runtime imports and assets, not project 
  assert.ok(included(pkg.bin['retrieviewer-stdio'].replace(/^\.\//,'')));
  for(const name of ['references/private.png','worker-packets/task.md','puppy-interactions16-v2-sheet.png','puppy-companion-interactions-v1.bin.gz'])assert.equal(included(name),false);
  for(const name of getPetAssetFiles('original').filter(n=>n.endsWith('.gz')))assert.equal(included(name),false,'no redundant original cache in runtime package');
- assert.equal(getPetAssetFiles().length,18);assert.ok(Object.isFrozen(getPetAssetFiles()));
+ assert.equal(getPetAssetFiles().length,17);assert.ok(Object.isFrozen(getPetAssetFiles()));
+ assert.equal(included('locomotion-puppy.animal'),false);
+ assert.equal(included('locomotion-core.mjs'),false);
+ assert.equal(included('vendor/procedural-animals/src'),false);
+ assert.equal(pkg.dependencies.three,undefined,'no 3D renderer installed for a dot-art pet');
  assert.throws(()=>getPetAssetFiles('bad'),RangeError);
  assert.equal(pkg.exports['./plugin'].types,'./retrieviewer-plugin.d.mts');
  assert.equal(included('puppy-stride-tweens.bin.gz'),false);

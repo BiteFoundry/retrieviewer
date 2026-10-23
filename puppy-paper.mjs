@@ -119,7 +119,7 @@ export function createPaperActor(animal,info,{manualTricks=false,trickTimings=nu
   rest(){return dispatch(()=>{route=false;target=null;waypoints=[];pendingAction=null;stayDown=false;stop();if(restProgress>0){enter('wake');}else if(state==='watch'||state==='arrival-exit'){/* finish shared return */}else if(seatProgress>0||state==='rise'||state==='sit-down')enter('sit-down');else if(!['idle','view-turn','turn'].includes(state))enter('finish');});},
   update(dt){
    if(!Number.isFinite(dt)||dt<0||dt>.1)throw Error('Invalid paper step');
-   const before=animal.position.clone();
+   const beforeX=animal.position.x,beforeZ=animal.position.z;
    if(state==='run'&&travel&&target){
     travelAge+=dt;const p=travel.plan.at(travelAge),ratio=travel.plan.distance?p.distance/travel.plan.distance:1;
     travelDistance=p.distance;motionSpeed=p.speed;motionStage=p.stage;
@@ -130,7 +130,7 @@ export function createPaperActor(animal,info,{manualTricks=false,trickTimings=nu
    animal.update(dt);
    const prepareDt=dt*preparationRate;
    age+=['view-turn','turn','rise','watch','arrival-exit','launch','wake'].includes(state)?prepareDt:dt;
-   const distance=Math.hypot(animal.position.x-before.x,animal.position.z-before.z);
+   const distance=Math.hypot(animal.position.x-beforeX,animal.position.z-beforeZ);
    director.update(dt,state==='run',distance);
    if(state==='run'){
     phase+=distance/travel.stride;

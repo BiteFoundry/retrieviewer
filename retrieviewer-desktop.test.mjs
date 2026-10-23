@@ -11,6 +11,22 @@ import {cropFrame,viewportOf,createFramePump} from './integrations/windows-overl
 import {desktopPaths,desktopStatus,stopDesktop,cleanDesktop,requestSession} from './integrations/windows-overlay/desktop.mjs';
 import {parseArguments,runCli} from './retrieviewer-cli.mjs';
 const viewport=(revision=1,visible=true)=>({type:'viewport',revision,visible,columns:4,rows:2,cellWidth:8,cellHeight:16});
+
+test('identical frames skip native repaint without freezing simulation or interactions',()=>{
+ let now=0,text='⠁',time=0;const sent=[];
+ const pet={step:dt=>time+=dt,frame:()=>({columns:1,rows:1,text}),interact:()=>true,dispose(){}};
+ const pump=createFramePump({pet,now:()=>now,send:f=>sent.push(f)});
+ const view={...viewport(),columns:1,rows:1};
+ pump.viewport(view);assert.equal(pump.tick(),true);pump.ack();
+ for(let i=0;i<30;i++){now+=1000/30;assert.equal(pump.tick(),false);}
+ assert.ok(Math.abs(time-1)<1e-9);assert.equal(sent.length,1);
+ text='⠃';assert.equal(pump.tick(),true);pump.ack();assert.equal(sent.length,2);
+ pump.interact('ball');assert.equal(pump.tick(),true);pump.ack();
+ pump.pause(true);assert.equal(pump.tick(),false);pump.pause(false);assert.equal(pump.tick(),true);pump.ack();
+ pump.viewport({...view,revision:2});assert.equal(pump.tick(),true);pump.ack();
+ assert.equal(sent.at(-1).revision,2);
+ pump.dispose();
+});
 test('desktop grid validation and exact, transparent crop',()=>{
  assert.equal(viewportOf(viewport(1,false)),null);assert.equal(viewportOf(viewport()).columns,4);
  for(const m of [{...viewport(),columns:500000}, {...viewport(),cellHeight:8},{...viewport(),revision:0}])assert.throws(()=>viewportOf(m));
