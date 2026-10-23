@@ -9,12 +9,29 @@ import {PAPER_ACTION_DURATIONS,createPaperActionSampler,paperActionPose} from '.
 import {createPawTransport} from './puppy-paper-paw-transport.mjs';
 import {createCompanionSpriteSampler} from './puppy-companion-sprites.mjs';
 import {mouthSourceFrame,mouthAnchor,projectMouth} from './puppy-mouth-anchor.mjs';
+import {trickClipEdges} from './puppy-paper-trick-timing.mjs';
 
 // Fixed viewer: slightly closer/wider lens gives depth without changing the art.
 export {PAPER_CAMERA} from './puppy-paper-world.mjs';
 
+// Comfort poses reuse existing clips only. Belly holds the calibrated roll-down
+// source exactly at the start of the edge leaving `key` (paws-up belly), easing
+// in/out with zero speed at the hold. `hold` defaults to the v9 keyOrder/edge
+// boundary of roll7; createPaperComfortTimings re-derives it from action info.
+export const PAPER_COMFORT_LIMITS=Object.freeze({belly:30,sleep:120,tug:30});
+export const PAPER_COMFORT_TIMINGS=Object.freeze({belly:Object.freeze({key:'roll7',hold:.4449823183425605,enter:1.3,exit:1.7}),tugExit:.35});
+export function createPaperComfortTimings(actionInfo,{key=PAPER_COMFORT_TIMINGS.belly.key}={}){
+ const {keys,bounds}=trickClipEdges('roll-down',actionInfo),i=keys.findIndex(k=>k[0]===key);
+ if(i<=0)throw Error(`Invalid comfort timing: no roll-down edge leaves ${key}`);
+ return Object.freeze({...PAPER_COMFORT_TIMINGS,belly:Object.freeze({...PAPER_COMFORT_TIMINGS.belly,key,hold:bounds[i]})});
+}
+const comfortDuration=(name,seconds)=>{if(typeof seconds!=='number'||!Number.isFinite(seconds)||seconds<=0||seconds>PAPER_COMFORT_LIMITS[name])throw Error(`Invalid ${name} duration`);};
+const comfortEase=u=>u<=0?0:u>=1?1:u*u*(3-2*u);
+
 // Original artwork only. Physics supplies ground travel; no procedural dog is drawn.
-export function createPaperActor(animal,info,{manualTricks=false,trickTimings=null,walkTransitions=false}={}){
+export function createPaperActor(animal,info,{manualTricks=false,trickTimings=null,walkTransitions=false,comfortTimings=PAPER_COMFORT_TIMINGS}={}){
+ const bellyTiming=comfortTimings?.belly;
+ if(!bellyTiming||![bellyTiming.hold,bellyTiming.enter,bellyTiming.exit,comfortTimings.tugExit].every(Number.isFinite)||bellyTiming.hold<=0||bellyTiming.hold>=1||bellyTiming.enter<=0||bellyTiming.exit<=0||comfortTimings.tugExit<=0)throw Error('Invalid comfort timing');
  let state='idle',age=0,phase=0,flip=false,nextFlip=false,target=null,route=false,routeIndex=0,view='front',nextView='front',turnView='front',turnFlip=false;
  let held=null,waypoints=[];
  let preparationRate=1;
@@ -22,6 +39,7 @@ export function createPaperActor(animal,info,{manualTricks=false,trickTimings=nu
  let straight=false,seatProgress=0,seatVariant='default',travel=null,approachPlan=null,travelAge=0,travelDistance=0,motionSpeed=0,motionStage='rest',completed=false;
  let watchSide='left',restProgress=0,idleHold=2.5;
  let pendingAction=null,activeAction=null,actionDone=null,deferred=null,movementMode='run',stayDown=false,manualDown=false,spinReady=false;
+ let comfort=null,comfortSeconds=0;
  const director=createPaperDirector();
  const points=[[.12,PAPER_GROUND.away]];
  const enter=s=>{state=s;age=0;};
@@ -33,13 +51,31 @@ export function createPaperActor(animal,info,{manualTricks=false,trickTimings=nu
  const turnSeconds=()=>snappyPreparation()?.22:.85;
  const launchSeconds=()=>snappyPreparation()?.10:.25;
  const dispatch=(fn,{keepDown=false}={})=>{
-  if(activeAction||(movementMode==='walk'&&state==='run')){route=false;deferred=()=>dispatch(fn,{keepDown});return true;}
+  if(activeAction||state==='tug'||(movementMode==='walk'&&state==='run')){route=false;deferred=()=>dispatch(fn,{keepDown});hurryComfort();return true;}
   // The calibrated trick down pose has its own byte-shared recovery; never
   // jump back into the older/larger rest illustration on another command.
   if(manualDown&&!keepDown){route=false;deferred=fn;playAction('lie-up',()=>{manualDown=false;view='approach';seatProgress=1;seatVariant='default';enter('idle');drain();},.55);return true;}
   return fn();
  };
  const drain=()=>{const fn=deferred;deferred=null;if(fn){fn();return true;}return false;};
+ // Belly: 0 -> hold eased to rest, held exact source sample, eased hold -> 1.
+ // Queued commands cut the remaining hold only; the roll always finishes at seat.
+ const bellyAction=seconds=>{
+  const {hold:H,enter:a,exit:b}=bellyTiming,t={comfort:'belly',hold:[a,a+seconds],duration:a+seconds+b};
+  t.progressAt=age=>{if(!Number.isFinite(age))throw Error('Invalid comfort age');return age<t.hold[0]?H*comfortEase(age/a):age<t.hold[1]?H:H+(1-H)*comfortEase((age-t.hold[1])/b);};
+  return t;
+ };
+ const startBelly=seconds=>{
+  manualDown=false;stayDown=false;restProgress=0;comfort=null;
+  const timing=bellyAction(seconds);activeAction={name:'roll-down',duration:timing.duration,timing,comfort:'belly'};actionDone=()=>finishTrick('roll');stop();enter('action');
+  if(deferred)hurryComfort();
+ };
+ const tugProgress=()=>{if(!comfort||comfort.kind!=='tug')return 0;const h=comfort.hurry;return h?(h.length>0?Math.min(1,h.progress+(1-h.progress)*(age-h.age)/h.length):1):Math.min(1,age/comfort.seconds);};
+ function hurryComfort(){
+  const t=activeAction?.timing;
+  if(t?.comfort==='belly'&&age<t.hold[1]){t.hold[1]=Math.max(t.hold[0],age);t.duration=activeAction.duration=t.hold[1]+bellyTiming.exit;}
+  else if(state==='tug'&&comfort&&!comfort.hurry){const progress=tugProgress();comfort.hurry={progress,age,length:Math.min(comfortTimings.tugExit,(1-progress)*comfort.seconds)};}
+ }
  const playAction=(name,done,duration=PAPER_ACTION_DURATIONS[name])=>{const timing=trickTimings?.[name];duration=timing?.duration??duration;if(!Number.isFinite(duration)||duration<=0)throw Error('Invalid paper action duration');activeAction={name,duration,timing};actionDone=done;stop();enter('action');};
  const finishTrick=name=>{if(name!=='spin'){view='approach';flip=false;seatProgress=1;seatVariant='default';enter('idle');}else{view='front';flip=false;seatProgress=0;enter('settle');}drain();};
  const issue=(skipEntry=false)=>{
@@ -61,6 +97,9 @@ export function createPaperActor(animal,info,{manualTricks=false,trickTimings=nu
   if(walkTransitions&&name==='spin'&&!spinReady){spinReady=true;enter('launch');return;}
   pendingAction=null;
   if(name==='sit'){enter('idle');return;}
+  if(name==='belly'){const seconds=comfortSeconds;playAction('lie-down',()=>startBelly(seconds),.65);return;}
+  if(name==='sleep'){stayDown=false;comfort={kind:'sleep',seconds:comfortSeconds};enter('recline');return;}
+  if(name==='tug'){stop();comfort={kind:'tug',seconds:comfortSeconds};enter('tug');return;}
   if(name==='lie'){
    if(manualTricks){playAction('lie-down',()=>{manualDown=true;enter('down');drain();},.65);}
    else{stayDown=true;enter('recline');}
@@ -73,7 +112,9 @@ export function createPaperActor(animal,info,{manualTricks=false,trickTimings=nu
   preparationRate=1;
   if(name==='roll'&&manualDown&&state==='down'){route=false;target=null;waypoints=[];pendingAction=null;stayDown=false;manualDown=false;restProgress=0;playAction('roll-down',()=>finishTrick('roll'));return true;}
   if(name==='roll'&&state==='down'&&restProgress===.25){route=false;target=null;waypoints=[];pendingAction=null;stayDown=false;restProgress=0;playAction('roll-down',()=>finishTrick('roll'));return true;}
-  route=false;target=null;waypoints=[];pendingAction=name;spinReady=false;completed=false;stayDown=false;movementMode='run';stop();
+  if(name==='belly'&&state==='down'&&(manualDown||restProgress===.25)){route=false;target=null;waypoints=[];pendingAction=null;startBelly(comfortSeconds);return true;}
+  if(name==='sleep'&&state==='sleep'&&comfort?.kind==='sleep'){comfort.seconds=age+comfortSeconds;return true;}
+  comfort=null;route=false;target=null;waypoints=[];pendingAction=name;spinReady=false;completed=false;stayDown=false;movementMode='run';stop();
   if(restProgress>0||state==='recline'||state==='wake')enter('wake');
   else if(['watch','view-turn','turn','arrival-exit'].includes(state)){/* reach a shared endpoint */}
   else if(['run','finish','launch','settle'].includes(state))enter('finish');
@@ -87,7 +128,7 @@ export function createPaperActor(animal,info,{manualTricks=false,trickTimings=nu
   if(![x,z].every(Number.isFinite))throw Error('Invalid paper target');
   preparationRate=urgent?3:1;
   target=paperGroundTarget(x,z);
-  pendingAction=null;stayDown=false;movementMode=walking?'walk':'run';
+  pendingAction=null;stayDown=false;comfort=null;movementMode=walking?'walk':'run';
   const dz=target[1]-animal.position.z,dx=target[0]-animal.position.x;
   waypoints=[];
   // Do not drag a straight rear/front drawing diagonally across the floor.
@@ -116,7 +157,11 @@ export function createPaperActor(animal,info,{manualTricks=false,trickTimings=nu
   walk(side,distance=1.05){if(!['left','right'].includes(side)||!Number.isFinite(distance)||distance<=0)throw Error('Invalid walk command');return dispatch(()=>{const [x,z]=paperWalkTarget(animal.position.x,animal.position.z,side==='left'?-1:1,distance);if(Math.abs(x-animal.position.x)<1e-6)return false;route=false;go(x,z,{walking:true});return true;});},
   look(side='left'){if(state!=='idle'||seatProgress!==1)return false;route=false;watchSide=side==='right'?'right':'left';enter('watch');return true;},
   lie(){const name=manualDown||activeAction?.name==='lie-down'||restProgress>0?'sit':'lie';return dispatch(()=>requestAction(name));},
-  rest(){return dispatch(()=>{route=false;target=null;waypoints=[];pendingAction=null;stayDown=false;stop();if(restProgress>0){enter('wake');}else if(state==='watch'||state==='arrival-exit'){/* finish shared return */}else if(seatProgress>0||state==='rise'||state==='sit-down')enter('sit-down');else if(!['idle','view-turn','turn'].includes(state))enter('finish');});},
+  // Comfort poses: bounded finite seconds; same dispatch safety as tricks.
+  belly(seconds=6){comfortDuration('belly',seconds);return dispatch(()=>{comfortSeconds=seconds;return requestAction('belly');},{keepDown:true});},
+  sleep(seconds=25){comfortDuration('sleep',seconds);return dispatch(()=>{comfortSeconds=seconds;return requestAction('sleep');});},
+  tug(seconds=6){comfortDuration('tug',seconds);return dispatch(()=>{comfortSeconds=seconds;return requestAction('tug');});},
+  rest(){return dispatch(()=>{route=false;target=null;waypoints=[];pendingAction=null;stayDown=false;comfort=null;stop();if(restProgress>0){enter('wake');}else if(state==='watch'||state==='arrival-exit'){/* finish shared return */}else if(seatProgress>0||state==='rise'||state==='sit-down')enter('sit-down');else if(!['idle','view-turn','turn'].includes(state))enter('finish');});},
   update(dt){
    if(!Number.isFinite(dt)||dt<0||dt>.1)throw Error('Invalid paper step');
    const beforeX=animal.position.x,beforeZ=animal.position.z;
@@ -151,7 +196,9 @@ export function createPaperActor(animal,info,{manualTricks=false,trickTimings=nu
    else if(state==='rise'){seatProgress=Math.max(0,seatProgress-prepareDt/(snappyPreparation()?.28:.65));if(seatProgress===0){if(seatVariant==='arrival')enter('arrival-exit');else prepareDirection();}}
    else if(state==='arrival-exit'&&age>=.22){seatVariant='default';prepareDirection();}
    else if(state==='watch'&&age>=1.4){if(pendingAction)prepareDirection();else if(target)enter('rise');else enter('idle');}
-   else if(state==='recline'){const end=stayDown?.25:1;restProgress=Math.min(end,restProgress+dt/1.8);if(restProgress===end)enter(stayDown?'down':'nap');}
+   else if(state==='recline'){const end=stayDown?.25:1;restProgress=Math.min(end,restProgress+dt/1.8);if(restProgress===end)enter(stayDown?'down':comfort?.kind==='sleep'?'sleep':'nap');}
+   else if(state==='sleep'&&age>=comfort.seconds){comfort=null;enter('wake');}
+   else if(state==='tug'&&tugProgress()>=1){comfort=null;enter('idle');drain();}
    else if(state==='nap'&&age>=5&&!stayDown){enter('wake');}
    else if(state==='wake'){restProgress=Math.max(0,restProgress-prepareDt/1.2);if(restProgress===0){if(pendingAction)prepareDirection();else if(target)enter('rise');else enter('idle');}}
    else if(state==='idle'&&route&&age>=idleHold)nextRoute();
@@ -161,7 +208,8 @@ export function createPaperActor(animal,info,{manualTricks=false,trickTimings=nu
    if(![12,24,30].includes(poseFps))throw Error('Invalid pose cadence');
    let pair=20,blend=0,kind=state,rearPair=null,approachPair=null;
    let seat=state==='sit-down'||state==='rise'||seatProgress>0?Math.round(seatProgress*48)/48:null;
-   let behavior=null,behaviorProgress=0;
+   let behavior=null,behaviorProgress=0,comfortPose=state==='tug'?{clip:'tug',progress:tugProgress()}:null;
+   if(activeAction?.comfort)kind=activeAction.comfort;
    let actionName=activeAction?.name??(state==='run'&&movementMode==='walk'?'walk':null),actionProgress=activeAction?(activeAction.timing?activeAction.timing.progressAt(age):Math.min(1,age/activeAction.duration)):phase;
    if(manualDown&&state==='down'){actionName='lie-down';actionProgress=1;}
    if(walkTransitions&&state==='view-turn'&&turnView==='front'){
@@ -192,8 +240,8 @@ export function createPaperActor(animal,info,{manualTricks=false,trickTimings=nu
    // Deliberate held source poses: no live frame blending or face/body deformation.
    blend=Math.round(blend*16)/16;
    const key=`${state}/${actionName}/${view}/${turnView}/${poseFps}/${Math.floor(clock*poseFps)}`;
-   if(held?.key===key){pair=held.pair;blend=held.blend;rearPair=held.rearPair;approachPair=held.approachPair;seat=held.seat;behavior=held.behavior;behaviorProgress=held.behaviorProgress;actionName=held.actionName;actionProgress=held.actionProgress;}else held={key,pair,blend,rearPair,approachPair,seat,behavior,behaviorProgress,actionName,actionProgress,posePhase:phase};
-   return{state:state==='run'||state==='finish'?'run':kind,pair,blend,rearPair,approachPair,seatProgress:seat,seatVariant,behavior,behaviorProgress,actionName,actionProgress,queued:!!deferred,view,straight,flip:state==='turn'&&!walkTransitions?false:flip,phase,posePhase:held.posePhase,stride:travel?.stride??PAPER_GAITS.front.stride,heading:travel?.heading??0,speed:motionSpeed,motionStage,travelDistance,energy:director.report.energy,x:animal.position.x,z:animal.position.z};
+   if(held?.key===key){pair=held.pair;blend=held.blend;rearPair=held.rearPair;approachPair=held.approachPair;seat=held.seat;behavior=held.behavior;behaviorProgress=held.behaviorProgress;actionName=held.actionName;actionProgress=held.actionProgress;comfortPose=held.comfortPose;}else held={key,pair,blend,rearPair,approachPair,seat,behavior,behaviorProgress,actionName,actionProgress,comfortPose,posePhase:phase};
+   return{state:state==='run'||state==='finish'?'run':kind,pair,blend,rearPair,approachPair,seatProgress:seat,seatVariant,behavior,behaviorProgress,actionName,actionProgress,queued:!!deferred,view,straight,flip:state==='turn'&&!walkTransitions?false:flip,phase,posePhase:held.posePhase,stride:travel?.stride??PAPER_GAITS.front.stride,heading:travel?.heading??0,speed:motionSpeed,motionStage,travelDistance,energy:director.report.energy,x:animal.position.x,z:animal.position.z,...(comfortPose?{comfortPose:{...comfortPose}}:{})};
   },get state(){return state;}
  };
 }
