@@ -79,7 +79,7 @@ test('browser preview: third tug button, EN/KO copy, cooldown loops and cache-bu
  const html=read('./docs/index.html'),app=read('./docs/app.mjs');
  assert.match(html,/id="tug"\s+disabled\s+data-i18n="tug"\s*>\s*Play tug\s*</);
  assert.ok(html.indexOf('id="treat"')<html.indexOf('id="tug"')&&html.indexOf('id="tug"')<html.indexOf('id="pause"'));
- assert.match(html,/app\.mjs\?v=0\.0\.8"/);
+ assert.match(html,/app\.mjs\?v=0\.0\.9"/);
  assert.match(app,/ {2}tug: "터그 놀이",/);assert.match(app,/tugSent: "터그 놀이를 시작했어요!"/);assert.match(app,/tugSent: "Tug of war started!"/);
  assert.equal(app.match(/for \(const kind of \["ball", "treat", "tug"\]\)/g).length,3);
  assert.doesNotMatch(app,/\["ball", "treat"\]/);assert.match(app,/kind \+ "Sent"/);

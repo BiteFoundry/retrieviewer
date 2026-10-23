@@ -1,5 +1,24 @@
 # Runtime weight and performance
 
+## Fixed-volume watch torso (0.0.9)
+
+Paw registration alone in0.0.8 left the upper torso unconstrained. In the36
+watch samples, chest-region (source rows205..230, ink threshold>24) area/mean
+silhouette width grew up to28.9% compared with the seated key. Offline torso
+envelope calibration brings both below1.2%, with centroid movement below0.52
+source pixels. Regression limits are2% chest area/width,1px centroid,3% whole
+torso area (rows205..270), plus the existing four-paw and common-floor tests.
+
+The same single-source inverse coordinate field now eases from y180 to205,
+matches the seated torso envelope through y265 and joins the paw field by y275.
+Only the silhouette calibration curves are smoothed, not fur pixels. Face rows
+0..179 remain byte-exact; the connected neck/bandana can move spatially to join
+the stable chest, instead of freezing the inflated source torso or compositing
+two pictures. The previous y230 pixel digest is superseded deliberately by a
+face-only digest plus explicit body-volume tests. No new frames, runtime work,
+buffer, dependency or process. The archive is3,118 bytes smaller than0.0.8.
+Earlier release sections below are historical, not current registration rules.
+
 ## Single-source watch registration and English desktop UI (0.0.8)
 
 The0.0.7 neck fix still joined a different torso to the lower legs. This pass

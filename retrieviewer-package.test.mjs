@@ -20,7 +20,7 @@ test('local package includes transitive runtime imports and assets, not project 
  for(const name of getPetAssetFiles()){
   assert.ok(included(name),`missing asset: ${name}`);assert.ok(existsSync(new URL(name,root)));
  }
- assert.equal(pkg.name,'@bitefoundry/retrieviewer');assert.equal(pkg.version,'0.0.8');
+ assert.equal(pkg.name,'@bitefoundry/retrieviewer');assert.equal(pkg.version,'0.0.9');
  assert.equal(pkg.private,false,'public release candidate');
  const policy=JSON.parse(readFileSync(new URL('release-policy.json',root)));
  for(const key of ['artLicenseTermsApproved','assetRightsReviewCompleted','artRedistributionApproved','publicPublishApproved'])assert.equal(policy[key],true,key);

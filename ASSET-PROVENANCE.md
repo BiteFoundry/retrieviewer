@@ -35,6 +35,12 @@ must be checked again for the final release bytes.
 
 ## Remaining limits
 
+0.0.9 adds offline torso-envelope constraints to the same single-source watch
+coordinate field, using only the existing seated key as a volume reference.
+Face pixels remain exact; the connected neck/body is spatially registered, not
+composited with another illustration. No new visual input or asset family;
+existing CC BY-SA4.0 attribution and licenses remain.
+
 0.0.8 replaces the watch-body joins with offline coordinate registration of
 the same single source drawing per sample. Four paw patches and a shared ground
 plane constrain the lower-body warp; original head/neck pixels remain exact.

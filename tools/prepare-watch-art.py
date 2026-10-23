@@ -11,6 +11,16 @@ frames=[];records=[]
 # coordinates, never fades two anatomies together or stitches at a horizontal row.
 patches=[(105,275,291),(138,278,301),(185,278,301),(218,275,291)]
 xx=np.arange(320,dtype=float)
+def outline(pic):
+ # Include the tail where it joins the torso, not a hard x=90 crop. Smooth
+ # only the calibration curves; fur pixels themselves are never blurred.
+ edges=[]
+ for row in pic:
+  xs=np.where(row>24)[0]
+  edges.append([float(xs[0]),float(xs[-1])] if len(xs) else [0.,319.])
+ edges=np.array(edges)
+ return np.column_stack([np.convolve(np.pad(edges[:,k],(2,2),mode='edge'),np.ones(5)/5,mode='valid') for k in range(2)])
+neutral_edges=outline(neutral)
 for i in range(162):
  source=np.frombuffer(raw[i*102400:(i+1)*102400],dtype=np.uint8).reshape(320,320)
  result=source.copy()
@@ -37,12 +47,21 @@ for i in range(162):
   assert all(a<b for a,b in zip(locations,locations[1:])), 'Crossed paw anchors'
   source_floor=int(np.where(np.any(source[:,90:251]>8,axis=1))[0][-1])
   target_floor=int(np.where(np.any(neutral[:,90:251]>8,axis=1))[0][-1])
+  source_edges=outline(source)
   def render():
    result=source.copy();mapped=np.interp(xx,knots,locations)
-   for y in range(230,320):
-    t=min(1,(y-230)/40);t=t*t*(3-2*t)
-    sx=xx+(mapped-xx)*t
-    v=min(1,(y-230)/70);v=v*v*(3-2*v)
+   for y in range(180,320):
+    if y<275:
+     nl,nr=neutral_edges[y];sl,sr=source_edges[y]
+     body=np.interp(xx,[0,nl,nr,319],[0,sl,sr,319])
+     if y<265:
+      t=max(0,min(1,(y-180)/25));t=t*t*(3-2*t)
+      sx=xx+(body-xx)*t
+     else:
+      t=(y-265)/10;t=t*t*(3-2*t)
+      sx=body+(mapped-body)*t
+    else:sx=mapped
+    v=max(0,min(1,(y-230)/70));v=v*v*(3-2*v)
     sy=min(319,y+(source_floor-target_floor)*v)
     lo=int(sy);hi=min(319,lo+1)
     a=np.interp(sx,xx,source[lo]);b=np.interp(sx,xx,source[hi])

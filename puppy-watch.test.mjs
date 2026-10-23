@@ -31,12 +31,35 @@ test('all four paws stay aligned without stitching a separate lower body onto th
   }
  }
 });
-test('all turned heads, jaws, necks and bandanas retain the original source pixels without a compositing seam',()=>{
+test('turned faces keep original pixels; the connected neck/body uses one coordinate warp, not compositing',()=>{
  const watch=load('./puppy-paper-behaviors-q5.bin.gz'),hash=createHash('sha256');
- for(let i=90;i<126;i++)if(![90,107,108,125].includes(i))hash.update(watch.getFrame(i).subarray(0,230*320));
- // Independent digest of the untouched 0.0.5 source's head/neck regions,
- // not of the prepared output. A neck dissolve/translation must fail here.
- assert.equal(hash.digest('hex'),'1f6ba57a7db9311537f41846ea6a32279852de4a9b3324f8a4c0482b5ab7fbed');
+ for(let i=90;i<126;i++)if(![90,107,108,125].includes(i))hash.update(watch.getFrame(i).subarray(0,180*320));
+ // The neck must now join a fixed-volume chest spatially. Protect the face,
+ // not the inflated source chest that the old y230 digest accidentally froze.
+ assert.equal(hash.digest('hex'),'39dce09ec8ce000a792a31b1d2670cdec753a19f9d0f13fad72b651361ac3259');
+ const registration=JSON.parse(readFileSync(new URL('./pet-q5-manifest.json',import.meta.url))).entries['puppy-paper-behaviors'].watchRegistration;
+ assert.equal(registration.bodyCompositing,false);
+});
+test('all watch frames keep seated chest area/width within 2% and center within one source pixel',()=>{
+ const seat=Uint8Array.from(load('./puppy-paper-seat-q5.bin.gz').getFrame(50)),watch=load('./puppy-paper-behaviors-q5.bin.gz');
+ function torso(f){let area=0,width=0,center=0;
+  for(let y=205;y<=230;y++){let left=320,right=-1;
+   for(let x=0;x<320;x++)if(f[y*320+x]>24){area++;center+=x;left=Math.min(left,x);right=Math.max(right,x);}
+   width+=right-left+1;
+  }
+  return{area,width,cx:center/area};
+ }
+ const base=torso(seat);
+ for(let i=90;i<126;i++){
+  const actual=torso(watch.getFrame(i));
+  for(const key of ['area','width'])assert.ok(Math.abs(actual[key]/base[key]-1)<=.02,JSON.stringify({frame:i,key,ratio:actual[key]/base[key]}));
+  assert.ok(Math.abs(actual.cx-base.cx)<=1,'torso center '+i);
+ }
+ // Include the belly/hips near the handoff to the four-paw field as well;
+ // protecting the narrow chest alone previously missed swelling farther down.
+ const area=f=>{let n=0;for(let y=205;y<=270;y++)for(let x=0;x<320;x++)if(f[y*320+x]>24)n++;return n;};
+ const baseline=area(seat);
+ for(let i=90;i<126;i++)assert.ok(Math.abs(area(watch.getFrame(i))/baseline-1)<=.03,'whole torso area '+i);
 });
 test('watch turns, holds the gaze and returns without teleporting or scaling the actor',()=>{
  assert.equal(paperWatchProgress(0),0);assert.equal(paperWatchProgress(.6),.5);assert.equal(paperWatchProgress(1.2),.5);assert.equal(paperWatchProgress(1.9),1);

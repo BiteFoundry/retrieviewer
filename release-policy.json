@@ -8,6 +8,6 @@
   "artLicense": "CC-BY-SA-4.0",
   "approvalDate": "2026-10-23",
   "rightsReview": "ASSET-PROVENANCE.md",
-  "approvedRelease": "0.0.8",
-  "releaseScope": "Continuing the approved npm release workflow: user requested quick leg/body alignment repair and English desktop UI on 2026-10-23. Offline single-source four-paw coordinate registration replaces body compositing; head/neck source pixels remain exact. Windows/macOS product-owned picker, toolbar, tray/menu and status text is English with expanded button widths; Linux already English. No new frames, runtime dependencies or live warp buffers. Code MIT/art CC BY-SA 4.0 unchanged. Exact installed-consumer and Windows native checks required. Linux retains earlier AlmaLinux8 GLIBC2.28 baseline, no fresh Linux GUI proof; macOS experimental; native Wayland unsupported."
+  "approvedRelease": "0.0.9",
+  "releaseScope": "Continuing the approved npm release workflow: user requested repair of swelling during watch on 2026-10-23. Offline single-source torso envelope and paw registration constrains chest width/area/center, whole torso area, four paw anchors and ground plane. Face rows0..179 remain exact, neck coordinates join the stable torso without compositing. Existing English desktop copy, Node optimization and rare butterflies retained. No new frames, runtime dependencies, work or buffers. MIT/CC BY-SA4.0 unchanged. Exact installed-consumer and Windows native checks required. Linux retains earlier AlmaLinux8 GLIBC2.28 baseline without fresh GUI proof; macOS experimental; native Wayland unsupported."
 }

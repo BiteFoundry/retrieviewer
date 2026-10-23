@@ -1,14 +1,14 @@
-# Retrieviewer 0.0.8 release process
+# Retrieviewer 0.0.9 release process
 
-Current target: `@bitefoundry/retrieviewer@0.0.8`, public `latest`, continuing the
-approved npm release workflow. The owner requested a quick leg/body alignment
-repair and English desktop messages on2026-10-23. Watch preparation now registers
-four paws using one source drawing and a smooth coordinate field; no separate
-torso/legs are composited. Head/jaw/neck pixels remain untouched. Windows/macOS
-picker, toolbar, menu and status copy is English (Linux already was English),
-with wider buttons. No new frames, runtime dependencies or live warp buffers.
-MIT/CC BY-SA4.0 unchanged. Preserve0.0.7 and earlier registry bytes; publish only
-the exact tested0.0.8 tarball. Historical scope below is not current verification.
+Current target: `@bitefoundry/retrieviewer@0.0.9`, public `latest`, continuing the
+approved npm release workflow. The owner requested correction of the watch
+torso's swelling on2026-10-23. Offline single-source registration now constrains
+chest width/area/center and whole torso area, keeping the four paw anchors and
+floor. Face pixels through y179 stay exact; neck coordinates can join the fixed
+torso without image compositing. No new frames, dependencies, runtime work or
+buffers. English desktop UI remains. MIT/CC BY-SA4.0 unchanged. Preserve0.0.8
+and earlier registry bytes; publish only the exact tested0.0.9 tarball.
+Historical scope below is not current verification.
 
 Target: `@bitefoundry/retrieviewer@0.0.4`, public npm registry, `latest` tag.
 The npm organization `bitefoundry` uses the free public-packages plan; account
