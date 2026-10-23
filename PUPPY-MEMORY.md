@@ -1,5 +1,18 @@
 # Runtime weight and performance
 
+## Watch neck seam repair (0.0.7)
+
+The0.0.6 watch registration moved the entire head/neck8px and dissolved it into
+the seated torso across y180..210. That crossed the bandana and produced a
+second collar/jaw silhouette. Preparation now preserves the original head,
+jaw, neck and bandana through y229. The join is below them in chest fur, with
+source/target chest contours registered before blending; lower legs/paws from
+y250 stay exactly seated. Endpoints and non-watch frames remain unchanged.
+The32 turned samples' protected regions have an independent original-source
+digest regression test. All changes are baked offline: no new frame, runtime
+dependency, live compositing buffer or per-frame computation. Published0.0.6
+bytes remain unchanged; this repair ships as0.0.7.
+
 ## Node compressed crops (0.0.6)
 
 Node now stores each validated Q5 crop as a small DEFLATE block, using built-in

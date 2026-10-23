@@ -1,13 +1,13 @@
-# Retrieviewer 0.0.6 release process
+# Retrieviewer 0.0.7 release process
 
-Current target: `@bitefoundry/retrieviewer@0.0.6`, public `latest`. The owner
-explicitly requested Node memory optimization, repaired watch motion, completed
-butterfly encounters and npm publication on2026-10-23. Built-in Node zlib keeps
-each Q5 crop compressed; portable browser storage stays unchanged. Watch art
-reuses existing drawings with canonical seated paws/body. Butterfly encounters
-reuse gallop poses with no extra dog archive. MIT/CC BY-SA4.0 unchanged.
-Preserve0.0.5 and all earlier registry bytes; publish only the exact tested0.0.6
-tarball. The historical scope below is not current verification evidence.
+Current target: `@bitefoundry/retrieviewer@0.0.7`, public `latest`. The owner
+explicitly requested npm publication of the watch neck seam repair on2026-10-23.
+The authored head/jaw/neck/bandana remain together; chest contours are registered
+offline before joining the seated lower body. No new frames, runtime buffers,
+dependencies or per-frame work. Node crop compression and butterfly behavior
+from0.0.6 remain. MIT/CC BY-SA4.0 unchanged. Preserve0.0.6 and all earlier registry
+bytes; publish only the exact tested0.0.7 tarball. The historical scope below is
+not current verification evidence.
 
 Target: `@bitefoundry/retrieviewer@0.0.4`, public npm registry, `latest` tag.
 The npm organization `bitefoundry` uses the free public-packages plan; account

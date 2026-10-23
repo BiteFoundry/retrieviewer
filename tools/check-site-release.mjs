@@ -15,7 +15,7 @@ try{
  assert.match(await page.locator('[data-i18n=resource]').textContent(),/96~106MiB/);
  await page.locator('#play').click();
  await page.waitForFunction(()=>Number(document.querySelector('.dog-stage').dataset.frames)>4,{},{timeout:45000});
- assert.ok(runtime.length>10&&runtime.every(u=>u.includes('/runtime/0.0.6/')));
+ assert.ok(runtime.length>10&&runtime.every(u=>u.includes('/runtime/0.0.7/')));
  await page.locator('#ball').click();
  await page.waitForFunction(()=>document.querySelector('#ball').disabled);
  await page.locator('#pause').click();
@@ -29,5 +29,5 @@ try{
  assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);
  await page.screenshot({path:'dist/site-qa/en-mobile.png'});
  assert.deepEqual(errors,[]);assert.deepEqual(bad,[]);
- console.log(JSON.stringify({url,english:true,korean:true,play:true,ball:true,rightSleep:true,mobile:true,runtimeVersion:'0.0.6',pageErrors:errors}));
+ console.log(JSON.stringify({url,english:true,korean:true,play:true,ball:true,rightSleep:true,mobile:true,runtimeVersion:'0.0.7',pageErrors:errors}));
 }finally{await browser.close();}

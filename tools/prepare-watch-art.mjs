@@ -20,6 +20,6 @@ const adjusted=readFileSync(p+'/behaviors-registered.gray');
 const encoded=encodePredictiveFrames(packFrames(adjusted,320,320,store.frameCount)),gz=gzipSync(encoded,{level:9}),check=readPackedFrames(encoded);
 for(let i=0;i<store.frameCount;i++)if((i<90||i>=126)&&!Buffer.from(check.getFrame(i)).equals(raw.subarray(i*102400,(i+1)*102400)))throw Error('Non-watch art changed');
 writeFileSync('puppy-paper-behaviors-q5.bin.gz',gz);
-Object.assign(manifest.entries['puppy-paper-behaviors'],{encodedBytes:encoded.length,gzipBytes:gz.length,residentPixelBytes:check.residentPixelBytes,encodedSha256:sha(encoded),quantizedSha256:sha(Buffer.concat(Array.from({length:check.frameCount},(_,i)=>Buffer.from(check.getFrame(i))))),watchRegistration:{sourceVersion:'0.0.5',sourceEncodedSha256:sha(source),canonicalSeat:50,bodyFromY:210,neckBlendFromY:180,headTranslateY:8,unchangedOtherFrames:true}});
+Object.assign(manifest.entries['puppy-paper-behaviors'],{encodedBytes:encoded.length,gzipBytes:gz.length,residentPixelBytes:check.residentPixelBytes,encodedSha256:sha(encoded),quantizedSha256:sha(Buffer.concat(Array.from({length:check.frameCount},(_,i)=>Buffer.from(check.getFrame(i))))),watchRegistration:{sourceVersion:'0.0.5',sourceEncodedSha256:sha(source),canonicalSeat:50,bodyFromY:250,chestBlendFromY:230,chestContourRegistered:true,headTranslateY:0,neckUnmodified:true,unchangedOtherFrames:true}});
 writeFileSync('pet-q5-manifest.json',JSON.stringify(manifest,null,1)+'\n');
 console.log(JSON.stringify({gzipBytes:gz.length,watchFrames:36,otherFramesUnchanged:true}));
