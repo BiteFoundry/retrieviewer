@@ -58,7 +58,7 @@ const ko = {
   pathBody:
     "이미 전역 설치했다면 npm prefix -g를 확인하세요. Linux/macOS는 그 경로의 bin, Windows는 그 경로 자체에 실행 파일이 있어요. csh/tcsh와 bash는 PATH 설정 문법이 달라요.",
   pathLink: "내 셸에 맞는 PATH 설정 보기 ↗",
-  supportTitle: "지원 범위도, 솔직하게.",
+  supportTitle: "지원 범위",
   windows: "실제 실행 검증 · x64, Node, .NET Framework4 컴파일러가 필요해요.",
   linux:
     "AlmaLinux8 / GLIBC2.28을 격리된 X11 GUI에서 검증했어요. Python3.6+, X11/Xrender/Xext, compositor가 필요해요.",
