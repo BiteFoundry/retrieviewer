@@ -77,6 +77,16 @@ export function createPaperSupportEpisodes(labels,indices,samples,{cyclic=true}=
  };
 }
 
+// Compiled once from the full source schedule, shared by all default renderers.
+// Only the current index/cycle is evaluated here; no stance scan or indexOf.
+export function createBakedSupportEpisodes(track){
+ return(feet,pair,blend,phase)=>{
+  const offset=track.offsets[pair];if(offset===undefined)return feet;
+  const q=offset+Math.round(blend*track.step),index=track.cyclic?q%track.period:Math.min(track.period,q),cycle=track.cyclic?Math.floor(phase)+Math.floor(q/track.period):0;
+  return feet.map(foot=>{const start=track.starts[foot.id]?.[index]??-1;return{...foot,episode:`${start}/${cycle-(track.cyclic&&start>index?1:0)}`};});
+ };
+}
+
 // Inverse, nearest-pixel leg warp; the entire head/torso above y=225 is identity.
 // A compact support covers both the old and new toe positions to avoid a second toe.
 export function footSourcePoint(x,y,pins){

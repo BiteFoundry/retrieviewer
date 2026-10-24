@@ -1,6 +1,6 @@
 {
   "name": "@bitefoundry/retrieviewer",
-  "version": "0.0.11",
+  "version": "0.0.12",
   "description": "A fluffy Braille desktop pet for Windows and Linux X11, with experimental macOS support and an embeddable TUI engine.",
   "license": "SEE LICENSE IN LICENSE",
   "homepage": "https://bitefoundry.github.io/retrieviewer/",
@@ -90,6 +90,7 @@
     "PUPPY-Q5-COMPARISON.md",
     "COMFORT-ART.md",
     "WATCH-REDRAW.md",
+    "MOTION-TABLES.md",
     "BUTTERFLY.md",
     "examples/embed.mjs",
     "examples/live.mjs",
@@ -102,6 +103,8 @@
     "puppy-paper.mjs",
     "puppy-paper-world.mjs",
     "puppy-paper-contact.mjs",
+    "puppy-motion-lookup.mjs",
+    "puppy-motion-tables.generated.mjs",
     "puppy-paper-seat.mjs",
     "puppy-paper-director.mjs",
     "puppy-paper-behaviors.mjs",
@@ -144,13 +147,15 @@
     "vendor/procedural-animals/LICENSE"
   ],
   "scripts": {
+    "bake:motion": "node tools/bake-pet-motion.mjs",
+    "check:motion": "node tools/bake-pet-motion.mjs --check",
     "start": "node tools/preview-site.mjs",
     "build:site": "node tools/build-site.mjs",
     "pet:companion": "node examples/live.mjs",
     "pet:desktop": "node retrieviewer-cli.mjs desktop",
     "test": "node --test \"*.test.mjs\"",
     "test:package": "node check-pet-package.mjs",
-    "release:check": "node tools/check-release.mjs",
+    "release:check": "npm run check:motion && node tools/check-release.mjs",
     "prepublishOnly": "npm run release:check"
   },
   "dependencies": {

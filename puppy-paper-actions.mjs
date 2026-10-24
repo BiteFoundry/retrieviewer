@@ -28,23 +28,24 @@ export function validatePaperActionInfo(info,byteLength){
  if(byteLength!==undefined&&byteLength!==f.width*f.height*f.samples*info.pairs)throw Error('Invalid action cache: byte length');
  return info;
 }
-export function paperActionPose(name,progress,info){
+export function paperActionPose(name,progress,info,compiledClips){
  if(typeof progress!=='number'||!Number.isFinite(progress))throw Error('Invalid paper action: progress');
- const{list,weights}=actionClip(name,info),total=weights.reduce((a,b)=>a+b,0);
+ if(compiledClips&&!own(compiledClips,name))throw Error(`Invalid paper action: unknown compiled clip ${JSON.stringify(name)}`);
+ const{list,weights,total=weights.reduce((a,b)=>a+b,0)}=compiledClips?.[name]??actionClip(name,info);
  let t=(name==='walk'?((progress%1)+1)%1:Math.max(0,Math.min(1,progress)))*total,index=0;
  while(index<list.length-1&&t>weights[index]){t-=weights[index++];}
  const blend=Math.round(Math.max(0,Math.min(1,t/weights[index]))*8)/8;
  if(!Number.isFinite(blend))throw Error('Invalid paper action: blend');
  return{pair:list[index],blend};
 }
-export function createPaperActionSampler(bytes,info,output){
+export function createPaperActionSampler(bytes,info,output,compiledClips){
  if(!isGrayFrameSource(bytes))throw Error('Invalid action cache: bytes');
  validatePaperActionInfo(info,bytes.byteLength);
  const stride=info.width*info.height,pairs=info.pairs,frames=grayFrameReader(bytes,info.width,info.height,pairs*9);
  const out=output??new Uint8ClampedArray(stride*4);
  if(!(out instanceof Uint8ClampedArray)||out.length!==stride*4)throw Error('Invalid action output');
  for(let i=3;i<out.length;i+=4)out[i]=255;
- return state=>{const p=paperActionPose(state.actionName,state.actionProgress,info),sample=Math.round(p.blend*8);
+ return state=>{const p=paperActionPose(state.actionName,state.actionProgress,info,compiledClips),sample=Math.round(p.blend*8);
   if(p.pair>=pairs||sample<0||sample>8)throw Error('Invalid paper action: sample out of range');
   const frame=frames.getFrame(p.pair*9+sample);for(let i=0,j=0;i<stride;i++,j+=4)out[j]=out[j+1]=out[j+2]=frame[i];return out;};
 }

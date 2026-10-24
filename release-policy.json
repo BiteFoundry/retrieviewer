@@ -8,6 +8,6 @@
   "artLicense": "CC-BY-SA-4.0",
   "approvalDate": "2026-10-24",
   "rightsReview": "ASSET-PROVENANCE.md",
-  "approvedRelease": "0.0.11",
-  "releaseScope": "Owner accepted the skill-reviewed fixes and authorized immediate release on2026-10-24. Release0.0.11 preserves the15 approved whole-body watch keys without crossfade ghosts, adds safe local braking for treat/tug attention, and skips rendering held poses before rasterization. Existing fetch patterns/returns, world motion, licenses and platform limits remain. Publish only the freshly installed-consumer/native/browser-verified tarball; preserve earlier registry artifacts. No new dependencies, no live pet restart, no new macOS/Linux GUI verification or large desktop RAM-reduction claim."
+  "approvedRelease": "0.0.12",
+  "releaseScope": "The owner authorized npm publication and website deployment of the reviewed precomputed motion-table work on2026-10-24. Publish only a fresh tested0.0.12 artifact; earlier releases remain immutable. Existing artwork licenses and rights approvals remain; no new artwork, runtime dependency or live pet restart. This reduces repeated setup/action-addressing work, not the retained image payload or process baseline."
 }

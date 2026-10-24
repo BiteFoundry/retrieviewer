@@ -4,18 +4,20 @@ import {createHash} from 'node:crypto';
 import {pathToFileURL} from 'node:url';
 import {resolve} from 'node:path';
 import {writeFile} from 'node:fs/promises';
-const {createPet}=await import(process.argv[2]?pathToFileURL(resolve(process.argv[2])):new URL('../retrieviewer.mjs',import.meta.url));
+const {createPet,defaultLoadAsset}=await import(process.argv[2]?pathToFileURL(resolve(process.argv[2])):new URL('../retrieviewer.mjs',import.meta.url));
+// Compare the same artwork/general metadata path against the bundled bake.
+const petOptions=process.argv.includes('--general-loader')?{loadAsset:name=>defaultLoadAsset(name)}:{};
 // zlib closes native handles on the following event-loop turns. Sampling in the
 // same microtask incorrectly counts their already-dead input/output buffers.
 const memory=async()=>{await new Promise(setImmediate);globalThis.gc?.();await new Promise(setImmediate);globalThis.gc?.();const m=process.memoryUsage();return {rss:m.rss,heapUsed:m.heapUsed,arrayBuffers:m.arrayBuffers};};
 const imported=await memory(),loadStart=performance.now();
-const pet=await createPet({seed:731});
+const pet=await createPet({seed:731,...petOptions});
 const loadMs=performance.now()-loadStart,loaded=await memory();
 const stepStart=performance.now(),stepCpu=process.cpuUsage();
 for(let i=0;i<1800;i++)pet.step(1/60);
 const stepCpuTime=process.cpuUsage(stepCpu),stepMs=performance.now()-stepStart;
 pet.dispose();
-const moving=await createPet({seed:731}),digest=createHash('sha256'),trajectory=[];
+const moving=await createPet({seed:731,...petOptions}),digest=createHash('sha256'),trajectory=[];
 const frameStart=performance.now(),frameCpu=process.cpuUsage(),timings=[];
 for(let i=0;i<450;i++) {
  if(i===24)moving.interact('ball');

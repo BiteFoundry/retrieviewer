@@ -5,6 +5,7 @@ import {createSnappyTrickTimings} from './puppy-paper-trick-timing.mjs';
 import {createCompanionLife,FETCH_RETURN_STYLES} from './puppy-companion-life.mjs';
 import {paintCompanionObjects} from './puppy-companion-objects.mjs';
 import {readPackedFrames} from './puppy-frame-store.mjs';
+import {BAKED_MOTION} from './puppy-motion-tables.generated.mjs';
 
 // Embeddable autonomous puppy. Importing or creating has no DOM, timer, stdin/stdout
 // or listener side effects: the host owns the loop and calls step() then frame().
@@ -121,11 +122,14 @@ export async function createPet({loadAsset=defaultLoadAsset,seed,energy,pawTrans
  let lease=await acquireAssets(loadAsset,artProfile),data=lease.data;
  const release=lease.release;lease=null;
  let {cache,info,meta}=data;const assets={...data.assets};data=null;
+ // Baked tables describe the bundled Q5 source only. External/optional artwork
+ // keeps the general metadata-driven path instead of using an unrelated bake.
+ const motionTables=loadAsset===defaultLoadAsset&&artProfile==='q5'?BAKED_MOTION:null;
  let animal,actor,life;
  try{
   if(!assets.actions.info.clips?.['lie-down']||!assets.actions.info.clips?.['lie-up'])throw Error('v9 action cache lacks lie-down/lie-up clips');
   animal=createPaperBody();
-  actor=createPaperActor(animal,info,{manualTricks:true,trickTimings:createSnappyTrickTimings(assets.actions.info),comfortTimings:createPaperComfortTimings(assets.actions.info),walkTransitions:true,scrambleSeconds:assets.comfort.info.scramble?.duration??0,fetchMotions:assets.comfort.info.version>=4?assets.comfort.info:null});
+  actor=createPaperActor(animal,info,{manualTricks:true,trickTimings:createSnappyTrickTimings(assets.actions.info),comfortTimings:createPaperComfortTimings(assets.actions.info),walkTransitions:true,scrambleSeconds:assets.comfort.info.scramble?.duration??0,fetchMotions:assets.comfort.info.version>=4?assets.comfort.info:null,motionTables});
   life=createCompanionLife(actor,{seed,returnStyle,...energy===undefined?{}:{energy}});
  }catch(e){animal?.dispose?.();release();throw e;}
  let paint=null,paintKey='',time=0,acc=0,disposed=false,lastHeldFrameKey=null;
@@ -150,7 +154,7 @@ export async function createPet({loadAsset=defaultLoadAsset,seed,energy,pawTrans
    if(typeof cellAspect!=='number'||!Number.isFinite(cellAspect)||cellAspect<=0)throw RangeError('cellAspect must be a positive number');
    if(![12,24,30].includes(poseFps))throw RangeError('poseFps must be 12, 24 or 30');
    const width=columns*2,height=rows*4,key=`${width}x${height}`;
-   if(paintKey!==key){paint=createPaperRenderer(cache,info,meta,width,height,{...assets,pawTransport});paintKey=key;}
+   if(paintKey!==key){paint=createPaperRenderer(cache,info,meta,width,height,{...assets,pawTransport,motionTables});paintKey=key;}
    const viewportWidth=camera?.viewportWidth??columns*cellAspect,viewportHeight=camera?.viewportHeight??rows;
    const projection=createPaperProjection({viewportWidth,viewportHeight,rect:camera?.rect??{left:0,top:0,width:viewportWidth,height:viewportHeight},width,height});
    const state=actor.sample(time,{poseFps}),report=life.report;

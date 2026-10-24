@@ -1,5 +1,6 @@
 import {createCachedTween,retimeRun,cleanGroundOffset} from './puppy-clean.mjs';
-import {createPaperFootLock,footSourcePoint,createRearSampler,createPaperSupportEpisodes} from './puppy-paper-contact.mjs';
+import {createPaperFootLock,footSourcePoint,createRearSampler,createPaperSupportEpisodes,createBakedSupportEpisodes} from './puppy-paper-contact.mjs';
+import {preparationRoute,canJoinMotion} from './puppy-motion-lookup.mjs';
 import {createPaperSeatSampler} from './puppy-paper-seat.mjs';
 import {planPaperRun,planPaperWalk,planPaperCarry,planPaperStumble,planPaperTravel,paperWalkTarget,planPaperApproach,planPaperApproachTravel,PAPER_DYNAMICS,PAPER_GAITS,PAPER_GROUND,paperGroundTarget} from './puppy-paper-world.mjs';
 import {createPaperDirector} from './puppy-paper-director.mjs';
@@ -37,7 +38,7 @@ export function paperWatchProgress(age){
 }
 
 // Original artwork only. Physics supplies ground travel; no procedural dog is drawn.
-export function createPaperActor(animal,info,{manualTricks=false,trickTimings=null,walkTransitions=false,comfortTimings=PAPER_COMFORT_TIMINGS,scrambleSeconds=0,fetchMotions=null}={}){
+export function createPaperActor(animal,info,{manualTricks=false,trickTimings=null,walkTransitions=false,comfortTimings=PAPER_COMFORT_TIMINGS,scrambleSeconds=0,fetchMotions=null,motionTables=null}={}){
  if(!Number.isFinite(scrambleSeconds)||scrambleSeconds<0||scrambleSeconds>3)throw Error('Invalid scramble duration');
  if(fetchMotions&&(!Number.isFinite(fetchMotions.scramble?.entryPhase)||fetchMotions.scramble.entryPhase<=0||fetchMotions.scramble.entryPhase>=1||!Number.isFinite(fetchMotions.scramble.brakeSeconds)||fetchMotions.scramble.brakeSeconds<=0||fetchMotions.scramble.brakeSeconds>scrambleSeconds||!['front','rear'].every(v=>Number.isFinite(fetchMotions.pickups?.[v]?.duration)&&fetchMotions.pickups[v].duration>0&&fetchMotions.pickups[v].duration<=3)))throw Error('Invalid fetch actor metadata');
  if(fetchMotions?.scramble.trajectory==='single-pass-target'){
@@ -110,6 +111,7 @@ export function createPaperActor(animal,info,{manualTricks=false,trickTimings=nu
   }
   if(scrambleArmed&&fetchMotions?.scramble.trajectory==='single-pass-target'&&view===fetchMotions.scramble.entryView&&!waypoints.length){
    const stumble=planPaperStumble(distance,fetchMotions.scramble);
+   if(motionTables&&!canJoinMotion(motionTables,'rear-run/scramble',{view,phase:stumble.entryPhase,speed:stumble.entrySpeed,nextSpeed:stumble.impactAt(0).speed}))throw Error('Unsafe baked run/impact connection');
    Object.assign(travel,{plan:stumble.plan,stride:stumble.stride,stumble,scrambleAt:stumble.entryTime});
   }else if(scrambleArmed&&fetchMotions&&view==='front'&&!waypoints.length&&fetchMotions.scramble.trajectory!=='single-pass-target'){
    // Last matching forepaw contact before the endpoint. Invert the existing
@@ -123,11 +125,16 @@ export function createPaperActor(animal,info,{manualTricks=false,trickTimings=nu
  const prepareAction=()=>{
   const name=pendingAction,desired=name==='spin'?'front':'approach';
   if(restProgress>0){enter('wake');return;}
-  if(name==='spin'&&seatProgress>0){enter('rise');return;}
-  if(flip&&view!=='front'){turnView='front';enter('view-turn');return;}
-  if(flip){turnFlip=false;enter('turn');return;}
-  if(view!==desired){turnView=view==='front'?desired:'front';enter('view-turn');return;}
-  if(name!=='spin'&&seatProgress<1){enter('sit-down');return;}
+  if(motionTables){
+   const [step,target]=preparationRoute(motionTables,'action',{view,flip,seatProgress,desired:name==='spin'?'stand':'seat',speed:motionSpeed});
+   if(step!=='ready'){if(step==='view-turn')turnView=target;else if(step==='turn')turnFlip=target;enter(step);return;}
+  }else{
+   if(name==='spin'&&seatProgress>0){enter('rise');return;}
+   if(flip&&view!=='front'){turnView='front';enter('view-turn');return;}
+   if(flip){turnFlip=false;enter('turn');return;}
+   if(view!==desired){turnView=view==='front'?desired:'front';enter('view-turn');return;}
+   if(name!=='spin'&&seatProgress<1){enter('sit-down');return;}
+  }
   // Spin's own cache starts at key24; prepare it once, only AFTER the standing
   // facing change. Do not crouch before a standing turn and then crouch again.
   if(walkTransitions&&name==='spin'&&!spinReady){spinReady=true;enter('launch');return;}
@@ -143,7 +150,13 @@ export function createPaperActor(animal,info,{manualTricks=false,trickTimings=nu
   }
   playAction(name,()=>finishTrick(name));
  };
- const prepareDirection=()=>{if(pendingAction){prepareAction();return;}if(!target){settle();return;}if(nextView!==view){turnView=view==='front'?nextView:'front';enter('view-turn');}else if(view==='front'&&nextFlip!==flip){turnFlip=nextFlip;enter('turn');}else issue();};
+ const prepareDirection=()=>{
+  if(pendingAction){prepareAction();return;}if(!target){settle();return;}
+  if(motionTables){
+   const [step,targetView]=preparationRoute(motionTables,'direction',{view,flip,desired:nextView,nextFlip,speed:motionSpeed});
+   if(step==='view-turn'){turnView=targetView;enter(step);}else if(step==='turn'){turnFlip=targetView;enter(step);}else issue();
+  }else if(nextView!==view){turnView=view==='front'?nextView:'front';enter('view-turn');}else if(view==='front'&&nextFlip!==flip){turnFlip=nextFlip;enter('turn');}else issue();
+ };
  const requestAction=(name,{urgent=false}={})=>{
   preparationRate=urgent?3:1;
   if(name==='roll'&&manualDown&&state==='down'){route=false;target=null;waypoints=[];pendingAction=null;stayDown=false;manualDown=false;restProgress=0;playAction('roll-down',()=>finishTrick('roll'));return true;}
@@ -333,7 +346,7 @@ export function createPaperActor(animal,info,{manualTricks=false,trickTimings=nu
  };
 }
 
-export function createPaperRenderer(cache,info,meta,width,height,{rear,approach,seat,arrivalSeat,behaviors,actions,interactions,comfort,contacts=true,pawTransport=false}={}){
+export function createPaperRenderer(cache,info,meta,width,height,{rear,approach,seat,arrivalSeat,behaviors,actions,interactions,comfort,contacts=true,pawTransport=false,motionTables=null}={}){
  if(![width,height].every(Number.isInteger)||width<2||height<2||width*height>1_000_000)throw Error('Invalid paper grid');
  const tween=createCachedTween(cache,info),renderMeta={...meta,pairs:info.pair_map,run_sequence:info.run_sequence};
  const out=new Uint8ClampedArray(width*height*4),area=createPaperAreaSampler();
@@ -350,14 +363,15 @@ export function createPaperRenderer(cache,info,meta,width,height,{rear,approach,
  const behaviorSample=behaviors?createPaperBehaviorSampler(behaviors.bytes,behaviors.info,spriteScratch):null;
  const interactionSample=interactions?createCompanionSpriteSampler(interactions.bytes,interactions.info,spriteScratch):null;
  const comfortSample=comfort?createComfortSpriteSampler(comfort.bytes,comfort.info,spriteScratch):null;
- const actionSample=actions?createPaperActionSampler(actions.bytes,actions.info,actionScratch.subarray(0,actions.info.width*actions.info.height*4)):null,actionArea=actions?createPaperAreaSampler(actions.info.width):null;
- const walkEpisodes=actions?createPaperSupportEpisodes(actions.info.feet,actions.info.clips.walk,9):null;
+ const actionSample=actions?createPaperActionSampler(actions.bytes,actions.info,actionScratch.subarray(0,actions.info.width*actions.info.height*4),motionTables?.actionClips):null,actionArea=actions?createPaperAreaSampler(actions.info.width):null;
+ const episodes=(key,labels,indices,samples,options)=>motionTables?.support[key]?createBakedSupportEpisodes(motionTables.support[key]):createPaperSupportEpisodes(labels,indices,samples,options);
+ const walkEpisodes=actions?episodes('walk',actions.info.feet,actions.info.clips.walk,9):null;
  const sourceEpisodes=rear?{
-  front:createPaperSupportEpisodes(rear.info.frontFeet,[0,1,2,3,4,5,6,7],17),
-  rear:createPaperSupportEpisodes(rear.info.rearFeet,[5,6,7,8,9,10,11,12],9),
-  approach:approach?createPaperSupportEpisodes(approach.info.feet,[5,6,7,8,9,10,11,12],9):null,
+  front:episodes('front',rear.info.frontFeet,[0,1,2,3,4,5,6,7],17),
+  rear:episodes('rear',rear.info.rearFeet,[5,6,7,8,9,10,11,12],9),
+  approach:approach?episodes('approach',approach.info.feet,[5,6,7,8,9,10,11,12],9):null,
  }:null;
- const behaviorEpisodes=behaviors?Object.fromEntries(Object.entries(behaviors.info.clips).map(([name,indices])=>[name,createPaperSupportEpisodes(behaviors.info.feet,indices,9,{cyclic:name==='walk'})])):{};
+ const behaviorEpisodes=behaviors?Object.fromEntries(Object.entries(behaviors.info.clips).map(([name,indices])=>[name,episodes('behavior/'+name,behaviors.info.feet,indices,9,{cyclic:name==='walk'})])):{};
  const render=(state,{x=.5,y=.85,size=.85,pixelAspect=1,contactEnabled=contacts,groundFromPixel,pixelFromGround}={})=>{
   if(![x,y,size].every(Number.isFinite)||size<=0||size>3)throw Error('Invalid paper placement');
   const isRear=state.rearPair!==null&&state.rearPair!==undefined&&rearSample;
@@ -379,7 +393,7 @@ export function createPaperRenderer(cache,info,meta,width,height,{rear,approach,
    feet=motion.feet[k].map(f=>({...f,episode:`carry/${state.comfortPose.cycle}/${f.id}`}));
    if(state.flip)feet=feet.map(p=>({...p,x:319-p.x}));
   }else if(contactEnabled&&isAction&&state.actionName==='walk'){
-   const p=paperActionPose('walk',state.actionProgress,actions.info);feet=walkEpisodes(actions.info.feet[p.pair][Math.round(p.blend*8)],p.pair,p.blend,state.actionProgress);
+   const p=paperActionPose('walk',state.actionProgress,actions.info,motionTables?.actionClips);feet=walkEpisodes(actions.info.feet[p.pair][Math.round(p.blend*8)],p.pair,p.blend,state.actionProgress);
    if(state.flip)feet=feet.map(p=>({...p,x:319-p.x}));
   }else if(contactEnabled&&rear&&state.state==='run'&&!isAction&&!isComfort){
    const b=isBehavior?paperBehaviorPose(state,behaviors.info):null;

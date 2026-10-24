@@ -1,4 +1,22 @@
-# Retrieviewer 0.0.11 release process
+# Retrieviewer 0.0.12 release process
+
+Current target: `@bitefoundry/retrieviewer@0.0.12`, public `latest`.
+On2026-10-24 the owner authorized npm publication and website deployment of the
+reviewed precomputed motion tables. Support episodes, action addressing and
+bounded preparation routes are compiled offline; live travel, perspective and
+paw correction remain dynamic. Default Q5 uses the tables; custom loaders and
+optional original art retain their metadata-driven path. See MOTION-TABLES.md.
+No new artwork, runtime dependency, process or timer. This removes repeated
+CPU/allocation work, not the retained image payload or Node/native baseline.
+Do not claim a large RAM reduction or new Linux/macOS live GUI certification.
+
+Build and verify a fresh exact0.0.12 tarball outside the source tree, including
+its owned Windows native lifecycle and bilingual browser runtime. Publish that
+same tarball, verify registry integrity and matching GitHub Pages runtime bytes.
+Do not restart the user's live pet or change host/agent configuration. Earlier
+npm artifacts remain immutable; MIT code / CC BY-SA4.0 artwork stay unchanged.
+
+## Previous 0.0.11 scope (historical)
 
 Current target: `@bitefoundry/retrieviewer@0.0.11`, public `latest`.
 On2026-10-24 the owner accepted the reviewed candidate and authorized immediate
