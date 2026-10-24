@@ -12,6 +12,9 @@ const baseAria = new Map(
   ]),
 );
 const ko = {
+  attentionPaw: "살살 부르기",
+  attentionWall: "벽 박박 긁기",
+  attentionSent: "알림 동작을 보여줘요. 실제 작업 알림은 아니에요.",
   skip: "본문으로 이동",
   headline: "일하는 화면에,<br>작은 친구 하나.",
   intro:
@@ -59,7 +62,7 @@ const ko = {
   runStep: "실행 → 앱 창 선택 → Attach 누르기",
   desktopLanguage: "데스크톱 창 선택창과 조작 메뉴는 영어로 표시됩니다.",
   latestUpdate:
-    '0.0.13 · 시작 중 종료 처리와 설정 복구 안내를 보강하고, 큰 창·낮은 FPS의 예외를 고쳤습니다. 그림과 움직임은 그대로입니다. <a href="https://github.com/BiteFoundry/retrieviewer/blob/main/RELEASING.md">변경 기록</a>',
+    '0.0.16 · 확인할 일이 있으면 앞발로 살살 부르거나 두 발로 서서 박박 긁어요. 위에서 두 동작을 눌러보세요. 감시·유료 연결은 선택이에요. <a href="https://github.com/BiteFoundry/retrieviewer/blob/main/RELEASING.md">변경 기록</a>',
   copy: "복사",
   copied: "명령을 복사했어요.",
   copyFailed: "복사하지 못했어요. 위 명령을 직접 선택해 복사해 주세요.",
@@ -114,6 +117,7 @@ const ko = {
   busy: "아직 놀고 있거나 쉬는 중이에요. 잠시 뒤 다시 해주세요.",
 };
 const enExtra = {
+  attentionSent: "Showing an attention gesture. This is a demo, not a real task alert.",
   sleepStudy: "Sleeping artwork, still preview. Choose Live puppy to continue.",
   resume: "Resume",
   copied: "Command copied.",
@@ -217,6 +221,7 @@ function syncControls() {
   pauseButton.textContent = t(pet && !playing ? "resume" : "pause");
   for (const kind of ["ball", "treat", "tug"])
     $("#" + kind).disabled = !pet || !playing || !!study;
+  for (const gesture of ['paw','wall'])$('#attention-'+gesture).disabled=!pet||!playing||!!study;
 }
 function paint() {
   if (!pet) return;
@@ -226,6 +231,8 @@ function paint() {
     $("#" + kind).disabled =
       !playing || frame.report.busy || frame.report.cooldowns[kind] > 0;
   stage.dataset.ready = "true";
+  stage.dataset.motion=frame.state.state;
+  for(const gesture of ['paw','wall'])$('#attention-'+gesture).disabled=!playing||!!study||frame.report.busy||!!frame.report.attention;
   stage.dataset.frames = String((Number(stage.dataset.frames) || 0) + 1);
 }
 function cancelLoop() {
@@ -270,7 +277,7 @@ async function load() {
   playing = false;
   cancelLoop();
   try {
-    const { createPet } = await import("./runtime/0.0.13/retrieviewer.mjs");
+    const { createPet } = await import("./runtime/0.0.16/retrieviewer.mjs");
     const next = await createPet({ seed: 731, returnStyle: $("#return-style").value });
     if (closed) {
       next.dispose();
@@ -311,7 +318,7 @@ $("#sleep-pose").addEventListener("change",async()=>{
   }
   study=key;playing=false;cancelLoop();syncControls();status('previewLoading');
   try{
-    const response=await fetch('./sleep-'+key+'.txt?v=0.0.13');
+    const response=await fetch('./sleep-'+key+'.txt?v=0.0.16');
     if(!response.ok)throw Error('Sleep preview HTTP '+response.status);
     const text=await response.text();if(request!==studyRequest||closed)return;
     art.textContent=text.replace(/^(?:\u2800*\n)+/,'').replace(/(?:\n\u2800*)+$/,'');
@@ -338,6 +345,12 @@ for (const kind of ["ball", "treat", "tug"])
     );
     paint();
   });
+for(const gesture of ['paw','wall'])$('#attention-'+gesture).addEventListener('click',()=>{
+  if(!pet||!playing||study)return;
+  status(pet.notify({kind:'input',gesture})?'attentionSent':'busy');
+  paint();
+});
+
 document.addEventListener("visibilitychange", () => {
   if (document.hidden) cancelLoop();
   else if (playing) schedule();

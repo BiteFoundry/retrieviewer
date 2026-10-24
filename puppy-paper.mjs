@@ -9,7 +9,7 @@ import {createPaperAreaSampler} from './puppy-paper-area.mjs';
 import {PAPER_ACTION_DURATIONS,createPaperActionSampler,paperActionPose} from './puppy-paper-actions.mjs';
 import {createPawTransport} from './puppy-paper-paw-transport.mjs';
 import {createCompanionSpriteSampler} from './puppy-companion-sprites.mjs';
-import {createComfortSpriteSampler,comfortMotion,comfortMotionKey} from './puppy-comfort-sprites.mjs';
+import {createComfortSpriteSampler,comfortMotion,comfortMotionKey,comfortProgress} from './puppy-comfort-sprites.mjs';
 import {mouthSourceFrame,mouthAnchor,projectMouth} from './puppy-mouth-anchor.mjs';
 import {trickClipEdges} from './puppy-paper-trick-timing.mjs';
 
@@ -70,7 +70,7 @@ export function createPaperActor(animal,info,{manualTricks=false,trickTimings=nu
  const launchSeconds=()=>snappyPreparation()?.10:.25;
  const dispatch=(fn,{keepDown=false,urgent=false}={})=>{
   if(urgent)preparationRate=3;
-  if(activeAction||state==='tug'||state==='scramble'||state==='pickup'||(movementMode==='walk'&&state==='run')){route=false;deferred=()=>dispatch(fn,{keepDown,urgent});hurryComfort();return true;}
+  if(activeAction||state==='tug'||state==='attention-paw'||state==='attention-wall'||state==='scramble'||state==='pickup'||(movementMode==='walk'&&state==='run')){route=false;deferred=()=>dispatch(fn,{keepDown,urgent});hurryComfort();return true;}
   // The calibrated trick down pose has its own byte-shared recovery; never
   // jump back into the older/larger rest illustration on another command.
   if(manualDown&&!keepDown){route=false;deferred=fn;playAction('lie-up',()=>{manualDown=false;view='approach';seatProgress=1;seatVariant='default';enter('idle');drain();},.55);return true;}
@@ -94,6 +94,7 @@ export function createPaperActor(animal,info,{manualTricks=false,trickTimings=nu
   const t=activeAction?.timing;
   if(t?.comfort==='belly'&&age<t.hold[1]){t.hold[1]=Math.max(t.hold[0],age);t.duration=activeAction.duration=t.hold[1]+bellyTiming.exit;}
   else if(state==='tug'&&comfort&&!comfort.hurry){const progress=tugProgress();comfort.hurry={progress,age,length:Math.min(comfortTimings.tugExit,(1-progress)*comfort.seconds)};}
+  else if((state==='attention-paw'||state==='attention-wall')&&comfort&&!comfort.hurry){const motion=state==='attention-wall'?fetchMotions.attentionWall:fetchMotions.attentionPaw,progress=held?.comfortPose?.clip===state?held.comfortPose.progress:Math.min(1,age/comfort.seconds),from=motion.frames[comfortMotionKey(progress,motion)];comfort.hurry={from,age,length:motion.releases[from].duration};}
  }
  const playAction=(name,done,duration=PAPER_ACTION_DURATIONS[name])=>{const timing=trickTimings?.[name];duration=timing?.duration??duration;if(!Number.isFinite(duration)||duration<=0)throw Error('Invalid paper action duration');activeAction={name,duration,timing};actionDone=done;stop();enter('action');};
  const finishTrick=name=>{if(name!=='spin'){view='approach';flip=false;seatProgress=1;seatVariant='default';enter('idle');}else{view='front';flip=false;seatProgress=0;enter('settle');}drain();};
@@ -143,6 +144,7 @@ export function createPaperActor(animal,info,{manualTricks=false,trickTimings=nu
   if(name==='belly'){const seconds=comfortSeconds;playAction('lie-down',()=>startBelly(seconds),.65);return;}
   if(name==='sleep'){stayDown=false;sleepLook={...nextSleepLook};comfort={kind:'sleep',seconds:comfortSeconds};enter('recline');return;}
   if(name==='tug'){stop();comfort={kind:'tug',seconds:comfortSeconds};enter('tug');return;}
+  if(name==='attention-paw'||name==='attention-wall'){stop();held=null;comfort={kind:name,seconds:(name==='attention-wall'?fetchMotions.attentionWall:fetchMotions.attentionPaw).duration};enter(name);return;}
   if(name==='lie'){
    if(manualTricks){playAction('lie-down',()=>{manualDown=true;enter('down');drain();},.65);}
    else{stayDown=true;enter('recline');}
@@ -228,6 +230,10 @@ export function createPaperActor(animal,info,{manualTricks=false,trickTimings=nu
   belly(seconds=6){comfortDuration('belly',seconds);return dispatch(()=>{comfortSeconds=seconds;return requestAction('belly');},{keepDown:true});},
   sleep(seconds=25,variant='side',right=false){comfortDuration('sleep',seconds);if(!['side','belly','curl','chin'].includes(variant)||typeof right!=='boolean')throw Error('Invalid sleep pose');return dispatch(()=>{comfortSeconds=seconds;nextSleepLook={variant,right};return requestAction('sleep');});},
   tug(seconds=6){comfortDuration('tug',seconds);return dispatch(()=>{comfortSeconds=seconds;return requestAction('tug');});},
+  attentionPaw(){if(!fetchMotions?.attentionPaw)return false;return dispatch(()=>requestAction('attention-paw'));},
+  get canAttentionPaw(){return !!fetchMotions?.attentionPaw;},
+  attentionWall(){if(!fetchMotions?.attentionWall)return false;return dispatch(()=>requestAction('attention-wall'));},
+  get canAttentionWall(){return !!fetchMotions?.attentionWall;},
   get canScramble(){return scrambleSeconds>0;},
   get canMovingScramble(){return !!fetchMotions;},
   get canSinglePassScramble(){return fetchMotions?.scramble.trajectory==='single-pass-target';},
@@ -292,6 +298,7 @@ export function createPaperActor(animal,info,{manualTricks=false,trickTimings=nu
    else if(state==='recline'){const end=stayDown?.25:1;restProgress=Math.min(end,restProgress+dt/1.8);if(restProgress===end)enter(stayDown?'down':comfort?.kind==='sleep'?'sleep':'nap');}
    else if(state==='sleep'&&age>=comfort.seconds){comfort=null;enter('wake');}
    else if(state==='tug'&&tugProgress()>=1){comfort=null;enter('idle');drain();}
+   else if((state==='attention-paw'||state==='attention-wall')&&(comfort.hurry?age-comfort.hurry.age>=comfort.hurry.length:age>=comfort.seconds)){comfort=null;enter('idle');drain();}
    else if((state==='scramble'||state==='pickup')&&age>=comfort.seconds){comfort=null;movingScramble=null;stop();enter('idle');drain();}
    else if(state==='nap'&&age>=5&&!stayDown){enter('wake');}
    else if(state==='wake'){restProgress=Math.max(0,restProgress-prepareDt/1.2);if(restProgress===0){if(pendingAction)prepareDirection();else if(target)enter('rise');else enter('idle');}}
@@ -304,6 +311,7 @@ export function createPaperActor(animal,info,{manualTricks=false,trickTimings=nu
    let seat=state==='sit-down'||state==='rise'||seatProgress>0?Math.round(seatProgress*48)/48:null;
    if(restProgress===0&&state!=='recline')sleepLook=null;
    let behavior=null,behaviorProgress=0,comfortPose=state==='scramble'?{clip:'scramble',view,progress:Math.min(1,age/comfort.seconds)}:state==='pickup'?{clip:'pickup',view,progress:Math.min(1,age/comfort.seconds)}:state==='tug'?{clip:'tug',progress:tugProgress()}:sleepLook&&restProgress>.72?{clip:'sleep',...sleepLook,blend:comfortEase((restProgress-.72)/.28)}:null;
+   if(state==='attention-paw'||state==='attention-wall')comfortPose={clip:state,progress:Math.min(1,age/comfort.seconds),...comfort.hurry?{release:{from:comfort.hurry.from,progress:Math.min(1,(age-comfort.hurry.age)/comfort.hurry.length)}}:{}};
    if(activeAction?.comfort)kind=activeAction.comfort;
    let actionName=activeAction?.name??(state==='run'&&movementMode==='walk'?'walk':null),actionProgress=activeAction?(activeAction.timing?activeAction.timing.progressAt(age):Math.min(1,age/activeAction.duration)):phase;
    if(manualDown&&state==='down'){actionName='lie-down';actionProgress=1;}
@@ -386,7 +394,7 @@ export function createPaperRenderer(cache,info,meta,width,height,{rear,approach,
   // Quantize source lookup only, never the projected rectangle. Rounding side,
   // left and top first introduced whole-body scale/position jumps at thresholds.
   const motion=isComfort?comfortMotion(state.comfortPose,comfort.info):null;
-  const left=width*x-sideX/2,floor=motion?(motion.floorOffsets?.[comfortMotionKey(state.comfortPose.progress,motion)]??motion.floorOffset??0):isInteraction||isAction||isBehavior||isSeat||isRear||isApproach?0:cleanGroundOffset(state,renderMeta),top=height*y-(300-floor)/320*side;
+  const left=width*x-sideX/2,floor=motion?(motion.floorOffsets?.[comfortMotionKey(comfortProgress(state.comfortPose),motion)]??motion.floorOffset??0):isInteraction||isAction||isBehavior||isSeat||isRear||isApproach?0:cleanGroundOffset(state,renderMeta),top=height*y-(300-floor)/320*side;
   let feet=[];
   if(contactEnabled&&isComfort&&state.comfortPose.clip==='carry-trot'){
    const k=comfortMotionKey(state.comfortPose.progress,motion);

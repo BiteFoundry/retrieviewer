@@ -1,4 +1,59 @@
-# Retrieviewer 0.0.13 release process
+# Retrieviewer 0.0.16 release process
+
+Current target: `@bitefoundry/retrieviewer@0.0.16`, public `latest`.
+On2026-10-24 the owner accepted the gentle-paw and standing-wall gestures and
+explicitly authorized merging, GitHub push, npm publication and website updates.
+Both cues preserve the accepted puppy; automatic notifications alternate them.
+Explicit host gesture selection and bilingual website demo buttons are included.
+The same comfort archive gains15 keys; all45 pre-gesture keys remain exact.
+Windows read-only watching resolves native executables or npm PowerShell shims
+with literal argv and closed stdin. No shell string or execution-policy change.
+
+Build/install one fresh exact tarball, run full tests and owned Windows checks,
+push and wait for Windows/Linux CI, publish the same artifact, verify registry
+integrity and a fresh consumer, and verify matching deployed Pages runtime bytes.
+No StackBite patch, completed-work alerts, screen capture, saved API key, live-pet
+restart or additional platform certification is part of this release.
+
+## Previous 0.0.15 scope (historical)
+
+Current target: `@bitefoundry/retrieviewer@0.0.15`, public `latest`.
+On 2026-10-24 the owner authorized npm publication of the reviewed rule-first
+attention update. The optional model now runs after a confirmed rule cue is
+accepted; no model response can delay, retract or repeat that cue. Windows
+displays a bounded local Seat name and approval/input kind with a hover tooltip.
+The pet reuses existing front contact, travel and whole-body look material;
+resolved approaches brake naturally and direct play keeps priority.
+
+Keep all nine art archives, runtime dependencies, provider/privacy restrictions,
+price ceilings and request bounds unchanged. Build/install a fresh exact tarball,
+compare every shipped byte, run the full suite and owned native checks, then
+publish that same artifact. Verify registry integrity and a fresh public-registry
+consumer. No StackBite changes, real approval actions, screen capture, host patch,
+live pet restart or website deployment are authorized by this release request.
+macOS/Linux live notification behavior remains unverified.
+
+## Previous 0.0.14 scope (historical)
+
+Current target: `@bitefoundry/retrieviewer@0.0.14`, public `latest`.
+On 2026-10-24 the owner authorized npm publication of the metadata-only StackBite
+watcher and optional paid DeepSeek V4.1 Flash 1017 backend. Existing artwork and
+physics are unchanged. Watching and remote inference both remain opt-in.
+
+The installed `retrieviewer` bin works from any directory; relative source
+commands require the checkout root. Include this unrelated-working-directory
+regression in the fresh installed-consumer check. Keep model identity, provider
+price ceilings, privacy restrictions, daily per-process attempt guard, deadlines,
+cache bounds, cancellation and rule fallback. No API keys ship or are saved.
+
+Build/install a fresh exact artifact, compare every shipped byte, run tests and
+an owned native worker check, then publish the same tarball. Verify registry
+integrity and a fresh registry consumer. Earlier versions stay immutable; do not
+restart the user's pet, patch the host, or certify untested macOS/Linux behavior.
+No new runtime dependency or local model is added. Website deployment is outside
+this release request.
+
+## Previous 0.0.13 scope (historical)
 
 Current target: `@bitefoundry/retrieviewer@0.0.13`, public `latest`.
 The owner authorized npm publication and website deployment on2026-10-24.

@@ -9,7 +9,7 @@ const root=process.env.RETRIEVIEWER_NATIVE_PACKAGE_ROOT?pathToFileURL(resolve(pr
 const {desktopStatus,stopDesktop,readSession,requestSession,removeDesktop}=await import(new URL('integrations/windows-overlay/desktop.mjs',root));
 const stateDir=await mkdtemp(join(tmpdir(),'retrieviewer-posix-qa-'));
 const spec={command:'python3',args:['-I',fileURLToPath(new URL('integrations/linux-overlay/overlay.py',root)),'--ipc-test'],mode:'linux-x11-overlay',fps:15};
-const worker=spawn(process.execPath,[fileURLToPath(new URL('integrations/windows-overlay/worker.mjs',root)),'--helper-spec',JSON.stringify(spec)],{stdio:['ignore','ignore','pipe','ipc'],env:{...process.env,RETRIEVIEWER_HOME:stateDir}});
+const worker=spawn(process.execPath,[fileURLToPath(new URL('integrations/windows-overlay/worker.mjs',root)),'--helper-spec',JSON.stringify(spec)],{stdio:['ignore','ignore','pipe','ipc'],env:{...process.env,RETRIEVIEWER_HOME:stateDir,RETRIEVIEWER_WATCH:'off',RETRIEVIEWER_BRAIN:'off'}});
 let stderr='';worker.stderr.on('data',b=>stderr=(stderr+b).slice(-8192));const delay=ms=>new Promise(r=>setTimeout(r,ms));
 try{
  await new Promise((resolve,reject)=>{const timeout=setTimeout(()=>reject(Error('Native worker timed out: '+stderr)),15000);worker.once('message',m=>{clearTimeout(timeout);m.error?reject(Error(m.error)):resolve(m);});worker.once('exit',code=>{clearTimeout(timeout);reject(Error('Native worker startup exit '+code+' '+stderr));});});

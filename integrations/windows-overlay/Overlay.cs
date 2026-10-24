@@ -110,12 +110,12 @@ sealed class Companion : ApplicationContext {
     readonly JavaScriptSerializer json=new JavaScriptSerializer();readonly object inputLock=new object();
     readonly Queue<Dictionary<string,object>> messages=new Queue<Dictionary<string,object>>();
     TargetItem target;Form pickerWindow;QuietWindow testTarget;readonly bool testMode;Rectangle canvas;int revision=0,cell=8;bool visible=false,paused=false,loaded=false,quitting=false,picking=false,announced=false;
-    Label status=new Label();Mutex mutex;
+    Label status=new Label();readonly ToolTip attentionTip=new ToolTip();Mutex mutex;string attentionText=null;
     internal Companion(Mutex single,bool diagnostic){
         mutex=single;testMode=diagnostic;bar.Text="Retrieviewer controls";bar.Size=new Size(538,40);bar.BackColor=Color.FromArgb(28,30,34);bar.ForeColor=Color.White;
         bar.Font=new Font("Segoe UI",9);bar.Controls.Add(MakeButton("Ball",8,()=>Interact("ball")));bar.Controls.Add(MakeButton("Treat",76,()=>Interact("treat")));
         bar.Controls.Add(MakeButton("Tug",144,()=>Interact("tug")));bar.Controls.Add(MakeButton("Window",212,ChooseTarget));bar.Controls.Add(MakeButton("Pause",280,TogglePause));bar.Controls.Add(MakeButton("Quit",348,Quit));
-        status.AutoSize=false;status.Location=new Point(422,12);status.Size=new Size(112,22);status.Text="Loading...";bar.Controls.Add(status);
+        status.AutoSize=false;status.AutoEllipsis=true;status.UseMnemonic=false;status.Location=new Point(422,12);status.Size=new Size(112,22);status.Text="Loading...";bar.Controls.Add(status);
         ContextMenuStrip menu=new ContextMenuStrip();menu.Items.Add("Choose window",null,(s,e)=>ChooseTarget());menu.Items.Add("Hide / resume",null,(s,e)=>TogglePause());menu.Items.Add("Quit",null,(s,e)=>Quit());
         tray.Icon=SystemIcons.Application;tray.Text="Retrieviewer · Choose window";tray.ContextMenuStrip=menu;tray.Visible=true;tray.DoubleClick+=(s,e)=>ChooseTarget();
         // Handles are created on the UI thread before the reader can signal EOF.
@@ -151,7 +151,13 @@ sealed class Companion : ApplicationContext {
                 string type=Program.Str(m,"type");
                 if(type=="quit"){Quit();return;}
                 if(type=="loaded"){string ink=m.ContainsKey("ink")?Program.Str(m,"ink"):"cream";if(ink!="cream"&&ink!="gold"&&ink!="dark")throw new Exception("Invalid ink");pet.Ink=ink=="gold"?Color.FromArgb(245,231,184,103):ink=="dark"?Color.FromArgb(245,67,48,24):Color.FromArgb(245,248,242,232);loaded=true;status.Text="Playing";if(testMode)((Button)bar.Controls[0]).PerformClick();continue;}
-                if(type=="interaction"){status.Text=Program.Bool(m,"accepted")?"Ready!":"Please wait";continue;}
+                if(type=="interaction"){status.Text=attentionText??(Program.Bool(m,"accepted")?"Ready!":"Please wait");continue;}
+                if(type=="attention"){
+                    int count=Program.Int(m,"count");string state=Program.Str(m,"state");
+                    attentionText=Program.AttentionText(state,count,m.ContainsKey("label")?Program.Str(m,"label"):"",m.ContainsKey("kind")?Program.Str(m,"kind"):"");status.Text=attentionText;attentionTip.SetToolTip(status,attentionText);
+                    Program.Emit(new {type="attention-label",text=attentionText});
+                    continue;
+                }
                 if(type=="error"){status.Text="Engine error";Quit();return;}
                 if(type=="frame"){
                     // Always acknowledge discarded frames too, otherwise resizing can deadlock the sender.
@@ -210,7 +216,7 @@ sealed class Companion : ApplicationContext {
         }
     }
     void Quit(){if(quitting)return;quitting=true;clock.Stop();if(pickerWindow!=null)pickerWindow.Close();pet.Close();bar.Close();tray.Visible=false;tray.Dispose();Program.Emit(new {type="quit"});ExitThread();}
-    protected override void Dispose(bool disposing){if(disposing){clock.Dispose();pet.Dispose();bar.Dispose();tray.Dispose();if(testTarget!=null)testTarget.Dispose();if(mutex!=null){mutex.ReleaseMutex();mutex.Dispose();mutex=null;}}base.Dispose(disposing);}
+    protected override void Dispose(bool disposing){if(disposing){clock.Dispose();attentionTip.Dispose();pet.Dispose();bar.Dispose();tray.Dispose();if(testTarget!=null)testTarget.Dispose();if(mutex!=null){mutex.ReleaseMutex();mutex.Dispose();mutex=null;}}base.Dispose(disposing);}
 }
 
 static class Program {
@@ -220,6 +226,17 @@ static class Program {
     internal static int Int(Dictionary<string,object> m,string key){return Convert.ToInt32(m[key]);}
     internal static string Str(Dictionary<string,object> m,string key){return Convert.ToString(m[key]);}
     internal static bool Bool(Dictionary<string,object> m,string key){return Convert.ToBoolean(m[key]);}
+    internal static string AttentionText(string state,int count,string label,string kind){
+        if(count<0||count>32||label.Length>64)throw new Exception("Invalid attention metadata");
+        foreach(char c in label)if(char.IsControl(c)||(c>=0x200b&&c<=0x200f)||(c>=0x202a&&c<=0x202e)||(c>=0x2060&&c<=0x206f))throw new Exception("Invalid attention label");
+        if(state=="connected"){
+            if(count==0)return "Watching";
+            if(label.Length==0)return count+" need input";
+            if(kind!="approval"&&kind!="input")throw new Exception("Invalid attention kind");
+            return label+" - "+(kind=="approval"?"Approval pending":"Input pending")+(count>1?" (+"+(count-1)+")":"");
+        }
+        return state=="paused"?"Watch paused":state=="connecting"?"Connecting...":"Watch offline";
+    }
     [STAThread] static int Main(string[] args){
         try{
             // GUI-subsystem processes have redirected handles but no console code
@@ -263,8 +280,9 @@ static class Program {
             Native.ShowWindow(target.Handle,4);Application.DoEvents();bool restored=!Native.IsIconic(target.Handle);
             bool focus=Native.GetForegroundWindow()==foreground;
             bool gridBounds=GridCell(3840,2160)==8&&GridCell(7680,4320)==12&&GridCell(32000,18000)==0&&GridCell(int.MaxValue,int.MaxValue)==0&&GridCell(0,0)==0;
-            bool passed=clickThrough&&noActivate&&layered&&follows&&minimized&&hidden&&restored&&focus&&pet.PaintedDots>0&&gridBounds;
-            Emit(new {type="self-test",passed=passed,gridBounds=gridBounds,clickThroughStyle=clickThrough,noActivateStyle=noActivate,layered=layered,followGeometry=follows,expectedX=expectedX,expectedY=expectedY,actualX=actual.Left,actualY=actual.Top,minimize=minimized,hide=hidden,restore=restored,foregroundPreserved=focus,dots=pet.PaintedDots,proof=proof});return passed?0:1;
+            bool labels=AttentionText("connected",2,"Worker & Review","approval")=="Worker & Review - Approval pending (+1)"&&AttentionText("connected",0,"","")=="Watching";
+            bool passed=clickThrough&&noActivate&&layered&&follows&&minimized&&hidden&&restored&&focus&&pet.PaintedDots>0&&gridBounds&&labels;
+            Emit(new {type="self-test",passed=passed,attentionLabels=labels,gridBounds=gridBounds,clickThroughStyle=clickThrough,noActivateStyle=noActivate,layered=layered,followGeometry=follows,expectedX=expectedX,expectedY=expectedY,actualX=actual.Left,actualY=actual.Top,minimize=minimized,hide=hidden,restore=restored,foregroundPreserved=focus,dots=pet.PaintedDots,proof=proof});return passed?0:1;
         }
     }
 }

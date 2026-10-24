@@ -14,7 +14,7 @@ if(!npm)throw Error('Run via npm run test:package (uses the current npm CLI).');
 // that happens to retain the same local development version.
 const dist=join(root,'dist');mkdirSync(dist,{recursive:true});
 const output=mkdtempSync(join(dist,'package-check-'));
-const runNpm=(args,cwd)=>execFileSync(process.execPath,[npm,...args],{cwd,encoding:'utf8',timeout:120000,maxBuffer:2e6});
+const runNpm=(args,cwd,env=process.env)=>execFileSync(process.execPath,[npm,...args],{cwd,env,encoding:'utf8',timeout:120000,maxBuffer:2e6});
 const [packed]=JSON.parse(runNpm(['pack','--ignore-scripts','--json','--pack-destination',output],root));
 const paths=packed.files.map(f=>f.path);
 assert.equal(paths.filter(p=>p.endsWith('-q5.bin.gz')).length,9);
@@ -27,8 +27,19 @@ const probe=`
 import assert from 'node:assert/strict';
 import {createPet,getPetAssetFiles,DEFAULT_ART_PROFILE} from '@bitefoundry/retrieviewer';
 import {createPetPlugin} from '@bitefoundry/retrieviewer/plugin';
+import {createAttentionMonitor} from '@bitefoundry/retrieviewer/attention';
+import {createOpenRouterBrain,OPENROUTER_MODEL} from '@bitefoundry/retrieviewer/brain';
 assert.equal(DEFAULT_ART_PROFILE,'q5');assert.equal(getPetAssetFiles().length,19);
 const a=await createPet({seed:731});let count=0,clears=0,frame;
+const brain=createOpenRouterBrain({apiKey:'fixture-not-a-real-key',fetch:async()=>new Response(JSON.stringify({choices:[{finish_reason:'stop',message:{content:JSON.stringify({decision:'notify'})}}]}))});
+assert.equal(OPENROUTER_MODEL,'deepseek/deepseek-v4.1-flash-1017');assert.equal((await brain.decide({kind:'approval',pendingCount:1})).decision,'notify');brain.dispose();
+const watcher=createAttentionMonitor({readSnapshot:async()=>({source:'fixture',scope:'room',items:[]}),onNotice:notice=>a.notify(notice),onClear:()=>a.clearNotice()});
+watcher.tick();await watcher.settled();assert.equal(watcher.status.state,'connected');watcher.dispose();
+assert.equal(a.notify({kind:'approval'}),true);assert.ok(a.frame({columns:24,rows:8}).report.attention);a.clearNotice();
+for(const gesture of ['paw','wall']){
+ const dog=await createPet({seed:731});let seen=false,done=false;
+ try{assert.equal(dog.notify({kind:'input',gesture}),true);for(let i=0;i<900;i++){dog.step(1/60);if(i%6)continue;const f=dog.frame({columns:80,rows:40,poseFps:30});if(f.state.state==='attention-'+gesture)seen=true;if(seen&&!f.report.attention){done=true;break;}}assert.ok(seen&&done,gesture+' installed cue');}finally{dog.dispose();}
+}
 assert.equal(a.frame({columns:24,rows:8}).report.returnStyle,'auto');
 assert.equal(a.setReturnStyle('brake'),'brake');assert.equal(a.interact('ball'),true);
 assert.equal(a.frame({columns:24,rows:8}).report.returnMode,'brake');
@@ -65,6 +76,14 @@ assert.match(help,/retrieviewer desktop/);assert.match(help,/desktop-remove --ye
 assert.match(help,/--return-style auto\|brake\|trot\|run-trot/);
 const desktopStatus=JSON.parse(execFileSync(process.execPath,[join(installed,'retrieviewer-cli.mjs'),'desktop-status','--json'],{cwd:consumer,env:cliEnv,encoding:'utf8',timeout:10000}));
 assert.deepEqual(desktopStatus,{running:false});
+// Reproduce launching outside the checkout: resolve the installed npm bin, not
+// a relative source filename. No visible overlay or real settings are touched.
+assert.equal(installedPackage.bin.retrieviewer,'retrieviewer-cli.mjs');
+const unrelated=mkdtempSync(join(tmpdir(),'retrieviewer-unrelated-cwd-'));
+const binStatus=JSON.parse(runNpm(['exec','--offline','--prefix',consumer,'--','retrieviewer','desktop-status','--json'],unrelated,cliEnv));
+assert.deepEqual(binStatus,{running:false});
+const binHelp=runNpm(['exec','--offline','--prefix',consumer,'--','retrieviewer','--help'],unrelated,cliEnv);
+assert.match(binHelp,/--watch stackbite\|off/);assert.match(binHelp,/--brain openrouter\|off/);assert.match(binHelp,/paid DeepSeek V4\.1/);
 for(const file of ['integrations/windows-overlay/Overlay.cs','integrations/windows-overlay/desktop.mjs','integrations/windows-overlay/worker.mjs','integrations/windows-overlay/protocol.mjs','WINDOWS-COMPANION.md'])assert.ok(paths.includes(file));
 const installProbe=`
 import assert from 'node:assert/strict';
@@ -92,6 +111,6 @@ if(python==='available'){
  python='passed installed example';
 }
 const sha256=createHash('sha256').update(readFileSync(archive)).digest('hex');
-const report={version:JSON.parse(readFileSync(join(installed,'package.json'))).version,archive,sha256,size:packed.size,unpackedSize:packed.unpackedSize,consumer,offlineInstall:true,exactInstalledFiles:true,defaultAssets:9,originalAssetsBundled:false,result,examples:['embed','plugin','live'],bridge:true,python,installerLifecycle:true};
+const report={version:JSON.parse(readFileSync(join(installed,'package.json'))).version,archive,sha256,size:packed.size,unpackedSize:packed.unpackedSize,consumer,offlineInstall:true,exactInstalledFiles:true,cliFromUnrelatedDirectory:true,defaultAssets:9,originalAssetsBundled:false,result,examples:['embed','plugin','live'],bridge:true,python,installerLifecycle:true};
 writeFileSync(join(output,'package-check.json'),JSON.stringify(report,null,2)+'\n');
 console.log(JSON.stringify(report,null,2));

@@ -54,16 +54,16 @@ test('auto preserves all three return gaits without adjacent repeats and seats a
 
 test('carry art has a seamless cyclic schedule, exact sitting handoff and bounded extra retention',()=>{
  const encoded=gunzipSync(readFileSync(new URL('./puppy-companion-comfort-q5.bin.gz',import.meta.url))),store=readPackedFrames(encoded),motion=meta.carryTrot;
- assert.equal(meta.frames,45);assert.equal(motion.frames.length,4);assert.equal(motion.settle.frames.length,4);
+ assert.equal(meta.attentionPaw?.baseFrames??meta.frames,45);assert.equal(motion.frames.length,4);assert.equal(motion.settle.frames.length,4);
  assert.equal(comfortMotionKey(0,motion),0);assert.equal(comfortMotionKey(.999999,motion),3);
  const arrival=readPackedFrames(gunzipSync(readFileSync(new URL('./puppy-paper-arrival-seat-q5.bin.gz',import.meta.url))));
  assert.deepEqual(store.getFrame(motion.settle.frames.at(-1)),arrival.getFrame(0));
  const hash=createHash('sha256');for(let i=0;i<37;i++)hash.update(store.getFrame(i));
  assert.equal(hash.digest('hex'),'891aa32b15fca24cb781dfc240856c30e15696c8148c51abbe25fd1d62e16160');
  const codec={compress:b=>deflateRawSync(b,{level:3}),expand:(b,n)=>inflateRawSync(b,{maxOutputLength:n})};
- const all=readPackedFrames(encoded,{codec}),base=readPackedFrames(encoded,{codec,frameIndices:Array.from({length:37},(_,i)=>i)});
+ const all=readPackedFrames(encoded,{codec,frameIndices:Array.from({length:45},(_,i)=>i)}),base=readPackedFrames(encoded,{codec,frameIndices:Array.from({length:37},(_,i)=>i)});
  assert.ok(all.residentPixelBytes-base.residentPixelBytes<110_000,'new Node compressed pixels under 108KiB');
- assert.ok(meta.gzipBytes-meta.carrySource.gzipBytes<90_000);
+ assert.ok((meta.attentionSource?.baseGzipBytes??meta.gzipBytes)-meta.carrySource.gzipBytes<90_000);
  const out=new Uint8ClampedArray(320*320*4),sample=createComfortSpriteSampler(store,meta,out);
  for(let i=0;i<30;i++)assert.equal(sample({clip:'carry-trot',progress:i/30}),out);
  assert.ok(store.stats().cachedFrames<=2);

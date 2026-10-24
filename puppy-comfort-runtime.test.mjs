@@ -21,7 +21,8 @@ test('tiny tug keys share the exact original seat endpoint and bounded source ca
  assert.ok(original.residentPixelBytes<350_000,'adding separate fetch keys must not inflate tug/sleep retained art');
  const fetchOnly=readPackedFrames(encoded,{frameIndices:Array.from({length:37},(_,i)=>i)});
  assert.ok(fetchOnly.residentPixelBytes-original.residentPixelBytes<750_000,'accepted fetch source increment stays bounded');
- assert.ok(bytes.residentPixelBytes-fetchOnly.residentPixelBytes<300_000,'eight new trot/gather keys stay bounded');
+ const trotOnly=readPackedFrames(encoded,{frameIndices:Array.from({length:45},(_,i)=>i)});
+ assert.ok(trotOnly.residentPixelBytes-fetchOnly.residentPixelBytes<300_000,'the original eight trot/gather keys stay bounded independently of attention art');
  const neutral=Uint8Array.from(sample({clip:'tug',progress:0}).filter((_,i)=>i%4===0));
  assert.deepEqual(neutral,seat.getFrame(50));
  for(let i=0;i<181;i++){const rgba=sample({clip:'tug',progress:i/180});assert.equal(rgba.length,320*320*4);}

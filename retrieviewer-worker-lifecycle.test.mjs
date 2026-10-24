@@ -13,7 +13,7 @@ async function bounded(promise){let timer;try{return await Promise.race([promise
 async function fixture(t,mode){
  const stateDir=await mkdtemp(join(tmpdir(),'retrieviewer-startup-')),marker=join(stateDir,'painter.json');
  const spec={command:process.execPath,args:[fileURLToPath(new URL('./tools/test-fixtures/overlay-lifecycle-helper.mjs',import.meta.url)),marker,mode],mode:'windows-overlay',fps:30};
- const worker=spawn(process.execPath,[fileURLToPath(new URL('./integrations/windows-overlay/worker.mjs',import.meta.url)),'--helper-spec',JSON.stringify(spec)],{windowsHide:true,stdio:['ignore','ignore','pipe','ipc'],env:{...process.env,RETRIEVIEWER_HOME:stateDir}});
+ const worker=spawn(process.execPath,[fileURLToPath(new URL('./integrations/windows-overlay/worker.mjs',import.meta.url)),'--helper-spec',JSON.stringify(spec)],{windowsHide:true,stdio:['ignore','ignore','pipe','ipc'],env:{...process.env,RETRIEVIEWER_HOME:stateDir,RETRIEVIEWER_WATCH:'off',RETRIEVIEWER_BRAIN:'off'}});
  let stderr='';worker.stderr.on('data',s=>stderr+=s);const exited=once(worker,'exit');
  t.after(async()=>{if(worker.connected)worker.disconnect();if(worker.exitCode===null&&worker.signalCode===null){await stopDesktop({stateDir}).catch(()=>{});if(worker.exitCode===null&&worker.signalCode===null)worker.kill();}await bounded(exited);});
  async function painter(){for(let i=0;i<100;i++){try{return JSON.parse(await readFile(marker,'utf8'));}catch(e){if(e.code!=='ENOENT')throw e;}await sleep(20);}throw Error('no painter '+stderr);}
@@ -42,7 +42,7 @@ test('disconnect immediately at spawn cannot leave a startup session behind',asy
 test('killing the launcher during startup also reaps its detached worker and painter',async t=>{
  const stateDir=await mkdtemp(join(tmpdir(),'retrieviewer-launcher-crash-')),marker=join(stateDir,'painter.json');
  const spec={command:process.execPath,args:[fileURLToPath(new URL('./tools/test-fixtures/overlay-lifecycle-helper.mjs',import.meta.url)),marker,'waiting'],mode:'windows-overlay',fps:30};
- const source=`import {spawn} from 'node:child_process';const worker=spawn(process.execPath,[${JSON.stringify(fileURLToPath(new URL('./integrations/windows-overlay/worker.mjs',import.meta.url)))},'--helper-spec',process.argv[2]],{detached:true,windowsHide:true,stdio:['ignore','ignore','ignore','ipc'],env:{...process.env,RETRIEVIEWER_HOME:process.argv[1]}});console.log(worker.pid);worker.on('message',()=>{});`;
+ const source=`import {spawn} from 'node:child_process';const worker=spawn(process.execPath,[${JSON.stringify(fileURLToPath(new URL('./integrations/windows-overlay/worker.mjs',import.meta.url)))},'--helper-spec',process.argv[2]],{detached:true,windowsHide:true,stdio:['ignore','ignore','ignore','ipc'],env:{...process.env,RETRIEVIEWER_HOME:process.argv[1],RETRIEVIEWER_WATCH:'off',RETRIEVIEWER_BRAIN:'off'}});console.log(worker.pid);worker.on('message',()=>{});`;
  const launcher=spawn(process.execPath,['--input-type=module','-e',source,stateDir,JSON.stringify(spec)],{windowsHide:true,stdio:['ignore','pipe','pipe']});
  const exited=once(launcher,'exit');let workerPid,painterPid;
  const gone=async pid=>{

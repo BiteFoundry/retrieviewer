@@ -2,20 +2,22 @@
   "version": 6,
   "width": 320,
   "height": 320,
-  "frames": 45,
+  "frames": 60,
   "clips": [
     "tug",
     "sleep",
     "scramble",
     "pickup-rear",
     "pickup-side",
-    "carry-trot"
+    "carry-trot",
+    "attention-paw",
+    "attention-wall"
   ],
-  "gzipBytes": 457052,
-  "residentPixelBytes": 1302445,
+  "gzipBytes": 617303,
+  "residentPixelBytes": 1667677,
   "sourceSheetSha256": "10fde9dacca5cb45acd68f387e7ed3bcf88cd72cf0f9c4220d31d819db91731e",
   "neutralSha256": "19f89a8bcb5a937e528593a8f36db846a0d45a5ee398f1b0873c056e5be2fa0a",
-  "encodedSha256": "f4e7604e3a581f5b610eb0f7873deee317a6e2ad0ff548106db2e64f6bead89b",
+  "encodedSha256": "5f598c2ba15212a73e88c02f0d189b20a74e46f2346f7dfbc3bca8c2d26fc66b",
   "method": "Approved momentum poses, single depth pursuit, exact source endpoints; one common scale per authored batch, no runtime image warp or expanded film.",
   "registration": {
     "sheetSize": [
@@ -462,5 +464,816 @@
     "gzipBytes": 375968,
     "residentPixelBytes": 1043388,
     "sheetSha256": "43e41a678d348439bf989535bf30761cc23ac9d4ca049705a9a651e1e8b61ee0"
+  },
+  "attentionPaw": {
+    "frames": [
+      0,
+      45,
+      46,
+      47,
+      48,
+      49,
+      47,
+      48,
+      49,
+      50,
+      0
+    ],
+    "times": [
+      0,
+      0.12,
+      0.28,
+      0.46,
+      0.64,
+      0.84,
+      1.04,
+      1.22,
+      1.42,
+      1.64,
+      1.88
+    ],
+    "duration": 1.88,
+    "floorOffsets": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "baseFrames": 45,
+    "movingPaw": "viewer-left",
+    "plantedPaw": "viewer-right",
+    "releases": {
+      "0": {
+        "frames": [
+          0,
+          0
+        ],
+        "times": [
+          0,
+          0.02
+        ],
+        "duration": 0.02,
+        "floorOffsets": [
+          0,
+          0
+        ]
+      },
+      "45": {
+        "frames": [
+          45,
+          50,
+          0
+        ],
+        "times": [
+          0,
+          0.12,
+          0.24
+        ],
+        "duration": 0.24,
+        "floorOffsets": [
+          0,
+          0,
+          0
+        ]
+      },
+      "46": {
+        "frames": [
+          46,
+          45,
+          50,
+          0
+        ],
+        "times": [
+          0,
+          0.1,
+          0.2,
+          0.3
+        ],
+        "duration": 0.3,
+        "floorOffsets": [
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "47": {
+        "frames": [
+          47,
+          45,
+          50,
+          0
+        ],
+        "times": [
+          0,
+          0.1,
+          0.2,
+          0.3
+        ],
+        "duration": 0.3,
+        "floorOffsets": [
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "48": {
+        "frames": [
+          48,
+          45,
+          50,
+          0
+        ],
+        "times": [
+          0,
+          0.1,
+          0.2,
+          0.3
+        ],
+        "duration": 0.3,
+        "floorOffsets": [
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "49": {
+        "frames": [
+          49,
+          45,
+          50,
+          0
+        ],
+        "times": [
+          0,
+          0.1,
+          0.2,
+          0.3
+        ],
+        "duration": 0.3,
+        "floorOffsets": [
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "50": {
+        "frames": [
+          50,
+          0
+        ],
+        "times": [
+          0,
+          0.18
+        ],
+        "duration": 0.18,
+        "floorOffsets": [
+          0,
+          0
+        ]
+      }
+    }
+  },
+  "attentionSource": {
+    "baseGzipBytes": 457052,
+    "generator": "built-in imagegen",
+    "sheetSha256": "0c3b01952378cd7c0fd941f53e1c43ca5de73c63b3875e58d035b009508d693a",
+    "reference": "existing licensed canonical seated puppy; no new photographs",
+    "registration": {
+      "sheetSize": [
+        1536,
+        1024
+      ],
+      "columns": 3,
+      "rows": 2,
+      "scale": 0.495260663507109,
+      "plantedTarget": [
+        187,
+        301
+      ],
+      "keys": [
+        {
+          "cell": 0,
+          "scale": 0.495260663507109,
+          "dx": 17,
+          "dy": 62,
+          "planted": [
+            187,
+            301
+          ],
+          "bounds": [
+            56,
+            91,
+            228,
+            301
+          ]
+        },
+        {
+          "cell": 1,
+          "scale": 0.495260663507109,
+          "dx": 32,
+          "dy": 62,
+          "planted": [
+            186.5,
+            301
+          ],
+          "bounds": [
+            56,
+            91,
+            229,
+            301
+          ]
+        },
+        {
+          "cell": 2,
+          "scale": 0.495260663507109,
+          "dx": 34,
+          "dy": 62,
+          "planted": [
+            187.5,
+            301
+          ],
+          "bounds": [
+            57,
+            91,
+            229,
+            301
+          ]
+        },
+        {
+          "cell": 3,
+          "scale": 0.495260663507109,
+          "dx": 18,
+          "dy": 72,
+          "planted": [
+            187.5,
+            301
+          ],
+          "bounds": [
+            58,
+            91,
+            229,
+            301
+          ]
+        },
+        {
+          "cell": 4,
+          "scale": 0.495260663507109,
+          "dx": 32,
+          "dy": 72,
+          "planted": [
+            187.5,
+            301
+          ],
+          "bounds": [
+            56,
+            91,
+            229,
+            301
+          ]
+        },
+        {
+          "cell": 5,
+          "scale": 0.495260663507109,
+          "dx": 30,
+          "dy": 71,
+          "planted": [
+            186.5,
+            301
+          ],
+          "bounds": [
+            51,
+            89,
+            227,
+            301
+          ]
+        }
+      ]
+    },
+    "existingFrameHashes": [
+      "19f89a8bcb5a937e528593a8f36db846a0d45a5ee398f1b0873c056e5be2fa0a",
+      "0048dad7f7241ba0e6c8d8a0d0436a5a76529e58b170de19ad61adb8cc974390",
+      "86a5e8243fe68a90405303627ce8bd88afff090f3bb59ba0f2c0669b63e9d712",
+      "157b21b573a568c2e8ff3380babc0fddfee10a4385d5ce7ace2086aa51eccbbe",
+      "764da6d44b7313daaf1e7946ab7736caf100d9054ea38e45097393488e70e4b2",
+      "692df98472244b85ae1f80422aaf61e0a6e1fa250df22511827a1848b72bfc2f",
+      "5d06580c26633dfe796c914fd0339b4f2989c8a71269c4614a7ed9cb79ee6090",
+      "3e19f24bb6194f3409d37e4e0261cc0318699a90aa06486f8b3f7628ce3bb700",
+      "831f566e98a59c70d017dee17c265174349f1b50abe46eab6857259f2f10353e",
+      "9cceca5cf751d9118496f06791f3d30490f3627579899496323835c46b0394dd",
+      "377f99fed443abfdd1bf723dd47c12a68eec4e20f621c294b9b6b23838974a16",
+      "73e77992ff2d63348561e5c944de48f8751505e40994c5e106a3da3091b92cf1",
+      "60aa7cdb978d829d6a3038e46bd0365d4f4f2f2f7c04690bdf4227bde65dcce5",
+      "8192c504552a3984c80e1c3216e134605d4a930ec14cd7f778036e629e334601",
+      "952ac24f57657fba4105d41419333ac54175cd4d4452621884927cfe6721168a",
+      "f8af51953c9f84d8c5384d0acd8d2f3b059e82935b6d77060b6516a0e6eb3e7d",
+      "fe997c1114d9aba1a4731b1ba2f11c61b2524b7db7a63387deb098632a79fafb",
+      "0f8465e6a67128227305cc958478311e6f4c611ad963357ab43e0165b3e20573",
+      "8192c504552a3984c80e1c3216e134605d4a930ec14cd7f778036e629e334601",
+      "614ffa7121c3bd4bcc3291e03be5b1187f6f39078e08defbb862dfc4de7a8031",
+      "75370437acab417a29d883304e2175ecf62d8b8e8472265dabf5188b68cf37d2",
+      "bc97048165d6f7cb2cc8fdbe43f0c471f233b3342729ac31d15515d7f6246763",
+      "e666dd9183b63e1d2ab952b8afa58223ee94a7e331282d2a3c38a2534490c015",
+      "56a367a878005c0f3126d24214ad1acce1935d82c924766b56097b47f765575d",
+      "614ffa7121c3bd4bcc3291e03be5b1187f6f39078e08defbb862dfc4de7a8031",
+      "fa79a8762b57c0d5b70586a687f10e4a313e227e11e2435f6d7af0cd0866cc83",
+      "69d769ef7895ce15a8a650e03fcfebb087d9df9e6f3315693867958accdf8b8f",
+      "721678516b3d5ab1deaea8fbc3e5bbf6bc2a178f167b926f68a254997f8bd77e",
+      "3c55726fec4410b664cede4e0ab3e264501f7bc53a1a3c41fbeeb6223b0363df",
+      "b8d932f525cda79aabb3c970acbc027cbdb1fb6a5aceb2c95a5d96083c8bedce",
+      "6c368b5c9bd77611f9fa72025480c7846dc7b1e510ffca1a1d86b8effdc8e435",
+      "aefd1527b562bc1514405df1f9e06505a886b3943737b6449aa3b2ef0632fa2f",
+      "d9c5aa24c8ee8d7fc1adea11f7ea04b986c7caf428cdf2b7abd0c28233bb0dc4",
+      "19d0c2b2103c8ef2223d2b9b06c0693f4bb41dbcd126e159e2235e1f82c5bdd3",
+      "b5416d2474b694037f5a37dc0ca0440e4721baff4a2f6c4d482564b00def415d",
+      "81fc98be2daedc59ecbf107dfcfb08fad553b7bb06550e722e6a2cd6ed803e14",
+      "8192c504552a3984c80e1c3216e134605d4a930ec14cd7f778036e629e334601",
+      "95b5ff7932618b1160664344679c63e6cd0a55bd3a5454caf3ba0de43404a427",
+      "0c94ce92e7d6ec5837649741c831e9efcab089a347909cdb336df6a1b4a2d136",
+      "1823038f6d39bbcd05632df0004263ac0f5498296a36375461b006b46b73f291",
+      "7a4b7fa148b8b8ed0f96cb6ac2d76fe6dac0a927eaf156f0aef9ae23046ac71e",
+      "2bd245b4a728b3dfd823e567a30aec068d1ef366c6bee9e6c55cc6b6cc6e7d55",
+      "ddf46cac1ada2146f1b672d6562c3ae935bd4b95b8ef74fcc753c2941ad3510a",
+      "17cb794b46c42a42b6252d4d7e963cbfefccf661c188a4dca5ac2c4227f61710",
+      "5ccf5acd9ca9ea81a0c9fc59d1ab2a2ddab148c942e31009f1a4c18de347fae8"
+    ],
+    "method": "Six whole-body keys at one uniform scale; registered on the same planted forepaw. Exact old neutral bookends; two short air scrapes; bounded authored release paths."
+  },
+  "attentionWall": {
+    "frames": [
+      0,
+      51,
+      52,
+      53,
+      54,
+      56,
+      55,
+      56,
+      54,
+      56,
+      57,
+      58,
+      59,
+      0
+    ],
+    "times": [
+      0,
+      0.12,
+      0.28,
+      0.48,
+      0.66,
+      0.8,
+      0.94,
+      1.08,
+      1.22,
+      1.36,
+      1.52,
+      1.72,
+      1.96,
+      2.2
+    ],
+    "duration": 2.2,
+    "floorOffsets": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "baseFrames": 51,
+    "plantedPaws": "hind-pair",
+    "wall": "implicit front glass",
+    "releases": {
+      "0": {
+        "frames": [
+          0,
+          0
+        ],
+        "times": [
+          0,
+          0.02
+        ],
+        "duration": 0.02,
+        "floorOffsets": [
+          0,
+          0
+        ]
+      },
+      "51": {
+        "frames": [
+          51,
+          59,
+          0
+        ],
+        "times": [
+          0,
+          0.12,
+          0.24
+        ],
+        "duration": 0.24,
+        "floorOffsets": [
+          0,
+          0,
+          0
+        ]
+      },
+      "52": {
+        "frames": [
+          52,
+          58,
+          59,
+          0
+        ],
+        "times": [
+          0,
+          0.1,
+          0.24,
+          0.36
+        ],
+        "duration": 0.36,
+        "floorOffsets": [
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "53": {
+        "frames": [
+          53,
+          58,
+          59,
+          0
+        ],
+        "times": [
+          0,
+          0.12,
+          0.26,
+          0.4
+        ],
+        "duration": 0.4,
+        "floorOffsets": [
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "54": {
+        "frames": [
+          54,
+          58,
+          59,
+          0
+        ],
+        "times": [
+          0,
+          0.12,
+          0.26,
+          0.4
+        ],
+        "duration": 0.4,
+        "floorOffsets": [
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "55": {
+        "frames": [
+          55,
+          58,
+          59,
+          0
+        ],
+        "times": [
+          0,
+          0.12,
+          0.26,
+          0.4
+        ],
+        "duration": 0.4,
+        "floorOffsets": [
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "56": {
+        "frames": [
+          56,
+          58,
+          59,
+          0
+        ],
+        "times": [
+          0,
+          0.12,
+          0.26,
+          0.4
+        ],
+        "duration": 0.4,
+        "floorOffsets": [
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "57": {
+        "frames": [
+          57,
+          58,
+          59,
+          0
+        ],
+        "times": [
+          0,
+          0.12,
+          0.26,
+          0.4
+        ],
+        "duration": 0.4,
+        "floorOffsets": [
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "58": {
+        "frames": [
+          58,
+          59,
+          0
+        ],
+        "times": [
+          0,
+          0.14,
+          0.28
+        ],
+        "duration": 0.28,
+        "floorOffsets": [
+          0,
+          0,
+          0
+        ]
+      },
+      "59": {
+        "frames": [
+          59,
+          0
+        ],
+        "times": [
+          0,
+          0.14
+        ],
+        "duration": 0.14,
+        "floorOffsets": [
+          0,
+          0
+        ]
+      }
+    }
+  },
+  "wallSource": {
+    "generator": "built-in imagegen",
+    "sheetSha256": "ea1a8f2f4d3f4b897bec95bcd06b8a4d6cd81d083713b67857efac469707e4af",
+    "baseGzipBytes": 512438,
+    "reference": "existing licensed canonical seated puppy; no new photos",
+    "registration": {
+      "sheetSize": [
+        1254,
+        1254
+      ],
+      "columns": 3,
+      "rows": 3,
+      "scale": 0.7572463768115942,
+      "plantedTarget": [
+        160,
+        301
+      ],
+      "keys": [
+        {
+          "cell": 0,
+          "scale": 0.7572463768115942,
+          "dx": -6,
+          "dy": -2,
+          "planted": [
+            160.25,
+            301
+          ],
+          "bounds": [
+            62,
+            92,
+            252,
+            301
+          ]
+        },
+        {
+          "cell": 1,
+          "scale": 0.7572463768115942,
+          "dx": 14,
+          "dy": -3,
+          "planted": [
+            159.5,
+            301
+          ],
+          "bounds": [
+            55,
+            39,
+            257,
+            301
+          ]
+        },
+        {
+          "cell": 2,
+          "scale": 0.7572463768115942,
+          "dx": 16,
+          "dy": -3,
+          "planted": [
+            160,
+            301
+          ],
+          "bounds": [
+            55,
+            9,
+            250,
+            301
+          ]
+        },
+        {
+          "cell": 3,
+          "scale": 0.7572463768115942,
+          "dx": -7,
+          "dy": 3,
+          "planted": [
+            160,
+            301
+          ],
+          "bounds": [
+            52,
+            18,
+            254,
+            301
+          ]
+        },
+        {
+          "cell": 4,
+          "scale": 0.7572463768115942,
+          "dx": 5,
+          "dy": 3,
+          "planted": [
+            160,
+            301
+          ],
+          "bounds": [
+            57,
+            21,
+            244,
+            301
+          ]
+        },
+        {
+          "cell": 5,
+          "scale": 0.7572463768115942,
+          "dx": 16,
+          "dy": 3,
+          "planted": [
+            160.25,
+            301
+          ],
+          "bounds": [
+            54,
+            20,
+            249,
+            301
+          ]
+        },
+        {
+          "cell": 6,
+          "scale": 0.7572463768115942,
+          "dx": -7,
+          "dy": 13,
+          "planted": [
+            160.25,
+            301
+          ],
+          "bounds": [
+            54,
+            15,
+            249,
+            301
+          ]
+        },
+        {
+          "cell": 7,
+          "scale": 0.7572463768115942,
+          "dx": 8,
+          "dy": 19,
+          "planted": [
+            159.75,
+            301
+          ],
+          "bounds": [
+            49,
+            60,
+            252,
+            301
+          ]
+        },
+        {
+          "cell": 8,
+          "scale": 0.7572463768115942,
+          "dx": 13,
+          "dy": 13,
+          "planted": [
+            160.25,
+            301
+          ],
+          "bounds": [
+            52,
+            85,
+            255,
+            301
+          ]
+        }
+      ]
+    },
+    "existingFrameHashes": [
+      "19f89a8bcb5a937e528593a8f36db846a0d45a5ee398f1b0873c056e5be2fa0a",
+      "0048dad7f7241ba0e6c8d8a0d0436a5a76529e58b170de19ad61adb8cc974390",
+      "86a5e8243fe68a90405303627ce8bd88afff090f3bb59ba0f2c0669b63e9d712",
+      "157b21b573a568c2e8ff3380babc0fddfee10a4385d5ce7ace2086aa51eccbbe",
+      "764da6d44b7313daaf1e7946ab7736caf100d9054ea38e45097393488e70e4b2",
+      "692df98472244b85ae1f80422aaf61e0a6e1fa250df22511827a1848b72bfc2f",
+      "5d06580c26633dfe796c914fd0339b4f2989c8a71269c4614a7ed9cb79ee6090",
+      "3e19f24bb6194f3409d37e4e0261cc0318699a90aa06486f8b3f7628ce3bb700",
+      "831f566e98a59c70d017dee17c265174349f1b50abe46eab6857259f2f10353e",
+      "9cceca5cf751d9118496f06791f3d30490f3627579899496323835c46b0394dd",
+      "377f99fed443abfdd1bf723dd47c12a68eec4e20f621c294b9b6b23838974a16",
+      "73e77992ff2d63348561e5c944de48f8751505e40994c5e106a3da3091b92cf1",
+      "60aa7cdb978d829d6a3038e46bd0365d4f4f2f2f7c04690bdf4227bde65dcce5",
+      "8192c504552a3984c80e1c3216e134605d4a930ec14cd7f778036e629e334601",
+      "952ac24f57657fba4105d41419333ac54175cd4d4452621884927cfe6721168a",
+      "f8af51953c9f84d8c5384d0acd8d2f3b059e82935b6d77060b6516a0e6eb3e7d",
+      "fe997c1114d9aba1a4731b1ba2f11c61b2524b7db7a63387deb098632a79fafb",
+      "0f8465e6a67128227305cc958478311e6f4c611ad963357ab43e0165b3e20573",
+      "8192c504552a3984c80e1c3216e134605d4a930ec14cd7f778036e629e334601",
+      "614ffa7121c3bd4bcc3291e03be5b1187f6f39078e08defbb862dfc4de7a8031",
+      "75370437acab417a29d883304e2175ecf62d8b8e8472265dabf5188b68cf37d2",
+      "bc97048165d6f7cb2cc8fdbe43f0c471f233b3342729ac31d15515d7f6246763",
+      "e666dd9183b63e1d2ab952b8afa58223ee94a7e331282d2a3c38a2534490c015",
+      "56a367a878005c0f3126d24214ad1acce1935d82c924766b56097b47f765575d",
+      "614ffa7121c3bd4bcc3291e03be5b1187f6f39078e08defbb862dfc4de7a8031",
+      "fa79a8762b57c0d5b70586a687f10e4a313e227e11e2435f6d7af0cd0866cc83",
+      "69d769ef7895ce15a8a650e03fcfebb087d9df9e6f3315693867958accdf8b8f",
+      "721678516b3d5ab1deaea8fbc3e5bbf6bc2a178f167b926f68a254997f8bd77e",
+      "3c55726fec4410b664cede4e0ab3e264501f7bc53a1a3c41fbeeb6223b0363df",
+      "b8d932f525cda79aabb3c970acbc027cbdb1fb6a5aceb2c95a5d96083c8bedce",
+      "6c368b5c9bd77611f9fa72025480c7846dc7b1e510ffca1a1d86b8effdc8e435",
+      "aefd1527b562bc1514405df1f9e06505a886b3943737b6449aa3b2ef0632fa2f",
+      "d9c5aa24c8ee8d7fc1adea11f7ea04b986c7caf428cdf2b7abd0c28233bb0dc4",
+      "19d0c2b2103c8ef2223d2b9b06c0693f4bb41dbcd126e159e2235e1f82c5bdd3",
+      "b5416d2474b694037f5a37dc0ca0440e4721baff4a2f6c4d482564b00def415d",
+      "81fc98be2daedc59ecbf107dfcfb08fad553b7bb06550e722e6a2cd6ed803e14",
+      "8192c504552a3984c80e1c3216e134605d4a930ec14cd7f778036e629e334601",
+      "95b5ff7932618b1160664344679c63e6cd0a55bd3a5454caf3ba0de43404a427",
+      "0c94ce92e7d6ec5837649741c831e9efcab089a347909cdb336df6a1b4a2d136",
+      "1823038f6d39bbcd05632df0004263ac0f5498296a36375461b006b46b73f291",
+      "7a4b7fa148b8b8ed0f96cb6ac2d76fe6dac0a927eaf156f0aef9ae23046ac71e",
+      "2bd245b4a728b3dfd823e567a30aec068d1ef366c6bee9e6c55cc6b6cc6e7d55",
+      "ddf46cac1ada2146f1b672d6562c3ae935bd4b95b8ef74fcc753c2941ad3510a",
+      "17cb794b46c42a42b6252d4d7e963cbfefccf661c188a4dca5ac2c4227f61710",
+      "5ccf5acd9ca9ea81a0c9fc59d1ab2a2ddab148c942e31009f1a4c18de347fae8",
+      "2380377ca6ebcbcca93504a75e131a1eb0eb4d54399a27ba5865a969c1b57b96",
+      "5d4b37e8eef9f82ba6f6ef7c4db718c98b9edaa8f197c65ff7f180fcb538d2df",
+      "31c469f45c192fcf3de8478f9d7c04139b9e9e3312214facd27dd78fcbf1b916",
+      "b2ffd2ded33fb1572978453ec8e1fe51feec92be61bd1b420e28100cc6e10a42",
+      "76dac49740eeec9cfc53646053d05d801b54c542d15dedea2138fa44452ff8c1",
+      "43ac9d362039449d7e856a573be6dc1c19a3d6536d1935e1e6c2a3a3dfe75b48"
+    ],
+    "method": "Nine connected whole-body keys at one common scale. Two rear soles support an implicit front glass scrabble; exact neutral bookends and bounded lowering paths."
   }
 }

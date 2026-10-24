@@ -167,6 +167,9 @@ export async function createPet({loadAsset=defaultLoadAsset,seed,energy,pawTrans
   },
   // 'ball' | 'treat' | 'tug'. False when busy or cooling down; unknown kinds throw.
   interact(kind){alive();if(!INTERACTIONS.includes(kind))throw TypeError(`Unknown interaction: ${kind}`);return life.interact(kind);},
+  // A bounded visual cue only; never clicks, types, focuses or approves anything.
+  notify(notice){alive();return life.notify(notice);},
+  clearNotice(){alive();life.clearNotice();},
   // Applies to the next ball throw; never rewrites a fetch already in motion.
   setReturnStyle(style){alive();return life.setReturnStyle(style);},
   get disposed(){return disposed;},

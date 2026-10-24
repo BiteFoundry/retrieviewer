@@ -10,12 +10,15 @@ import {controlAddress,parseHelperSpec} from '../desktop/platform.mjs';
 
 let helper,pump,timer,server,session,paths,owned=false,stopping=false,frames=0,paintedFrames=0,visible=false,selected=false,pickerVisible=false,pendingViewport=null,lastInteraction=null;
 let nativeError=null,ready=false,detached=false;
+let attention=null,brain=null,attentionLabel=null;
 const returnStyle=process.env.RETRIEVIEWER_RETURN_STYLE??'auto';
+const watchSource=process.env.RETRIEVIEWER_WATCH??'off';
+const brainSource=process.env.RETRIEVIEWER_BRAIN??'off';
 let nativeStderr='';
 const sendParent=message=>{if(process.connected)try{process.send(message,error=>{if(error&&!detached)stop();});}catch{if(!detached)stop();}};
 const starting=()=>{if(stopping||(!process.connected&&!detached))throw Error('Desktop launcher closed during startup');};
 async function stop(){
- const first=!stopping;stopping=true;clearInterval(timer);pump?.dispose();
+ const first=!stopping;stopping=true;clearInterval(timer);attention?.dispose();brain?.dispose();pump?.dispose();
  if(helper&&!helper.killed){try{helper.stdin.end(JSON.stringify({type:'quit'})+'\n');}catch{}}
  if(server?.listening)server.close();
  if(owned)try{const current=JSON.parse(await readFile(paths.session,'utf8'));if(current.token===session.token)await unlink(paths.session);}catch{}
@@ -41,7 +44,7 @@ try{
    body+=bytes.toString('utf8');if(body.length>2048)return socket.destroy();if(!body.includes('\n'))return;
    let command;try{command=JSON.parse(body.split('\n')[0]);}catch{return socket.destroy();}
    if(command.token!==session.token||!['status','stop'].includes(command.command))return socket.destroy();
-   socket.end(JSON.stringify(command.command==='stop'?{stopped:true}:{running:true,reachable:true,selected,visible,pickerVisible,frames,paintedFrames,lastInteraction,returnStyle,pid:process.pid,painterPid:helper?.pid,rssBytes:process.memoryUsage().rss})+'\n');
+   socket.end(JSON.stringify(command.command==='stop'?{stopped:true}:{running:true,reachable:true,selected,visible,pickerVisible,frames,paintedFrames,lastInteraction,returnStyle,attentionLabel,watch:{source:watchSource,...attention?.status??{state:'off',pendingCount:0}},brain:brain?.status??{provider:'off',state:'off'},pid:process.pid,painterPid:helper?.pid,rssBytes:process.memoryUsage().rss})+'\n');
    if(command.command==='stop')stop();
   });
  });
@@ -49,7 +52,8 @@ try{
  if(process.platform!=='win32')await chmod(session.pipe,0o600);
  starting();
  // GUI-subsystem exe: no console to hide. SW_HIDE here also hides its first UI.
- helper=spawn(spec.command,spec.args,{windowsHide:false,stdio:['pipe','pipe','pipe']});
+ const helperEnv={...process.env};delete helperEnv.OPENROUTER_API_KEY;
+ helper=spawn(spec.command,spec.args,{windowsHide:false,stdio:['pipe','pipe','pipe'],env:helperEnv});
  helper.stdin.on('error',()=>stop());helper.stderr.setEncoding('utf8');helper.stderr.on('data',s=>{nativeStderr=(nativeStderr+s).slice(-4096);});helper.once('error',error=>{sendParent({error:error.message});stop();});
  helper.once('exit',code=>{if(!stopping)sendParent({error:nativeError??('Desktop painter exited ('+code+')'+(nativeStderr?' — '+nativeStderr.trim():''))});stop();});
  const write=message=>{if(!stopping&&!helper.stdin.destroyed)helper.stdin.write(JSON.stringify(message)+'\n');};
@@ -62,6 +66,7 @@ try{
    else if(m.type==='picker')pickerVisible=m.visible===true;
    else if(m.type==='viewport'){pendingViewport=m;visible=m.visible;selected=m.selected===true;pump?.viewport(m);}
    else if(m.type==='ack'){frames++;if(m.painted)paintedFrames++;pump?.ack();}
+   else if(m.type==='attention-label'){if(typeof m.text!=='string'||m.text.length>160)throw Error('Invalid attention label');attentionLabel=m.text;}
    else if(m.type==='pause')pump?.pause(m.paused);
    else if(m.type==='interact'){const accepted=pump?.interact(m.kind)??false;lastInteraction={kind:m.kind,accepted};write({type:'interaction',kind:m.kind,accepted});}
    else if(m.type==='quit')stop();
@@ -70,6 +75,18 @@ try{
  starting();const {createPet}=await import('../../retrieviewer.mjs');starting();const pet=await createPet({returnStyle});
  if(stopping)pet.dispose();else{
   pump=createFramePump({pet,send:write});if(pendingViewport)pump.viewport(pendingViewport);
-  write({type:'loaded',ink:process.env.RETRIEVIEWER_INK??'cream'});timer=setInterval(()=>{try{pump.tick();}catch(error){write({type:'error',message:error.message});stop();}},1000/spec.fps);
+  if(!['off','stackbite'].includes(watchSource))throw Error('Invalid desktop watch source');
+  if(!['off','openrouter'].includes(brainSource)||brainSource==='openrouter'&&watchSource!=='stackbite')throw Error('Invalid desktop brain/watch combination');
+  if(brainSource==='openrouter'){const {createOpenRouterBrain}=await import('../openrouter/brain.mjs');starting();brain=createOpenRouterBrain();}
+  if(watchSource==='stackbite'){
+   const [{createAttentionMonitor},{createStackBiteSource}]=await Promise.all([import('../../retrieviewer-attention.mjs'),import('../stackbite/attention.mjs')]);starting();
+   const source=createStackBiteSource();
+   attention=createAttentionMonitor({readSnapshot:source.readSnapshot,...brain?{judgeNotice:input=>brain.decide(input)}:{},onNotice:notice=>pump.notify(notice),onClear:()=>pump.clearNotice(),onChange:status=>{
+    // Older POSIX helpers deliberately reject unknown message types. They can
+    // run the visual cue, but only the Windows bar implements this status label.
+    if(spec.mode==='windows-overlay')write({type:'attention',state:status.state,count:status.pendingCount,label:status.target?.label??'',kind:status.target?.kind??''});
+   }});
+  }
+  write({type:'loaded',ink:process.env.RETRIEVIEWER_INK??'cream'});timer=setInterval(()=>{try{attention?.tick({active:!pump.hidden});pump.tick();}catch(error){write({type:'error',message:error.message});stop();}},1000/spec.fps);
  }
 }catch(error){sendParent({error:error.message});await stop();}

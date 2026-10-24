@@ -19,6 +19,7 @@ const CARRY_HEIGHT=.19,SETTLE_FALLBACK=.6,MAX_DT=.25,ARRIVE=.05;
 // Active simulation seconds, never a wall-clock timer that wakes a hidden pet.
 export const BUTTERFLY_RULES=Object.freeze({firstMin:240,firstSpread:240,cooldownMin:720,cooldownSpread:480,maxVisible:18});
 const LABEL={
+ notifyWall:'뒷발로 서서 벽을 박박 긁는 중',
  start:'기다리는 중',pause:'잠시 느긋하게 둘러보는 중',lie:'엎드리는 중',rest:'엎드려 쉬는 중',recover:'앉아서 기운 차리는 중',
  sit:'앉는 중',watch:'앉아서 지켜보는 중',look:'고개를 돌려 살피는 중',observe:'가만히 주변 관찰 중',
  stroll:'옆으로 살짝 걸어가는 중',sniff:'잠깐 멈춰 주변을 살피는 중',dash:'저 멀리 달려가는 중',far:'멀리서 둘러보는 중',home:'제자리로 돌아오는 중',nest:'쉴 자리를 찾아가는 중',
@@ -26,7 +27,7 @@ const LABEL={
  belly:'배를 보이고 발라당 쉬는 중',sleep:'새근새근 잠자는 중',tug:'장난감을 물고 당기는 중',
  butterflyNotice:'나비를 발견하고 귀를 쫑긋하는 중',butterfly:'나비를 폴짝폴짝 쫓는 중',butterflyBye:'날아가는 나비를 바라보는 중',
  fetch:'공을 쫓아가는 중',miss:'굴러가는 공을 한 번 놓친 중',reChase:'공을 다시 쫓아가는 중',tumble:'우당탕 균형을 되찾는 중',pickup:'공을 무는 중',carry:'공을 물고 돌아오는 중',drop:'공을 내려놓는 중',offer:'공을 내려놓고 기다리는 중',
- treatSit:'간식 앞에 앉는 중',chew:'간식 먹는 중'
+ treatSit:'간식 앞에 앉는 중',chew:'간식 먹는 중',notifySit:'확인할 일을 발견하고 앉는 중',notifyContact:'확인할 일이 있어 사용자를 바라보는 중',notifyCome:'확인할 일을 알려주러 가까이 오는 중',notifyPaw:'앞발로 살살 관심을 끄는 중',notify:'확인할 일이 있는 쪽을 바라보는 중'
 };
 const PENDING_LABEL={treat:'곧 간식',tug:'곧 터그놀이'};
 // Baked interaction clips, played only while holding at the shared seated endpoint.
@@ -62,7 +63,7 @@ export function createCompanionLife(actor,{seed=731,energy=.8,returnStyle='auto'
  let clock=0,decisions=0,lastEpisode=null,quiet=0;
  let queue=[],hold=0,holdIntent=null,waiting=null,gesture=null;
  let intent='start',label=LABEL.start,pending=null,active=null,ball=null,treat=null;
- let fetchPlan=null;
+ let fetchPlan=null,notice=null,noticeCount=0;
 
  const cmd=(name,args,step,when)=>({cmd:name,args,intent:step,label:LABEL[step],when});
  const wait=(seconds,step)=>({hold:seconds,intent:step,label:LABEL[step]});
@@ -236,6 +237,15 @@ export function createCompanionLife(actor,{seed=731,energy=.8,returnStyle='auto'
   holdIntent=null;gesture=null;
   if(!safe)return;
   if(pending&&!active)startInteraction();
+  if(notice?.phase==='queued'&&!active&&!pending){
+   notice.phase='showing';
+   const far=()=>{const s=actor.sample(clock);return Math.hypot(s.x-HOME.x,s.z-HOME.z)>.8;};
+   queue=[sit('notifySit'),wait(.45,'notifyContact'),
+    fx(()=>{if(far())notice.phase='approaching';}),cmd('go',[HOME.x,HOME.z],'notifyCome',far),
+    sit('notifySit'),fx(()=>{notice.phase='showing';}),wait(.6,'notifyContact'),
+    ...(notice.gesture==='wall'?[cmd('attentionWall',[],'notifyWall'),wait(.3,'notifyContact')]:actor.canAttentionPaw?[cmd('attentionPaw',[],'notifyPaw'),wait(.3,'notifyContact')]:[]),
+    cmd('look',[notice.side],'notify'),wait(2.5,'notify'),fx(()=>{notice=null;})];
+  }
   // Run instant effects; stop at the first hold or issued command (at most one command per update).
   for(;;){
    if(!queue.length){
@@ -257,6 +267,7 @@ export function createCompanionLife(actor,{seed=731,energy=.8,returnStyle='auto'
   if(!['ball','treat','tug'].includes(kind))return false;
   if(kind==='tug'&&typeof actor.tug!=='function')return false;
   if(pending||active||cooldowns[kind]>0)return false;
+  clearNotice();
   quiet=0;
   if(butterfly||lastEpisode==='butterfly'){
    butterfly=null;queue=[];hold=0;holdIntent=null;gesture=null;waiting=null;
@@ -304,6 +315,27 @@ export function createCompanionLife(actor,{seed=731,energy=.8,returnStyle='auto'
   return true;
  }
 
+ function clearNotice(){
+  if(!notice)return;
+  const approaching=notice.phase==='approaching';
+  notice=null;queue=[];hold=0;holdIntent=null;gesture=null;waiting=null;
+  intent='recover';label=LABEL.recover;
+  if(approaching||actor.state==='attention-paw'||actor.state==='attention-wall')actor.attend?.();
+  // Let any connected head turn/sit finish naturally. No snap or new route.
+ }
+ function notify({kind,side='left',gesture='auto'}={}){
+  if(!['approval','input'].includes(kind)||!['left','right'].includes(side)||!['auto','paw','wall'].includes(gesture))throw Error('Invalid pet notice');
+  // Explicit play/feeding always wins. Notifications never queue a second pet.
+  if(active||pending||notice)return false;
+  if(gesture==='wall'&&!actor.canAttentionWall)return false;
+  const selected=gesture==='auto'?(actor.canAttentionWall&&noticeCount%2===1?'wall':'paw'):gesture;
+  noticeCount++;
+  notice={kind,side,gesture:selected,phase:'queued'};
+  butterfly=null;queue=[];hold=0;holdIntent=null;gesture=null;waiting=null;
+  actor.attend?.();
+  return true;
+ }
+
  // Recomputed from the live pose so the marker stays truthful before and after sitting.
  function treatReport(){
   if(!treat)return null;
@@ -322,13 +354,14 @@ export function createCompanionLife(actor,{seed=731,energy=.8,returnStyle='auto'
  }
 
  return {
-  update,interact,
+  update,interact,notify,clearNotice,
   setReturnStyle(style){validateReturnStyle(style);returnStyle=style;return style;},
   get report(){
    const interaction=active??pending;
    return {
     intent:actor.state==='scramble'&&fetchPlan?'tumble':intent,label:pending?`${label} · ${PENDING_LABEL[pending]}`:actor.state==='scramble'&&fetchPlan?LABEL.tumble:label,episode:lastEpisode,interaction,busy:interaction!==null,
     ball:ballReport(),fetchPattern:fetchPlan?.pattern??null,returnStyle,returnMode:fetchPlan?.returnMode??null,treat:treatReport(),butterfly:butterflyPoint(),tug:actor.state==='tug'?{progress:actor.sample(clock).comfortPose?.progress??0,grip:1}:null,
+    attention:notice?{...notice}:null,
     snore:actor.state==='sleep'?((clock%3.6)/3.6):null,energy:needs.energy,drowsiness:needs.drowsiness,decisions,cooldowns:{...cooldowns},
     // Local hold clock only: progress freezes between updates; null outside the stationary hold.
     gesture:gesture&&SAFE.has(actor.state)?{clip:gesture.clip,progress:clamp(gesture.elapsed/gesture.duration,0,1)}:null

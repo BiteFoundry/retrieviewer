@@ -102,6 +102,19 @@ records the exact36 source-key indices and `pixelBlending:false`. No new generat
 or photographic input, asset family or attribution is added. Existing CC BY-SA4.0
 terms and all non-watch pixels remain unchanged. See WATCH-REDRAW.md for the A/B.
 
+Local attention-paw candidate2026-10-24 appends six built-in imagegen whole-body
+keys to the existing comfort archive. Inputs were the existing licensed seated
+puppy and a generated paw study; no new photographs were introduced. All45 old
+comfort frames remain exact. ATTENTION-PAW.md records the source-sheet hash,
+prompt specification, registration and byte costs. Existing attribution and
+CC BY-SA4.0 terms apply; source sheets are excluded from npm.
+
+Local standing-wall candidate2026-10-24 appends nine generated whole-body keys,
+referenced only from the existing canonical puppy. All51 accepted comfort frames
+remain exact. Source hash, prompt specification, common-scale registration and
+costs are in ATTENTION-WALL.md. No new photo/video inputs or raw npm sheets;
+existing attribution and CC BY-SA4.0 terms continue to apply.
+
 Copyrightability of AI-generated expression, the precise derivative-work analysis,
 and worldwide name clearance are not conclusively determined here. Existing
 domestic trademark research records possible similar marks; owning an npm scope

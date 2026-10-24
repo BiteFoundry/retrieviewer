@@ -130,6 +130,33 @@ The native OpenCode pane has Windows/OpenCode 2.1.2 host evidence; Codex, Claude
 Cursor, Grok and Antigravity **in-terminal** renderers are not implemented.
 An MCP connection alone cannot insert a persistent picture into those clients.
 
+## Optional StackBite alerts
+
+Version 0.0.14 adds [metadata-only StackBite alerts](./ATTENTION.md).
+It is opt-in and does not capture screens or operate other apps.
+An [optional paid DeepSeek/OpenRouter backend](./BRAIN.md) can judge anonymous event metadata;
+offline rules remain the default and preserve confirmed pending alerts.
+
+Version 0.0.15 alerts without waiting for the model, shows the Seat name and
+pending kind locally on Windows, and lets the puppy approach before looking
+toward the sidebar. It reuses existing artwork; names never enter model input.
+
+Version 0.0.16 adds two approved attention gestures: a gentle seated paw and a
+standing two-paw glass scrabble. They alternate for new alerts; both are playable
+in the website demo. Windows watching also supports npm's PowerShell launcher.
+Completed-work checkmarks are not alert events yet.
+
+After updating, run inside a live StackBite Seat on the display computer:
+
+```sh
+retrieviewer desktop --watch stackbite --brain openrouter
+```
+
+The paid backend requires `OPENROUTER_API_KEY` in that terminal's environment.
+Omit `--brain openrouter` for rule-only alerts. Quit an existing companion first
+with `retrieviewer desktop-stop`. These installed commands work from any folder;
+`node retrieviewer-cli.mjs` is for developers running in the source checkout.
+
 ## Build, contribute, be kind
 
 ```sh

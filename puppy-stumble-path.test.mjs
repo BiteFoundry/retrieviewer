@@ -54,7 +54,7 @@ test('installed motion art preserves every old comfort pixel, exact run/pickup e
  const hash=createHash('sha256');for(let i=0;i<13;i++)hash.update(store.getFrame(i));assert.equal(hash.digest('hex'),'d6acd36bff0fbe31ea7eb26499b342d011467cf03c5b119be05f54383c90a282');
  const rear=readPackedFrames(gunzipSync(readFileSync(new URL('./puppy-paper-rear-gallop-q5.bin.gz',import.meta.url))));
  assert.deepEqual(store.getFrame(meta.scramble.frames[0]),rear.getFrame(7*9));assert.deepEqual(store.getFrame(meta.scramble.frames.at(-1)),rear.getFrame(5*9));
- assert.deepEqual(store.getFrame(meta.pickups.rear.frames[0]),rear.getFrame(5*9));assert.ok(meta.carrySource.gzipBytes-meta.sourceComfort.gzipBytes<260_000);assert.ok(meta.gzipBytes-meta.carrySource.gzipBytes<90_000);
+ assert.deepEqual(store.getFrame(meta.pickups.rear.frames[0]),rear.getFrame(5*9));assert.ok(meta.carrySource.gzipBytes-meta.sourceComfort.gzipBytes<260_000);assert.ok((meta.attentionSource?.baseGzipBytes??meta.gzipBytes)-meta.carrySource.gzipBytes<90_000);
  for(const key of ['perPoseScale','bodyCompositing','nonlinearWarp'])assert.equal(meta.scramble.registration[key],false);
  assert.deepEqual(meta.scramble.registration.approvedOriginalKeys,[2,4,6,8]);
 });

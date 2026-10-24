@@ -106,6 +106,28 @@ npm uninstall -g @bitefoundry/retrieviewer
 별도로 [OpenCode 네이티브 등록](INSTALLING.md)을 했다면 해당 등록을 disconnect한
 뒤 제거하세요. Codex/Claude/Cursor 등에 MCP만 연결해 내부 그림을 띄우는 기능은 없어요.
 
+## StackBite 알림
+
+0.0.16은 앞발로 살살 부르기와 두 발로 서서 벽 박박 긁기를 번갈아 보여줘요.
+홈페이지에서도 두 동작을 눌러볼 수 있어요. Windows의 npm 설치형 StackBite도
+감시할 수 있게 했어요. 작업 완료 체크표시는 아직 알림 대상이 아니에요.
+
+0.0.14부터 [승인·입력 대기 알림](ATTENTION.md)을 선택해서 켤 수 있어요.
+0.0.15는 LLM을 기다리지 않고 알리고, Windows에 Seat 이름과 대기 종류를 표시해요.
+강아지도 기존 그림으로 가까이 와서 알림 방향을 봐요. 이름은 외부로 보내지 않아요.
+화면 캡처나 자동 승인 없이 현재 Room의 메타데이터만 읽어요.
+업데이트 후, 화면이 보이는 PC의 실행 중인 StackBite Seat에서 실행하세요.
+
+```sh
+retrieviewer desktop --watch stackbite --brain openrouter
+```
+
+[유료 DeepSeek 연결](BRAIN.md)에는 같은 터미널의 `OPENROUTER_API_KEY`가 필요해요.
+`--brain openrouter`를 빼면 API 없이 규칙 알림만 써요. 이미 실행 중이면 먼저
+`retrieviewer desktop-stop`으로 종료하세요. 설치된 `retrieviewer` 명령은 어느
+폴더에서든 쓸 수 있어요. `node retrieviewer-cli.mjs`는 소스 폴더 안에서만 쓰는
+개발용 명령이에요.
+
 ## 직접 만든 TUI에 붙이기
 
 JS 플러그인과 JSONL 브리지를 제공해요. 화면·입력·시간 제어는 호스트가 소유합니다.

@@ -12,6 +12,18 @@ test('CLI strict parse catches unknown commands/options and IDs',()=>{
  assert.deepEqual(parseArguments(['enable','--agent','opencode','--yes']),{command:'enable',options:{agent:'opencode',yes:true}});
  for(const args of [['wat'],['enable','--agent'],['enable','--agent','wat'],['enable','--oops'],['enable','--agent','opencode','--agent','codex'],['disable','--agent','opencode','--dry-run'],['status','--yes']])assert.throws(()=>parseArguments(args));
 });
+
+test('desktop watch is explicit, validated and forwarded without widening commands',async()=>{
+ assert.deepEqual(parseArguments(['desktop','--watch','stackbite']).options,{watch:'stackbite'});
+ for(const args of [['desktop','--watch'],['desktop','--watch','screen'],['status','--watch','stackbite'],['attention','--yes']])assert.throws(()=>parseArguments(args));
+ let received;const streams=io();await runCli(['desktop','--watch','stackbite'],{...streams,desktop:{async startDesktop(options){received=options;return {running:true};}}});assert.deepEqual(received,{watch:'stackbite'});
+});
+
+test('LLM opt-in is explicit, requires its source and forwards no credentials in options',async()=>{
+ for(const args of [['desktop','--brain','openrouter'],['desktop','--brain','paid'],['status','--brain','off'],['brain-check','--watch','stackbite']])assert.throws(()=>parseArguments(args));
+ let received;await runCli(['desktop','--watch','stackbite','--brain','openrouter'],{...io(),desktop:{async startDesktop(options){received=options;return {running:true};}}});assert.deepEqual(received,{watch:'stackbite',brain:'openrouter'});
+ assert.deepEqual(parseArguments(['brain-check','--json']),{command:'brain-check',options:{json:true}});
+});
 test('help/status/dry-run are read-only, non-TTY refuses implicit changes',async()=>{
  const installer=backend(),streams=io();
  assert.equal(await runCli(['help'],{...streams,installer}),0);assert.match(streams.out,/retrieviewer enable/);

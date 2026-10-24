@@ -93,15 +93,24 @@ export async function desktopHelper(options={}){
  throw Error('Linux desktop needs system Python3.6+ (AlmaLinux8 platform-python is supported). No packages or system settings were installed.');
 }
 export async function startDesktop(options={}){
+ const watch=options.watch??'off';if(!['off','stackbite'].includes(watch))throw Error('Invalid desktop watch source');
+ const brain=options.brain??'off';if(!['off','openrouter'].includes(brain))throw Error('Invalid desktop brain');
+ if(brain==='openrouter'){
+  if(watch!=='stackbite')throw Error('--brain openrouter requires --watch stackbite');
+  const {createOpenRouterBrain}=await import('../openrouter/brain.mjs');createOpenRouterBrain().dispose();
+ }
+ if(watch==='stackbite'){const {stackBiteBinding}=await import('../stackbite/attention.mjs');stackBiteBinding();}
  const ink=options.ink??'cream';if(!['cream','gold','dark'].includes(ink))throw Error('Invalid desktop ink');
  const returnStyle=options.returnStyle??'auto';if(!['auto','brake','trot','run-trot'].includes(returnStyle))throw Error('Invalid return style');
  // Fail before creating any cache/session on unsupported desktops (e.g. Wayland).
  desktopPlatform(options);
- const status=await desktopStatus(options);if(status.running)return {...status,alreadyRunning:true,...status.returnStyle!==returnStyle?{requestedReturnStyle:returnStyle,restartRequired:true}:{}};
+ const status=await desktopStatus(options);if(status.running)return {...status,alreadyRunning:true,...status.returnStyle!==returnStyle?{requestedReturnStyle:returnStyle,restartRequired:true}:{},...(status.watch?.source??'off')!==watch?{requestedWatch:watch,restartRequired:true}:{},...(status.brain?.provider??'off')!==brain?{requestedBrain:brain,restartRequired:true}:{}};
  if(status.stale)await stopDesktop(options);
  const helper=await desktopHelper(options);
+ const workerEnv={...process.env,RETRIEVIEWER_HOME:getConfigPaths(options).root,RETRIEVIEWER_INK:ink,RETRIEVIEWER_RETURN_STYLE:returnStyle,RETRIEVIEWER_WATCH:watch,RETRIEVIEWER_BRAIN:brain};
+ if(brain==='off')delete workerEnv.OPENROUTER_API_KEY;
  return new Promise((resolve,reject)=>{
-  const child=spawn(process.execPath,[fileURLToPath(new URL('./worker.mjs',import.meta.url)),'--helper-spec',JSON.stringify(helper)],{detached:true,windowsHide:true,stdio:['ignore','ignore','ignore','ipc'],env:{...process.env,RETRIEVIEWER_HOME:getConfigPaths(options).root,RETRIEVIEWER_INK:ink,RETRIEVIEWER_RETURN_STYLE:returnStyle}});
+  const child=spawn(process.execPath,[fileURLToPath(new URL('./worker.mjs',import.meta.url)),'--helper-spec',JSON.stringify(helper)],{detached:true,windowsHide:true,stdio:['ignore','ignore','ignore','ipc'],env:workerEnv});
   let settled=false,ready=null;const finish=(error,message)=>{if(settled)return;settled=true;clearTimeout(timer);if(child.connected)child.disconnect();child.unref();error?reject(error):resolve(message);};
   // Disconnect on failure aborts startup. Only an acknowledged detach may live on.
   const timer=setTimeout(()=>finish(Error('Desktop startup timed out; no agent settings changed')),20000);

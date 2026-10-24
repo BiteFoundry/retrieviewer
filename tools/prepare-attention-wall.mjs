@@ -1,0 +1,37 @@
+// Offline extension of the existing comfort family; never used by the runtime.
+import {readFileSync,writeFileSync,mkdirSync,copyFileSync} from 'node:fs';
+import {execFileSync} from 'node:child_process';
+import {gunzipSync,gzipSync,deflateRawSync,inflateRawSync} from 'node:zlib';
+import {createHash} from 'node:crypto';
+import {fileURLToPath} from 'node:url';
+import {join,resolve} from 'node:path';
+import {readPackedFrames,packFrames} from '../puppy-frame-store.mjs';
+import {encodePredictiveFrames} from '../puppy-frame-predictive.mjs';
+const root=fileURLToPath(new URL('../',import.meta.url)),stage=join(root,'dist/attention-wall-v1');
+if(!process.argv[2])throw Error('Usage: node tools/prepare-attention-wall.mjs GENERATED_SHEET.png');
+mkdirSync(stage,{recursive:true});
+const oldMeta=JSON.parse(readFileSync(join(root,'puppy-companion-comfort.json'))),old=readPackedFrames(gunzipSync(readFileSync(join(root,'puppy-companion-comfort-q5.bin.gz'))));
+const count=oldMeta.attentionWall?.baseFrames??oldMeta.frames;
+if(count!==51)throw Error('Expected the accepted 51-frame comfort and paw baseline');
+const frames=Array.from({length:count},(_,i)=>Uint8Array.from(old.getFrame(i))),sheet=resolve(process.argv[2]);
+copyFileSync(sheet,join(stage,'source.png'));writeFileSync(join(stage,'neutral.gray'),frames[0]);
+execFileSync('python',[join(root,'tools/prepare-attention-art.py'),sheet,join(stage,'neutral.gray'),stage,'--wall'],{stdio:'inherit',windowsHide:true});
+const keys=readFileSync(join(stage,'keys.gray'));if(keys.length!==9*320*320)throw Error('Expected nine authored keys');
+const encoded=encodePredictiveFrames(packFrames(Buffer.concat([...frames,keys]),320,320,count+9)),gz=gzipSync(encoded,{level:9}),store=readPackedFrames(encoded);
+for(let i=0;i<count;i++)if(!Buffer.from(store.getFrame(i)).equals(Buffer.from(frames[i])))throw Error('An accepted comfort frame changed: '+i);
+const motion=(frames,times)=>({frames,times,duration:times.at(-1),floorOffsets:frames.map(()=>0)});
+// Committed weight shift, rise, a braced quick scrabble, and a slower landing.
+const attentionWall={...motion([0,51,52,53,54,56,55,56,54,56,57,58,59,0],[0,.12,.28,.48,.66,.8,.94,1.08,1.22,1.36,1.52,1.72,1.96,2.2]),baseFrames:count,plantedPaws:'hind-pair',wall:'implicit front glass',releases:{}};
+attentionWall.releases[0]=motion([0,0],[0,.02]);
+attentionWall.releases[51]=motion([51,59,0],[0,.12,.24]);
+attentionWall.releases[52]=motion([52,58,59,0],[0,.1,.24,.36]);
+for(const i of [53,54,55,56,57])attentionWall.releases[i]=motion([i,58,59,0],[0,.12,.26,.4]);
+attentionWall.releases[58]=motion([58,59,0],[0,.14,.28]);
+attentionWall.releases[59]=motion([59,0],[0,.14]);
+const sha=b=>createHash('sha256').update(b).digest('hex');
+const meta={...oldMeta,frames:count+9,clips:[...oldMeta.clips.filter(c=>c!=='attention-wall'),'attention-wall'],attentionWall,gzipBytes:gz.length,residentPixelBytes:store.residentPixelBytes,encodedSha256:sha(encoded),wallSource:{generator:'built-in imagegen',sheetSha256:sha(readFileSync(sheet)),baseGzipBytes:oldMeta.wallSource?.baseGzipBytes??oldMeta.gzipBytes,reference:'existing licensed canonical seated puppy; no new photos',registration:JSON.parse(readFileSync(join(stage,'registration.json'))),existingFrameHashes:frames.map(sha),method:'Nine connected whole-body keys at one common scale. Two rear soles support an implicit front glass scrabble; exact neutral bookends and bounded lowering paths.'}};
+const codec={compress:b=>deflateRawSync(b,{level:3}),expand:(b,size)=>inflateRawSync(b,{maxOutputLength:size})};
+const native=readPackedFrames(encoded,{codec}),baseline=readPackedFrames(encodePredictiveFrames(packFrames(Buffer.concat(frames),320,320,count)),{codec});
+const report={addedKeys:9,preservedFrames:count,gzipAdded:gz.length-meta.wallSource.baseGzipBytes,nodeCompressedBytesAdded:native.residentPixelBytes-baseline.residentPixelBytes,finalFrames:meta.frames,sheetSha256:meta.wallSource.sheetSha256};
+writeFileSync(join(root,'puppy-companion-comfort-q5.bin.gz'),gz);writeFileSync(join(root,'puppy-companion-comfort.json'),JSON.stringify(meta,null,2)+'\n');
+writeFileSync(join(stage,'receipt.json'),JSON.stringify(report,null,2)+'\n');console.log(JSON.stringify(report));

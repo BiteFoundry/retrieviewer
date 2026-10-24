@@ -13,7 +13,9 @@ Usage:
   retrieviewer doctor [--agent ID] [--json]
   retrieviewer agents [--json]
   retrieviewer preview [--original]
-  retrieviewer desktop [--ink cream|gold|dark] [--return-style auto|brake|trot|run-trot]
+  retrieviewer desktop [--ink cream|gold|dark] [--return-style auto|brake|trot|run-trot] [--watch stackbite|off] [--brain openrouter|off]
+  retrieviewer brain-check [--json]
+  retrieviewer attention [--json]
   retrieviewer desktop-status [--json]
   retrieviewer desktop-stop
   retrieviewer desktop-clean --yes
@@ -28,12 +30,19 @@ use Codex normally. Exit from its tray icon or desktop-stop. No auto-start is ad
 Windows is verified; macOS and Linux X11 adapters are experimental. Native Wayland
 app tracking is not supported. Linux targets AlmaLinux8/GLIBC2.28, system Python3.6+.
 Return style defaults to auto (mix all three). Restart the companion to change it.
+Watch is OFF by default. Inside a live StackBite Seat, --watch stackbite reads only
+that Room's pending-input metadata. No screen capture, clicks or approvals.
+Hidden/paused companions stop polling. attention performs one read-only check.
+Brain is OFF by default. --brain openrouter requires --watch stackbite and
+OPENROUTER_API_KEY; sends only anonymous event kinds/counts to paid DeepSeek V4.1
+Flash 1017 with token price ceilings. Failures fall back to rule alerts.
+brain-check sends one synthetic event and incurs API usage charges.
 `;
 export function parseArguments(args){
  const [command='help',...rest]=args,options={};
  for(let i=0;i<rest.length;i++){
   const token=rest[i];
-  if(token==='--agent'||token==='--ink'||token==='--return-style'){
+  if(token==='--agent'||token==='--ink'||token==='--return-style'||token==='--watch'||token==='--brain'){
    const key=token.slice(2);
    if(options[key]||!rest[i+1]||rest[i+1].startsWith('-'))throw Error(token+' requires one value');
    options[key]=rest[++i];
@@ -43,19 +52,37 @@ export function parseArguments(args){
  if(options.agent&&!AGENTS.some(a=>a.id===options.agent))throw Error('Unknown agent: '+options.agent);
  if(options.ink&&!['cream','gold','dark'].includes(options.ink))throw Error('--ink must be cream, gold or dark');
  if(options['return-style']&&!['auto','brake','trot','run-trot'].includes(options['return-style']))throw Error('--return-style must be auto, brake, trot or run-trot');
- if(!['help','--help','-h','enable','disable','disconnect','status','doctor','agents','preview','desktop','desktop-status','desktop-stop','desktop-clean','desktop-remove'].includes(command))throw Error('Unknown command: '+command);
- const allowed={desktop:['ink','return-style'],enable:['agent','yes','json','dry-run'],disconnect:['agent','yes','json','dry-run'],disable:['agent','json'],status:['agent','json'],doctor:['agent','json'],agents:['json'],preview:['original'],'desktop-status':['json'],'desktop-clean':['yes'],'desktop-remove':['yes']};
+ if(options.watch&&!['off','stackbite'].includes(options.watch))throw Error('--watch must be stackbite or off');
+ if(options.brain&&!['off','openrouter'].includes(options.brain))throw Error('--brain must be openrouter or off');
+ if(options.brain==='openrouter'&&options.watch!=='stackbite')throw Error('--brain openrouter requires --watch stackbite');
+ if(!['help','--help','-h','enable','disable','disconnect','status','doctor','agents','preview','attention','brain-check','desktop','desktop-status','desktop-stop','desktop-clean','desktop-remove'].includes(command))throw Error('Unknown command: '+command);
+ const allowed={desktop:['ink','return-style','watch','brain'],attention:['json'],'brain-check':['json'],enable:['agent','yes','json','dry-run'],disconnect:['agent','yes','json','dry-run'],disable:['agent','json'],status:['agent','json'],doctor:['agent','json'],agents:['json'],preview:['original'],'desktop-status':['json'],'desktop-clean':['yes'],'desktop-remove':['yes']};
  for(const key of Object.keys(options))if(!(allowed[command]??[]).includes(key))throw Error(`--${key} is not supported by ${command}`);
  return {command,options};
 }
 export async function runCli(args,{input=process.stdin,output=process.stdout,error=process.stderr,installer=createInstaller(),desktop}={}){
  const {command,options}=parseArguments(args),emit=value=>output.write(JSON.stringify(value,null,2)+'\n');
  if(['help','--help','-h'].includes(command)){output.write(HELP);return 0;}
+ if(command==='brain-check'){
+  const {createOpenRouterBrain,BrainError}=await import('./integrations/openrouter/brain.mjs');
+  const brain=createOpenRouterBrain({timeoutMs:8000});
+  try{const result=await brain.decide({kind:'approval',pendingCount:1});emit({ok:true,synthetic:true,...result,brain:brain.status});return 0;}
+  catch(error){emit({ok:false,synthetic:true,error:error instanceof BrainError?error.code:'unavailable',brain:brain.status});return 2;}
+  finally{brain.dispose();}
+ }
+ if(command==='attention'){
+  const {createStackBiteSource}=await import('./integrations/stackbite/attention.mjs');
+  const snapshot=await createStackBiteSource().readSnapshot();
+  // Diagnostic metadata only; prompts/output/credentials were discarded upstream.
+  if(options.json)emit({...snapshot,pendingCount:snapshot.items.length});
+  else output.write(`StackBite current Room: ${snapshot.items.length} pending input item(s). No screen capture or actions.\n`);
+  return 0;
+ }
  if(command.startsWith('desktop')){
   if(['desktop-clean','desktop-remove'].includes(command)&&!options.yes)throw Error('Use '+command+' --yes to remove only the companion cache.');
   const api=desktop??await import('./integrations/windows-overlay/desktop.mjs');
   const action={'desktop':'startDesktop','desktop-status':'desktopStatus','desktop-stop':'stopDesktop','desktop-clean':'cleanDesktop','desktop-remove':'removeDesktop'}[command];
-  emit(await api[action]({...options.ink?{ink:options.ink}:{},...options['return-style']?{returnStyle:options['return-style']}:{} }));return 0;
+  emit(await api[action]({...options.ink?{ink:options.ink}:{},...options['return-style']?{returnStyle:options['return-style']}:{},...options.watch?{watch:options.watch}:{},...options.brain?{brain:options.brain}:{} }));return 0;
  }
  if(command==='preview'){await import('./examples/live.mjs');return 0;}
  if(['status','doctor','agents'].includes(command)){

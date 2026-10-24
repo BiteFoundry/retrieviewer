@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="ko">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Retrieviewer · Attention preview</title>
+<style>
+  :root{color-scheme:dark;font:14px/1.5 ui-monospace,Consolas,monospace;background:#101211;color:#d9dfd9}
+  body{margin:24px}h1{font:inherit;margin:0 0 6px;color:#f8f2e8}p{margin:0 0 18px;color:#9ca79e}
+  button{font:inherit;background:#242b26;color:#e2e9e2;border:1px solid #414e44;border-radius:5px;padding:8px 12px;cursor:pointer}
+  button:hover{background:#344338}button:disabled{opacity:.45;cursor:wait}nav{display:flex;gap:8px;flex-wrap:wrap;margin:16px 0}
+  main{display:grid;grid-template-columns:180px 1fr;height:calc(100vh - 270px);min-height:360px;border-top:1px solid #303b32}
+  aside{padding:20px 10px 0 0;border-right:1px solid #303b32}#pending{margin-top:18px;color:#dfc58e;white-space:pre-wrap}
+  #stage{overflow:hidden;display:flex;justify-content:center;align-items:center;background:#0b0d0c;min-width:0}
+  pre{font-family:Consolas,monospace;font-size:clamp(5px,calc((100vh - 270px)/120),16px);line-height:1.65;letter-spacing:0;margin:0;color:#f8f2e8;user-select:none}
+  output{display:block;min-height:22px;color:#afc4af}small{color:#8b9b90}
+  @media(max-width:900px){main{grid-template-columns:130px 1fr}pre{font-size:6px;line-height:10px}}
+</style>
+<h1>Retrieviewer · 확인할 일이 생겼을 때</h1>
+<p>로컬 시뮬레이션. 실제 StackBite·화면·LLM에 연결하지 않는 동작 검수 화면입니다.</p>
+<nav aria-label="검수 동작">
+ <button id="approval" disabled>승인 대기 만들기</button><button id="question" disabled>질문 만들기</button>
+ <button id="far" disabled>멀리에서 알림</button><button id="advice" disabled>모의 LLM 응답 끊기</button>
+ <button id="resolve" disabled>해결됨</button><button id="disconnect" disabled>연결 끊김</button>
+ <button id="ball" disabled>공 던지기</button><button id="treat" disabled>간식</button><button id="pause" disabled>잠깐 쉬기</button>
+ <button id="wall" disabled>벽 박박 긁기 알림</button>
+</nav>
+<output id="status" aria-live="polite">강아지를 불러오는 중…</output>
+<small id="motion"></small>
+<main><aside>StackBite<br><small>Demo Room · Worker</small><div id="pending">확인할 일 없음</div></aside><div id="stage"><pre id="art" aria-label="도트 리트리버"></pre></div></main>
+<p><small>검수용으로 조회 1초·알림 간격 2초. 실제 데스크톱은 조회 5초·알림 간격 20초입니다. 직접 공·간식 상호작용이 우선합니다.</small></p>
+<script type="module">
+ import {createPet} from '/retrieviewer.mjs';
+ import {createAttentionMonitor} from '/retrieviewer-attention.mjs';
+ const $=id=>document.getElementById(id);
+ let nextGesture='auto';
+ let pet,monitor,items=[],turn=0,offline=false,paused=false,closed=false,timer=null,last=null,lastPaint=0,notices=0,slowAdvice=false;
+ const drawStatus=()=>{
+  const s=monitor.status;
+  $('status').textContent=`${paused?'Paused':s.state} · pending ${s.pendingCount} · cues ${notices}${s.target?' · '+s.target.label+' / '+s.target.kind:''} · advice ${s.judging?'pending':s.lastJudgment??'none'} (simulated)`;
+  $('pending').textContent=offline?'연결 상태를 확인할 수 없음':items.length?(items[0].kind==='approval'?'승인 대기\nWorker · demo':'질문 대기\nWorker · demo'):'확인할 일 없음';
+ };
+ function cancel(){clearTimeout(timer);timer=null;last=null;}
+ function tick(){
+  timer=null;if(closed||!pet)return;
+  const t=performance.now(),active=!paused&&!document.hidden;
+  monitor.tick({active});
+  if(active){pet.step(last===null?0:(t-last)/1000);if(t-lastPaint>=1000/24){const frame=pet.frame({columns:200,rows:72});$('art').textContent=frame.text;$('stage').dataset.behavior=frame.state.behavior??'';$('stage').dataset.attention=frame.report.attention?.phase??'';$('stage').dataset.intent=frame.report.intent;$('stage').dataset.depth=frame.state.z.toFixed(3);$('motion').textContent=frame.report.label;lastPaint=t;}last=t;}else last=null;
+  if(!document.hidden)timer=setTimeout(tick,1000/30);
+ }
+ try{
+  pet=await createPet({seed:731});
+  monitor=createAttentionMonitor({intervalMs:1000,staleMs:5000,noticeCooldownMs:2000,
+   readSnapshot:async()=>{if(offline)throw Error('demo disconnected');return {source:'demo',scope:'room',items};},
+   judgeNotice:({signal})=>slowAdvice?new Promise(resolve=>signal.addEventListener('abort',()=>resolve({decision:'uncertain'}),{once:true})):Promise.resolve({decision:'notify'}),
+   onNotice:notice=>{const accepted=pet.notify({...notice,gesture:nextGesture});if(accepted){nextGesture='auto';notices++;drawStatus();}return accepted;},
+   onClear:()=>pet.clearNotice(),onChange:drawStatus});
+  for(const button of document.querySelectorAll('button'))button.disabled=false;
+  for(const kind of ['approval','question'])$(kind).onclick=()=>{offline=false;nextGesture='auto';items=[{id:'worker',generation:'demo-generation',turnId:++turn,kind:kind==='approval'?'approval':'input',label:'Demo Worker'}];drawStatus();};
+  $('wall').onclick=()=>{offline=false;nextGesture='wall';items=[{id:'worker',generation:'demo-generation',turnId:++turn,kind:'input',label:'Demo Worker'}];drawStatus();};
+  $('advice').onclick=()=>{slowAdvice=!slowAdvice;$('advice').textContent=slowAdvice?'모의 LLM 응답 복구':'모의 LLM 응답 끊기';};
+  $('far').onclick=()=>{
+   // QA-only time skip through normal autonomy; no root teleport or art swap.
+   monitor.tick({active:false});items=[];offline=false;pet.clearNotice();
+   for(let i=0;i<1800;i++){pet.step(.1);if(i%10===0){const f=pet.frame({columns:24,rows:8});if(f.state.z<-3&&!f.report.busy)break;}}
+   last=null;lastPaint=0;$('question').click();
+  };
+  $('resolve').onclick=()=>{offline=false;items=[];drawStatus();};
+  $('disconnect').onclick=()=>{offline=true;drawStatus();};
+  for(const kind of ['ball','treat'])$(kind).onclick=()=>pet.interact(kind);
+  $('pause').onclick=()=>{paused=!paused;$('pause').textContent=paused?'다시 놀기':'잠깐 쉬기';monitor.tick({active:!paused&&!document.hidden});drawStatus();};
+  document.addEventListener('visibilitychange',()=>{cancel();if(document.hidden)monitor.tick({active:false});else tick();});
+  window.addEventListener('pagehide',()=>{closed=true;cancel();monitor.dispose();pet.dispose();},{once:true});
+  tick();
+ }catch{cancel();$('status').textContent='미리보기를 불러오지 못했습니다. 페이지를 새로 열어주세요.';pet?.dispose();}
+</script>
+</html>

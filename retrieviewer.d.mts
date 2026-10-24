@@ -40,6 +40,8 @@ export interface PetState {
   [key: string]: unknown;
 }
 export interface LifeReport {
+  /** Metadata-triggered visual cue only. No host input or approval authority. */
+  attention: {kind: 'approval' | 'input'; side: 'left' | 'right'; gesture: 'paw' | 'wall'; phase: 'queued' | 'approaching' | 'showing'} | null;
   /** Last selected autonomous episode; null before the first decision. */
   episode: string | null;
   intent: string;
@@ -93,6 +95,10 @@ export interface Pet {
   needsFrame(options: FrameOptions): boolean;
   /** False when busy or cooling down. */
   interact(kind: 'ball' | 'treat' | 'tug'): boolean;
+  /** False during direct play/feeding or another cue. Does not operate the host. */
+  notify(notice: {kind: 'approval' | 'input'; side?: 'left' | 'right'; gesture?: 'auto' | 'paw' | 'wall'}): boolean;
+  /** Cancel the cue, preserving any in-progress connected pose recovery. */
+  clearNotice(): void;
   /** Sets the next throw's return style. Does not interrupt a fetch in progress. */
   setReturnStyle(style: FetchReturnStyle): FetchReturnStyle;
   readonly disposed: boolean;

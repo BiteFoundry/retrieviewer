@@ -1,6 +1,6 @@
 {
   "name": "@bitefoundry/retrieviewer",
-  "version": "0.0.13",
+  "version": "0.0.16",
   "description": "A fluffy Braille desktop pet for Windows and Linux X11, with experimental macOS support and an embeddable TUI engine.",
   "license": "SEE LICENSE IN LICENSE",
   "homepage": "https://bitefoundry.github.io/retrieviewer/",
@@ -47,6 +47,14 @@
       "types": "./retrieviewer-plugin.d.mts",
       "default": "./retrieviewer-plugin.mjs"
     },
+    "./attention": {
+      "types": "./retrieviewer-attention.d.mts",
+      "default": "./retrieviewer-attention.mjs"
+    },
+    "./brain": {
+      "types": "./integrations/openrouter/brain.d.mts",
+      "default": "./integrations/openrouter/brain.mjs"
+    },
     "./tui": "./integrations/opencode/tui.tsx",
     "./opencode/tui": "./integrations/opencode/tui.tsx",
     "./package.json": "./package.json"
@@ -62,6 +70,8 @@
     "RELEASING.md",
     "retrieviewer.mjs",
     "retrieviewer.d.mts",
+    "retrieviewer-attention.mjs",
+    "retrieviewer-attention.d.mts",
     "retrieviewer-stdio.mjs",
     "retrieviewer-plugin.mjs",
     "retrieviewer-plugin.d.mts",
@@ -75,6 +85,13 @@
     "integrations/windows-overlay/worker.mjs",
     "integrations/windows-overlay/Overlay.cs",
     "integrations/desktop/platform.mjs",
+    "integrations/stackbite/attention.mjs",
+    "integrations/openrouter/brain.mjs",
+    "integrations/openrouter/brain.d.mts",
+    "BRAIN.md",
+    "ATTENTION.md",
+    "ATTENTION-PAW.md",
+    "ATTENTION-WALL.md",
     "integrations/linux-overlay/overlay.py",
     "integrations/linux-overlay/README.md",
     "integrations/macos-overlay/overlay.jxa",
