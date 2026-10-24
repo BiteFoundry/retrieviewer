@@ -16,8 +16,12 @@ test('import performs no asset I/O and installs no listeners, timers or globals'
   import fs from 'node:fs';import {syncBuiltinESMExports} from 'node:module';
   let reads=0;for(const o of [fs,fs.promises])for(const k of ['readFile','readFileSync','open','openSync'])if(o[k]){const f=o[k];o[k]=function(...a){if(/\.(gz|animal)$|puppy-(stride-meta|stable-meta|paper-[a-z0-9-]+|companion-[a-z0-9-]+)\.json$/.test(String(a[0])))reads++;return f.apply(this,a);};}
   syncBuiltinESMExports();
+  // Windows Node20 can retain an ESM-loader CloseReq until the next loop turn.
+  // Drain that loader bookkeeping on BOTH sides; keep checking every resource.
+  await new Promise(setImmediate);
   const globals=new Set(Object.getOwnPropertyNames(globalThis)),handles=process.getActiveResourcesInfo().length,listeners=['exit','SIGINT','SIGWINCH','uncaughtException'].map(e=>process.listenerCount(e));
   const m=await import(${JSON.stringify(moduleUrl)});
+  await new Promise(setImmediate);
   if(typeof m.createPet!=='function')throw Error('missing createPet');
   const added=Object.getOwnPropertyNames(globalThis).filter(k=>!globals.has(k));
   const now=['exit','SIGINT','SIGWINCH','uncaughtException'].map(e=>process.listenerCount(e));
