@@ -11,7 +11,7 @@ export async function createPetPlugin({host,petOptions,fps=30,scheduler}={}){
  fn(host.getSize,'host.getSize');fn(host.render,'host.render');
  if(host.clear!==undefined)fn(host.clear,'host.clear');
  if(host.onError!==undefined)fn(host.onError,'host.onError');
- if(typeof fps!=='number'||!Number.isFinite(fps)||fps<=0||fps>120)throw RangeError('fps must be within (0, 120]');
+ if(typeof fps!=='number'||!Number.isFinite(fps)||fps<=0||fps>120||1000/fps>2147483647)throw RangeError('fps must be within [1000/2147483647, 120] (bounded timer delay)');
  if(scheduler!==undefined){
   if(!scheduler||typeof scheduler!=='object')throw TypeError('scheduler must be an object');
   fn(scheduler.now,'scheduler.now');fn(scheduler.schedule,'scheduler.schedule');fn(scheduler.cancel,'scheduler.cancel');

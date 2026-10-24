@@ -36,6 +36,14 @@ test('desktop grid validation and exact, transparent crop',()=>{
  assert.throws(()=>cropFrame({columns:1,rows:1,text:'X'},1));
 });
 
+test('an oversized hidden viewport suspends rendering and can recover at a normal size',()=>{
+ let renders=0;const pet={step(){},frame(v){renders++;return{...v,text:Array(v.rows).fill('⠁'.repeat(v.columns)).join('\n')};},dispose(){}};
+ const pump=createFramePump({pet,send(){}});
+ pump.viewport({...viewport(1,false),columns:2000,rows:562,cellWidth:16,cellHeight:32});
+ assert.equal(pump.tick(),false);assert.equal(renders,0);
+ pump.viewport(viewport(2));assert.equal(pump.tick(),true);assert.equal(renders,1);pump.dispose();
+});
+
 test('a failed send retries a static frame even when its pre-render key is already current',()=>{
  let dirty=true,text='⠁',fail=false,sends=0,renders=0;
  const pet={step(){},needsFrame:()=>dirty,frame(){renders++;dirty=false;return{columns:1,rows:1,text};},interact:()=>true,dispose(){}};

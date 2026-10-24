@@ -99,6 +99,31 @@ Inside OpenCode, `/retrieviewer enable`, `/retrieviewer disable`,
 `/retrieviewer ball`, `/retrieviewer treat`, `/retrieviewer status` control the native
 pet. The adapter owns no raw keyboard or stdout; the host owns drawing and layout.
 
+## Recovering an interrupted settings change
+
+Settings writes use an exclusive `settings.lock`. New locks record the owning
+PID, hostname, start time and a random token. A busy error prints the exact lock
+path and PID when known. An old or empty lock may have no owner information.
+Locks are deliberately **not** deleted just because they are old or a PID probe
+fails: a long operation, PID reuse or a shared directory can make that unsafe.
+
+If an operation crashed:
+
+1. Stop all Retrieviewer enable/disable/disconnect commands and close all host
+   agents that can change its settings. If the directory is shared, stop writers
+   on every machine. Inspect the exact lock named in the error; an active owner
+   must finish first. Do not kill an unrelated process just because its PID matches.
+2. With **all writers stopped**, move only that `settings.lock` aside in the same
+   directory (for example to `settings.lock.recovered`). Keep it as a backup;
+   do not overwrite an existing backup, touch `settings.json`, remove the whole
+   directory, or follow a symlink. Then retry the original command. A fresh lock
+   is acquired normally and the existing settings are preserved.
+
+Default directory: `%USERPROFILE%\.config\retrieviewer` on Windows,
+`~/.config/retrieviewer` on macOS/Linux. `RETRIEVIEWER_HOME` overrides it, so use
+the path in the error rather than assuming the default. This is an **offline
+manual recovery**, not a command to remove a live lock or automatic stale reaping.
+
 ## Evidence, not a misleading green check
 
 Registration means the config contains our plugin URL. A runtime receipt means

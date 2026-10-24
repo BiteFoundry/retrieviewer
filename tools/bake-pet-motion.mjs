@@ -10,6 +10,8 @@ import {PAPER_GAITS} from '../puppy-paper-world.mjs';
 
 const ROOT=fileURLToPath(new URL('../',import.meta.url));
 const sha=bytes=>createHash('sha256').update(bytes).digest('hex');
+// Git may check text out with CRLF. Hash logical LF text, never normalize art.
+export const motionText=text=>text.replace(/\r\n/g,'\n');
 const names={stride:'puppy-stride-meta.json',rear:'puppy-paper-rear-gallop.json',approach:'puppy-paper-approach.json',actions:'puppy-paper-actions-v9.json',behaviors:'puppy-paper-behaviors.json',comfort:'puppy-companion-comfort.json'};
 
 // Same support-episode semantics as the existing runtime, including the cyclic
@@ -38,9 +40,9 @@ function bakeRoutes(){
  return {maxPreparationSpeed:1e-8,steps,direction,action};
 }
 
-export function buildMotionTables(root=ROOT){
+export function buildMotionTables(root=ROOT,readSource=readFileSync){
  const sources={},info={};
- for(const [key,name] of Object.entries(names)){const bytes=readFileSync(join(root,name));sources[name]=sha(bytes);info[key]=JSON.parse(bytes);}
+ for(const [key,name] of Object.entries(names)){const text=motionText(readSource(join(root,name)).toString('utf8'));sources[name]=sha(text);info[key]=JSON.parse(text);}
  const {rear,approach,actions,behaviors,comfort}=info;
  const range=(start,n)=>Array.from({length:n},(_,i)=>start+i);
  const support={front:bakeSupportTrack(rear.frontFeet,range(0,8),17),rear:bakeSupportTrack(rear.rearFeet,range(5,8),9),approach:bakeSupportTrack(approach.feet,range(5,8),9),walk:bakeSupportTrack(actions.feet,actions.clips.walk,9)};
@@ -50,7 +52,7 @@ export function buildMotionTables(root=ROOT){
  const stores=new Map(),codec={compress:b=>deflateRawSync(b,{level:3}),expand:(b,n)=>inflateRawSync(b,{maxOutputLength:n})};
  const frame=(family,index)=>{
   const file=family+'-q5.bin.gz';let store=stores.get(file);
-  if(!store){const bytes=readFileSync(join(root,file));sources[file]=sha(bytes);store=readPackedFrames(gunzipSync(bytes),{codec});stores.set(file,store);}
+  if(!store){const bytes=readSource(join(root,file));sources[file]=sha(bytes);store=readPackedFrames(gunzipSync(bytes),{codec});stores.set(file,store);}
   return Buffer.from(store.getFrame(index));
  };
  const joins={};
@@ -77,7 +79,7 @@ export function motionModule(tables){
 }
 if(process.argv[1]&&resolve(process.argv[1])===fileURLToPath(import.meta.url)){
  const output=join(ROOT,'puppy-motion-tables.generated.mjs'),text=motionModule(buildMotionTables());
- if(process.argv.includes('--check')){if(readFileSync(output,'utf8')!==text)throw Error('Stale motion tables: run npm run bake:motion');}
+ if(process.argv.includes('--check')){if(motionText(readFileSync(output,'utf8'))!==text)throw Error('Stale motion tables: run npm run bake:motion');}
  else writeFileSync(output,text);
  console.log(JSON.stringify({checked:process.argv.includes('--check'),bytes:Buffer.byteLength(text),file:output}));
 }

@@ -33,6 +33,7 @@ const worker=spawn(process.execPath,[fileURLToPath(new URL('integrations/windows
 let stderr='';worker.stderr.on('data',s=>stderr+=s);const delay=ms=>new Promise(r=>setTimeout(r,ms));
 try{
  await new Promise((resolve,reject)=>{const timeout=setTimeout(()=>reject(Error('Worker startup timed out')),10000);worker.once('message',m=>{clearTimeout(timeout);m.error?reject(Error(m.error)):resolve(m);});worker.once('exit',code=>{clearTimeout(timeout);reject(Error('Worker startup exit '+code+' '+stderr));});});
+ await new Promise((resolve,reject)=>{worker.once('message',m=>m.detached===true?resolve():reject(Error('Worker did not acknowledge detach')));worker.send({command:'detach'});});
  worker.disconnect();
  let status;for(let i=0;i<80;i++){status=await desktopStatus({stateDir});if(status.paintedFrames>=8)break;await delay(100);}
  if(!(status.paintedFrames>=8&&status.visible&&status.selected))throw Error('Native worker did not paint frames: '+JSON.stringify(status)+' '+stderr);

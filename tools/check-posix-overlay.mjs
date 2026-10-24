@@ -13,6 +13,7 @@ const worker=spawn(process.execPath,[fileURLToPath(new URL('integrations/windows
 let stderr='';worker.stderr.on('data',b=>stderr=(stderr+b).slice(-8192));const delay=ms=>new Promise(r=>setTimeout(r,ms));
 try{
  await new Promise((resolve,reject)=>{const timeout=setTimeout(()=>reject(Error('Native worker timed out: '+stderr)),15000);worker.once('message',m=>{clearTimeout(timeout);m.error?reject(Error(m.error)):resolve(m);});worker.once('exit',code=>{clearTimeout(timeout);reject(Error('Native worker startup exit '+code+' '+stderr));});});
+ await new Promise((resolve,reject)=>{worker.once('message',m=>m.detached===true?resolve():reject(Error('Worker did not acknowledge detach')));worker.send({command:'detach'});});
  worker.disconnect();let status;
  for(let i=0;i<100;i++){status=await desktopStatus({stateDir});if(status.paintedFrames>=12)break;await delay(100);}
  if(!(status.paintedFrames>=12&&status.selected&&status.visible&&status.lastInteraction?.kind==='ball'&&status.lastInteraction.accepted))throw Error('Native Linux painter/ball failed: '+JSON.stringify(status)+' '+stderr);

@@ -50,5 +50,7 @@ test('collection belongs to the website, not the npm runtime package',()=>{
   const html=readFileSync(new URL('./docs/index.html',import.meta.url),'utf8');
   assert.match(html,/src="\.\/analytics\.mjs\?v=1"/);
   assert.match(html,/data-i18n="webAnalytics"/);
+  assert.match(html,/This page sends visit and performance statistics to/);
+  assert.match(html,/No analytics code is included in the desktop pet/);
   assert.doesNotMatch(html,/dash\.cloudflare\.com|api\.cloudflare\.com/);
 });

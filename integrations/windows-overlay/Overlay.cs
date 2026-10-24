@@ -168,8 +168,10 @@ sealed class Companion : ApplicationContext {
         if(target!=null&&!Native.IsIconic(target.Window)&&Native.IsWindowVisible(target.Window)){
             next=Native.ClientBounds(target.Window);IntPtr foreground=Native.GetForegroundWindow();show=!picking&&(testMode||foreground==target.Window||foreground==bar.Handle)&&next.Width>=160&&next.Height>=120;
         }
-        int nextCell=8;while(next.Width/nextCell*(next.Height/(nextCell*2))>125000&&nextCell<16)nextCell+=2;
-        if(nextCell==14)nextCell=16;
+        int nextCell=Program.GridCell(next.Width,next.Height);
+        // A huge target may exceed the transport budget even at the largest cell.
+        // Hide until its size fits again; never send an invalid visible grid.
+        if(nextCell==0){show=false;nextCell=16;}
         int columns=next.Width/nextCell,rows=next.Height/(nextCell*2);
         if(force||show!=visible||next!=canvas||nextCell!=cell){
             visible=show;canvas=next;cell=nextCell;revision++;pet.Hide();
@@ -237,6 +239,13 @@ static class Program {
             using(Companion context=new Companion(single,ipcTest))Application.Run(context);return 0;
         }catch(Exception error){Emit(new {type="error",message=error.Message});return 1;}
     }
+    internal static int GridCell(int width,int height){
+        foreach(int size in new int[]{8,10,12,16}){
+            long columns=(long)width/size,rows=(long)height/(size*2);
+            if(columns>0&&rows>0&&columns*rows<=125000)return size;
+        }
+        return 0;
+    }
     static int SelfTest(string proof){
         // Uses only our own off-screen windows. Does NOT click/type in or capture a user application.
         IntPtr foreground=Native.GetForegroundWindow();
@@ -253,8 +262,9 @@ static class Program {
             Native.ShowWindow(target.Handle,7);Application.DoEvents();bool minimized=Native.IsIconic(target.Handle);pet.Hide();bool hidden=!pet.Visible;
             Native.ShowWindow(target.Handle,4);Application.DoEvents();bool restored=!Native.IsIconic(target.Handle);
             bool focus=Native.GetForegroundWindow()==foreground;
-            bool passed=clickThrough&&noActivate&&layered&&follows&&minimized&&hidden&&restored&&focus&&pet.PaintedDots>0;
-            Emit(new {type="self-test",passed=passed,clickThroughStyle=clickThrough,noActivateStyle=noActivate,layered=layered,followGeometry=follows,expectedX=expectedX,expectedY=expectedY,actualX=actual.Left,actualY=actual.Top,minimize=minimized,hide=hidden,restore=restored,foregroundPreserved=focus,dots=pet.PaintedDots,proof=proof});return passed?0:1;
+            bool gridBounds=GridCell(3840,2160)==8&&GridCell(7680,4320)==12&&GridCell(32000,18000)==0&&GridCell(int.MaxValue,int.MaxValue)==0&&GridCell(0,0)==0;
+            bool passed=clickThrough&&noActivate&&layered&&follows&&minimized&&hidden&&restored&&focus&&pet.PaintedDots>0&&gridBounds;
+            Emit(new {type="self-test",passed=passed,gridBounds=gridBounds,clickThroughStyle=clickThrough,noActivateStyle=noActivate,layered=layered,followGeometry=follows,expectedX=expectedX,expectedY=expectedY,actualX=actual.Left,actualY=actual.Top,minimize=minimized,hide=hidden,restore=restored,foregroundPreserved=focus,dots=pet.PaintedDots,proof=proof});return passed?0:1;
         }
     }
 }

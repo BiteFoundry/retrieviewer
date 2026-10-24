@@ -59,7 +59,7 @@ const ko = {
   runStep: "실행 → 앱 창 선택 → Attach 누르기",
   desktopLanguage: "데스크톱 창 선택창과 조작 메뉴는 영어로 표시됩니다.",
   latestUpdate:
-    '0.0.12 · 발 디딤과 동작 연결 정보를 미리 계산해, 실행 중 반복 작업을 줄였습니다. 그림과 움직임은 그대로입니다. <a href="https://github.com/BiteFoundry/retrieviewer/blob/main/MOTION-TABLES.md">변경 기록</a>',
+    '0.0.13 · 시작 중 종료 처리와 설정 복구 안내를 보강하고, 큰 창·낮은 FPS의 예외를 고쳤습니다. 그림과 움직임은 그대로입니다. <a href="https://github.com/BiteFoundry/retrieviewer/blob/main/RELEASING.md">변경 기록</a>',
   copy: "복사",
   copied: "명령을 복사했어요.",
   copyFailed: "복사하지 못했어요. 위 명령을 직접 선택해 복사해 주세요.",
@@ -101,7 +101,7 @@ const ko = {
   credits: "크레딧과 그림 이용 조건",
   fonts: "글꼴 라이선스",
   webAnalytics:
-    '홈페이지 방문은 쿠키 없는 <a href="https://developers.cloudflare.com/web-analytics/about/">Cloudflare Web Analytics</a>로 집계해요. 설치한 강아지는 사용 통계를 전송하지 않아요.',
+    '이 페이지의 방문·성능 통계는 <a href="https://developers.cloudflare.com/web-analytics/about/">Cloudflare Web Analytics</a>로 전송됩니다. 데스크톱 펫에는 분석 코드를 넣지 않았습니다.',
   loading: "강아지를 불러오고 있어요… 약19MB를 내려받아요.",
   running: "공을 던져주거나 간식을 줘 보세요. 아니면 그냥 지켜봐도 좋아요.",
   paused: "잠깐 쉬고 있어요. 다시 놀기를 누르면 이어집니다.",
@@ -270,7 +270,7 @@ async function load() {
   playing = false;
   cancelLoop();
   try {
-    const { createPet } = await import("./runtime/0.0.12/retrieviewer.mjs");
+    const { createPet } = await import("./runtime/0.0.13/retrieviewer.mjs");
     const next = await createPet({ seed: 731, returnStyle: $("#return-style").value });
     if (closed) {
       next.dispose();
@@ -311,7 +311,7 @@ $("#sleep-pose").addEventListener("change",async()=>{
   }
   study=key;playing=false;cancelLoop();syncControls();status('previewLoading');
   try{
-    const response=await fetch('./sleep-'+key+'.txt?v=0.0.12');
+    const response=await fetch('./sleep-'+key+'.txt?v=0.0.13');
     if(!response.ok)throw Error('Sleep preview HTTP '+response.status);
     const text=await response.text();if(request!==studyRequest||closed)return;
     art.textContent=text.replace(/^(?:\u2800*\n)+/,'').replace(/(?:\n\u2800*)+$/,'');

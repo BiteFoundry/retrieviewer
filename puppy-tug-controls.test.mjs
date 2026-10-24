@@ -79,7 +79,7 @@ test('browser preview: third tug button, EN/KO copy, cooldown loops and cache-bu
  const html=read('./docs/index.html'),app=read('./docs/app.mjs');
  assert.match(html,/id="tug"\s+disabled\s+data-i18n="tug"\s*>\s*Play tug\s*</);
  assert.ok(html.indexOf('id="treat"')<html.indexOf('id="tug"')&&html.indexOf('id="tug"')<html.indexOf('id="pause"'));
- assert.match(html,/app\.mjs\?v=0\.0\.12"/);
+ assert.match(html,/app\.mjs\?v=0\.0\.13"/);
  assert.match(app,/ {2}tug: "터그 놀이",/);assert.match(app,/tugSent: "터그 놀이를 시작했어요!"/);assert.match(app,/tugSent: "Tug of war started!"/);
  assert.equal(app.match(/for \(const kind of \["ball", "treat", "tug"\]\)/g).length,3);
  assert.doesNotMatch(app,/\["ball", "treat"\]/);assert.match(app,/kind \+ "Sent"/);
@@ -89,7 +89,7 @@ test('website keeps bilingual current-release guidance and two primary install s
  const html=read('./docs/index.html'),app=read('./docs/app.mjs');
  const {version}=JSON.parse(read('./package.json'));
  assert.ok(html.includes(`npm · v${version}`));
- assert.ok(html.includes(`${version} · Precomputed contact and transition data reduce repeated work`));
+ assert.ok(html.includes(`${version} · Safer startup and settings recovery`));
  for(const key of ['desktopLanguage','latestUpdate']){
   assert.ok(html.includes(`data-i18n="${key}"`));
   assert.match(app,new RegExp(`\\n  ${key}:`));

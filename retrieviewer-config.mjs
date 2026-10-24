@@ -1,5 +1,5 @@
 // Tiny runtime settings API. No art, processes, timers or I/O on import.
-import {homedir} from 'node:os';
+import {homedir,hostname} from 'node:os';
 import {join,resolve} from 'node:path';
 import {readFile,mkdir,lstat,open,rename,unlink} from 'node:fs/promises';
 import {randomUUID} from 'node:crypto';
@@ -30,8 +30,19 @@ export async function writeAtomicJson(path,value){
 export async function withSettingsLock(fn,options={}){
  const paths=getConfigPaths(options);await noLink(paths.root);await mkdir(paths.root,{recursive:true,mode:0o700});
  await noLink(paths.lock);let handle;
- try{handle=await open(paths.lock,'wx',0o600);}catch(e){if(e.code==='EEXIST')throw Error('Retrieviewer settings are locked by another operation; retry when it finishes.');throw e;}
- try{return await fn(paths);}finally{await handle.close();await unlink(paths.lock);}
+ const owner={owner:'retrieviewer-settings-lock-v1',pid:process.pid,host:hostname(),startedAt:new Date().toISOString(),token:randomUUID()};
+ try{handle=await open(paths.lock,'wx',0o600);}catch(e){
+  if(e.code!=='EEXIST')throw e;
+  let pid;try{await noLink(paths.lock);const info=JSON.parse(await readFile(paths.lock,'utf8'));if(info.owner===owner.owner&&Number.isSafeInteger(info.pid)&&info.pid>0)pid=info.pid;}catch{}
+  throw Error(`Retrieviewer settings are locked${pid?' (owner PID '+pid+')':''}: ${paths.lock}. Retry when it finishes. If the owner crashed, stop ALL Retrieviewer settings writers first, then follow INSTALLING.md#recovering-an-interrupted-settings-change. No lock was removed automatically.`);
+ }
+ try{await handle.writeFile(JSON.stringify(owner)+'\n');await handle.sync();return await fn(paths);}
+ finally{
+  try{await handle.close();}finally{
+   // Do not remove a replacement lock if someone moved ours during the operation.
+   try{await noLink(paths.lock);const current=JSON.parse(await readFile(paths.lock,'utf8'));if(current.token===owner.token)await unlink(paths.lock);}catch(e){if(e.code!=='ENOENT')throw e;}
+  }
+ }
 }
 export async function setAgentEnabled(agent,enabled,options={}){
  agentId(agent);if(typeof enabled!=='boolean')throw TypeError('enabled must be boolean');

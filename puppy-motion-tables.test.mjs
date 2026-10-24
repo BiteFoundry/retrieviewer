@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {createHash} from 'node:crypto';
 import {BAKED_MOTION as tables} from './puppy-motion-tables.generated.mjs';
-import {buildMotionTables,motionModule} from './tools/bake-pet-motion.mjs';
+import {buildMotionTables,motionModule,motionText} from './tools/bake-pet-motion.mjs';
 import {createPaperSupportEpisodes,createBakedSupportEpisodes} from './puppy-paper-contact.mjs';
 import {paperActionPose} from './puppy-paper-actions.mjs';
 import {preparationRoute,canJoinMotion} from './puppy-motion-lookup.mjs';
@@ -16,11 +16,22 @@ const json=n=>JSON.parse(readFileSync(new URL(n,import.meta.url)));
 const rear=json('./puppy-paper-rear-gallop.json'),approach=json('./puppy-paper-approach.json'),actions=json('./puppy-paper-actions-v9.json'),behaviors=json('./puppy-paper-behaviors.json'),comfort=json('./puppy-companion-comfort.json'),stride=json('./puppy-stride-meta.json');
 
 test('offline bake is reproducible and current, including exact-pixel transition witnesses',()=>{
- const text=motionModule(buildMotionTables());assert.equal(readFileSync(new URL('./puppy-motion-tables.generated.mjs',import.meta.url),'utf8'),text);
+ const text=motionModule(buildMotionTables());assert.equal(motionText(readFileSync(new URL('./puppy-motion-tables.generated.mjs',import.meta.url),'utf8')),text);
  assert.ok(Buffer.byteLength(text)<16*1024);assert.equal(Object.keys(tables.joins).length,10);
  assert.ok(Object.isFrozen(tables.support.front.starts));
  const impact=tables.joins['rear-run/scramble'];assert.equal(impact.airborne,true);assert.deepEqual(impact.supports,[],'never invent contact for an airborne source');
  for(const join of Object.values(tables.joins))assert.match(join.poseSha256,/^[a-f0-9]{64}$/);
+});
+
+test('LF and Windows CRLF metadata produce the same bake without normalizing binary art',()=>{
+ let binaryReads=0;
+ const windows=buildMotionTables(undefined,name=>{
+  const bytes=readFileSync(name);
+  if(name.endsWith('.json'))return Buffer.from(motionText(bytes.toString('utf8')).replace(/\n/g,'\r\n'));
+  binaryReads++;return bytes;
+ });
+ assert.ok(binaryReads>0);assert.deepEqual(windows,tables);
+ const text=motionModule(windows);assert.equal(motionText(text.replace(/\n/g,'\r\n')),text);
 });
 
 test('baked contact episodes match the original algorithm at every source sample, cycle and wrap',()=>{

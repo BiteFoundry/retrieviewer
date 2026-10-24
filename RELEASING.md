@@ -1,4 +1,30 @@
-# Retrieviewer 0.0.12 release process
+# Retrieviewer 0.0.13 release process
+
+Current target: `@bitefoundry/retrieviewer@0.0.13`, public `latest`.
+The owner authorized npm publication and website deployment on2026-10-24.
+This release contains the reviewed reliability fixes, with unchanged art/motion:
+
+- Canonical LF text/hash checks and CRLF regression coverage; binary art stays
+  byte-for-byte unchanged. Git attributes and existing JSON text use LF.
+- Exclusive settings locks record the owner PID/host/time/token. Busy errors
+  identify the lock and link to the offline manual recovery in INSTALLING.md.
+  There is no automatic removal of possibly live locks.
+- Workers require ready plus an acknowledged detach to survive launcher loss.
+  Startup disconnect/launcher-death tests cover worker, painter and session cleanup.
+- Oversized Windows grids hide until they fit again; plugin timer delays cannot
+  overflow Node's signed32-bit timeout bound into a1ms loop.
+- Windows20 / Linux22 Node CI on push and PR, including installed-consumer checks
+  and an owned Windows native diagnostic. Website copy discloses page visit and
+  performance analytics separately from the desktop pet.
+
+Build and install a fresh exact tarball outside the source tree, compare installed
+bytes and test its native/browser runtimes. Publish that same artifact after the
+new remote CI succeeds; verify registry integrity and matching Pages runtime.
+No new runtime dependency, process, background timer or art cache. No claim of
+new macOS/Linux GUI certification or a material RAM reduction. Preserve all
+earlier npm artifacts, MIT code / CC BY-SA4.0 art and the user's running pet.
+
+## Previous 0.0.12 scope (historical)
 
 Current target: `@bitefoundry/retrieviewer@0.0.12`, public `latest`.
 On2026-10-24 the owner authorized npm publication and website deployment of the

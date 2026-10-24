@@ -19,7 +19,9 @@ reject stale output after source metadata or witnessed art changes.
   gait-phase/velocity-match requirements. These cover walk entry/exit, rear run
   into the authored impact, impact into rear pickup, carry-gather into arrival
   seat, tug into the canonical seat, and four watch endpoints into that seat.
-- SHA256 of every input metadata/art file used by the bake. No source images,
+- SHA256 of every input metadata/art file used by the bake. JSON text is hashed
+  with LF line endings; binary artwork is hashed byte-for-byte. Generated text
+  checks also accept CRLF checkouts. No source images,
   source hashes or graph search are computed by the running pet.
 
 The generated routes preserve the existing approved preparation order. This is

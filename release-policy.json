@@ -8,6 +8,6 @@
   "artLicense": "CC-BY-SA-4.0",
   "approvalDate": "2026-10-24",
   "rightsReview": "ASSET-PROVENANCE.md",
-  "approvedRelease": "0.0.12",
-  "releaseScope": "The owner authorized npm publication and website deployment of the reviewed precomputed motion-table work on2026-10-24. Publish only a fresh tested0.0.12 artifact; earlier releases remain immutable. Existing artwork licenses and rights approvals remain; no new artwork, runtime dependency or live pet restart. This reduces repeated setup/action-addressing work, not the retained image payload or process baseline."
+  "approvedRelease": "0.0.13",
+  "releaseScope": "The owner authorized npm publication and website deployment on2026-10-24. Release0.0.13 contains CRLF-stable baking, settings-lock ownership and offline manual recovery, acknowledged worker detach, oversized-grid hiding, bounded plugin timers, Windows/Linux PR verification and clearer website analytics disclosure. No new artwork, runtime dependency or live pet restart. Publish only the exact fresh installed/native/browser-tested artifact after remote CI passes. Preserve all earlier releases; no new macOS/Linux GUI certification or RAM-reduction claim."
 }

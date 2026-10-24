@@ -51,9 +51,19 @@ test('options are validated before any asset loads',async()=>{
  const before=loads,host=makeHost();
  await assert.rejects(createPetPlugin({host:{render(){}}}),TypeError);
  await assert.rejects(createPetPlugin({host,fps:0}),RangeError);
+ for(const fps of [Number.MIN_VALUE,1e-12,1000/(2**31),NaN,Infinity,121]){
+  await assert.rejects(createPetPlugin({host,petOptions:{loadAsset},fps}),RangeError);
+ }
  await assert.rejects(createPetPlugin({host,scheduler:{now(){},schedule(){}}}),TypeError);
  await assert.rejects(createPetPlugin({host:{...host,onError:1}}),TypeError);
  assert.equal(loads,before);
+});
+
+test('lowest supported FPS schedules one bounded timeout, never an overflow loop',async t=>{
+ const clock=fakeClock(),host=makeHost(),delay=2147483647;
+ const plugin=await make(host,{clock,fps:1000/delay});t.after(()=>plugin.dispose());
+ plugin.start();assert.equal(clock.queue.size,1);assert.equal([...clock.queue.values()][0].at,delay);
+ clock.advance(1000);assert.equal(host.frames.length,1);plugin.pause();assert.equal(clock.queue.size,0);
 });
 
 test('scheduled loop: immediate first frame, elapsed dt, idempotent start, pause/resume without catch-up',async t=>{

@@ -21,7 +21,7 @@ export interface PetPluginScheduler {
 export interface PetPluginOptions {
   host: PetPluginHost;
   petOptions?: PetOptions;
-  /** Scheduled frame rate, default 30. */
+  /** Scheduled frame rate, default 30; 1000/2147483647 through 120 inclusive. */
   fps?: number;
   /** Default: performance.now() with setTimeout/clearTimeout, used only after start(). */
   scheduler?: PetPluginScheduler;
