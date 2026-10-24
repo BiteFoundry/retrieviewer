@@ -30,6 +30,9 @@ jobs:
       - run: npm ci --ignore-scripts --no-audit --no-fund
       - run: npm run check:motion
       - run: node --test --test-concurrency=1
+      # npm ci fetches locked tarballs, but a fresh offline consumer also needs
+      # registry metadata in the cache. Prime only the pinned runtime dependency.
+      - run: npm cache add jsonc-parser@3.3.1 --ignore-scripts
       - run: npm run test:package
       - if: runner.os == 'Windows'
         run: node tools/check-windows-overlay.mjs
