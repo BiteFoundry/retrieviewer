@@ -153,7 +153,7 @@
     "build:site": "node tools/build-site.mjs",
     "pet:companion": "node examples/live.mjs",
     "pet:desktop": "node retrieviewer-cli.mjs desktop",
-    "test": "node --test \"*.test.mjs\"",
+    "test": "node --test",
     "test:package": "node check-pet-package.mjs",
     "release:check": "npm run check:motion && node tools/check-release.mjs",
     "prepublishOnly": "npm run release:check"

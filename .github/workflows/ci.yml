@@ -29,7 +29,7 @@ jobs:
           cache: npm
       - run: npm ci --ignore-scripts --no-audit --no-fund
       - run: npm run check:motion
-      - run: node --test --test-concurrency=1 "*.test.mjs"
+      - run: node --test --test-concurrency=1
       - run: npm run test:package
       - if: runner.os == 'Windows'
         run: node tools/check-windows-overlay.mjs
