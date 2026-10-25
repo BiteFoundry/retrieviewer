@@ -68,7 +68,7 @@ export function encodePredictiveFrames(rvf1,{filter}={}){
 }
 
 // Exact PNG inverse filter of one row into `cur` (bpp 1, integer arithmetic).
-function unfilterRow(type,src,at,cur,prev,w){
+export function unfilterRow(type,src,at,cur,prev,w){
  switch(type){
   case 0:for(let x=0;x<w;x++)cur[x]=src[at+x];return;
   case 1:for(let x=0;x<w;x++)cur[x]=(src[at+x]+(x?cur[x-1]:0))&255;return;

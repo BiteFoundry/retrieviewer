@@ -30,6 +30,8 @@ import {createPet,getPetAssetFiles,DEFAULT_ART_PROFILE} from '@bitefoundry/retri
 import {createPetPlugin} from '@bitefoundry/retrieviewer/plugin';
 import {createAttentionMonitor} from '@bitefoundry/retrieviewer/attention';
 import {createOpenRouterBrain,OPENROUTER_MODEL} from '@bitefoundry/retrieviewer/brain';
+import {createCat} from '@bitefoundry/retrieviewer/cat';
+const cat=await createCat({seed:731});try{assert.equal(cat.interact('treat'),true);for(let i=0;i<120;i++)cat.step(1/60);const cf=cat.frame({columns:80,rows:40});assert.equal(cf.text.split('\\n').length,40);assert.equal(cf.columns,80);}finally{cat.dispose();}
 assert.equal(DEFAULT_ART_PROFILE,'q5');assert.equal(getPetAssetFiles().length,19);
 const a=await createPet({seed:731});let count=0,clears=0,frame;
 const brain=createOpenRouterBrain({apiKey:'fixture-not-a-real-key',fetch:async()=>new Response(JSON.stringify({choices:[{finish_reason:'stop',message:{content:JSON.stringify({decision:'notify'})}}]}))});

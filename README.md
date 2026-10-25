@@ -77,7 +77,7 @@ Do not use `sudo npm install -g` as a blanket workaround.
 
 | Desktop | Status / requirements |
 | --- | --- |
-| Windows 10/11 x64 | Live tested. Node + Windows .NET Framework 4 compiler; helper builds on first launch. |
+| Windows 10/11 x64 | Live tested. Node20+; bundled native engine for basic mode. Optional watching uses the .NET compatibility helper. |
 | Linux X11 | AlmaLinux 8 / GLIBC 2.28 / Python 3.6.8 / Node 22.23.4 tested in an isolated composited X11 desktop. Requires system Python 3.6+, X11/Xrender/Xext and a compositor. |
 | macOS | **Experimental; no Mac runtime verification yet.** Uses built-in osascript/AppKit. |
 | Native Wayland / headless SSH | Not supported by the desktop overlay. No session/privacy workaround is installed. |
@@ -188,3 +188,13 @@ the complete package is **not MIT-only**.
 The puppy artwork was developed with AI-generated imagery and programmatic pose,
 grounding and frame processing. It is authored animation, not motion capture or
 a claim of sentience.
+
+## 0.0.18
+
+Windows x64 basic mode now runs one native process; Node exits after launch.
+The existing artwork and behavior stay the same. Use `retrieviewer desktop --pet cat`
+for the ginger cat, or select it in the window picker. Only one pet is loaded.
+Optional StackBite/LLM watching retains the higher-memory Node compatibility
+engine. Linux/macOS and browser previews retain their existing host architecture.
+Both species use indexed crops for local loading.
+See [runtime scope and measurements](NATIVE-RUNTIME.md).

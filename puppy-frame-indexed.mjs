@@ -31,7 +31,7 @@ const display=Uint8Array.from({length:32},(_,q)=>Math.round(q*255/31));
 
 // The host provides bounded positional reads and a synchronous gzip decoder.
 // Only two reconstructed frames survive; compressed art stays on disk.
-export function createIndexedFrameStore(index,{read,expand,close=()=>{},frameIndices}={}){
+export function createIndexedFrameStore(index,{read,expand,close=()=>{},frameIndices,kernel=null}={}){
  if(typeof read!=='function'||typeof expand!=='function')fail('reader');
  const {width,height,frameCount,uniqueCount,map,rects,indexBytes}=index,n=width*height;
  const retained=frameIndices===undefined?null:new Uint8Array(frameCount);
@@ -50,7 +50,7 @@ export function createIndexedFrameStore(index,{read,expand,close=()=>{},frameInd
    const rows=expand(compressed,expected);if(!(rows instanceof Uint8Array)||rows.length!==expected)fail('expanded length');
    // Mark the evicted slot invalid before parsing: a failed decode is never a hit.
    const slot=slots.pop();slots.unshift(slot);slot.unique=-1;const frame=slot.frame??=new Uint8Array(n);frame.fill(0);prev.fill(0);
-   for(let r=0,at=0;r<h;r++){
+   if(kernel?.decodeRows)kernel.decodeRows(frame,rows,x,y,w,h,width);else for(let r=0,at=0;r<h;r++){
     const type=rows[at++];if(type>4)fail('filter');
     unfilterRow(type,rows,at,cur,prev,w);at+=w;
     for(let c=0;c<w;c++){

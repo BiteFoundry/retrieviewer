@@ -1,6 +1,6 @@
 {
   "name": "@bitefoundry/retrieviewer",
-  "version": "0.0.17",
+  "version": "0.0.18",
   "description": "A fluffy Braille desktop pet for Windows and Linux X11, with experimental macOS support and an embeddable TUI engine.",
   "license": "SEE LICENSE IN LICENSE",
   "homepage": "https://bitefoundry.github.io/retrieviewer/",
@@ -57,7 +57,8 @@
     },
     "./tui": "./integrations/opencode/tui.tsx",
     "./opencode/tui": "./integrations/opencode/tui.tsx",
-    "./package.json": "./package.json"
+    "./package.json": "./package.json",
+    "./cat": "./integrations/purrviewer/src/purrviewer.mjs"
   },
   "files": [
     "LICENSE",
@@ -164,7 +165,38 @@
     "vendor/procedural-animals/LICENSE",
     "puppy-frame-indexed.mjs",
     "puppy-frame-file.mjs",
-    "pet-indexed-manifest.json"
+    "pet-indexed-manifest.json",
+    "integrations/native-windows/desktop.mjs",
+    "integrations/native-windows/runtime.mjs",
+    "integrations/native-windows/runtime.bundle.mjs",
+    "integrations/native-windows/manifest.json",
+    "integrations/native-windows/bin/win32-x64/retrieviewer-native.exe",
+    "integrations/native-windows/host.cpp",
+    "integrations/native-windows/native-window.hpp",
+    "integrations/native-windows/native-control.hpp",
+    "integrations/native-windows/CMakeLists.txt",
+    "integrations/native-windows/sources.json",
+    "integrations/native-windows/THIRD-PARTY-LICENSES.txt",
+    "NATIVE-RUNTIME.md",
+    "integrations/purrviewer/ART.md",
+    "integrations/purrviewer/ASSETS-LICENSE.md",
+    "integrations/purrviewer/LICENSE",
+    "integrations/purrviewer/art/ginger.bin.gz",
+    "integrations/purrviewer/art/ginger.json",
+    "integrations/purrviewer/art/ginger.rvz",
+    "integrations/purrviewer/src/contact.mjs",
+    "integrations/purrviewer/src/habitat.mjs",
+    "integrations/purrviewer/src/life.mjs",
+    "integrations/purrviewer/src/purrviewer-core.mjs",
+    "integrations/purrviewer/src/purrviewer.mjs",
+    "integrations/purrviewer/src/walk-cycle.mjs",
+    "integrations/purrviewer/src/world.mjs",
+    "integrations/purrviewer/vendor/retrieviewer/braille.mjs",
+    "integrations/purrviewer/vendor/retrieviewer/LICENSE-CODE",
+    "integrations/purrviewer/vendor/retrieviewer/puppy-frame-predictive.mjs",
+    "integrations/purrviewer/vendor/retrieviewer/puppy-frame-store.mjs",
+    "integrations/purrviewer/vendor/retrieviewer/puppy-frame-file.mjs",
+    "integrations/purrviewer/vendor/retrieviewer/puppy-frame-indexed.mjs"
   ],
   "scripts": {
     "bake:motion": "node tools/bake-pet-motion.mjs",
@@ -178,7 +210,9 @@
     "release:check": "npm run check:motion && node tools/check-release.mjs",
     "prepublishOnly": "npm run release:check",
     "bake:art-index": "node tools/index-pet-art.mjs",
-    "check:art-index": "node tools/index-pet-art.mjs --check"
+    "check:art-index": "node tools/index-pet-art.mjs --check",
+    "build:native": "node tools/build-native-windows.mjs",
+    "check:native-pixels": "node tools/check-native-pixels.mjs"
   },
   "dependencies": {
     "jsonc-parser": "3.3.1"

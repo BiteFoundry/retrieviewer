@@ -1,3 +1,22 @@
+# Retrieviewer 0.0.18 release process
+
+Current target: `@bitefoundry/retrieviewer@0.0.18`, public `latest`.
+The owner authorized immediate npm and website deployment of the lightweight
+shared engine on2026-10-25, and explicitly selected CC BY-SA4.0 for cat artwork.
+Code remains MIT. Ship the real native Windows x64 basic runtime, ginger cat and
+portable compatibility paths. Preserve approved artwork, physics, autonomy,
+optional watcher/brain behavior and the user's already-running pet.
+
+Validate exact native-vs-portable rendered pixels, authenticated control,
+species switching, startup EOF cleanup, real picker lifecycle and real4K memory.
+Build/install a fresh exact tarball, compare every shipped byte, run the full
+suite and owned Windows checks, then publish that artifact. Verify registry
+integrity, a fresh public-registry consumer and the deployed bilingual website.
+Native low-memory figures apply only to Windows x64 basic mode; watch/brain,
+other operating systems and browser previews keep their documented scope.
+
+## Previous 0.0.17 scope (historical)
+
 # Retrieviewer 0.0.17 release process
 
 Current target: `@bitefoundry/retrieviewer@0.0.17`, public `latest`.

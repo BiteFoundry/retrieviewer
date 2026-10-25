@@ -1,34 +1,11 @@
-import {readPackedFrames} from '../vendor/retrieviewer/puppy-frame-store.mjs';
 import {rgbaToBraille} from '../vendor/retrieviewer/braille.mjs';
 import {createCatMotion,projectCat} from './world.mjs';
 import {createCatLife} from './life.mjs';
 import {createCatContacts,footSourcePoint} from './contact.mjs';
 import {paintHabitat} from './habitat.mjs';
-let shared=null,pending=null,leases=0;
-const root=new URL('../art/',import.meta.url);
-async function read(url){
- if(url.protocol==='file:'){const {readFile}=await import('node:fs/promises');return new Uint8Array(await readFile(url));}
- const r=await fetch(url);if(!r.ok)throw Error('Cat asset HTTP '+r.status);return new Uint8Array(await r.arrayBuffer());
-}
-async function acquire(){
- if(!pending&&!shared)pending=(async()=>{
-  const [json,gzip]=await Promise.all([read(new URL('ginger.json',root)),read(new URL('ginger.bin.gz',root))]);
-  const meta=JSON.parse(new TextDecoder().decode(json));let encoded,codec;
-  if(root.protocol==='file:'){
-   const z=await import('node:zlib');encoded=z.gunzipSync(gzip);codec={compress:b=>z.deflateRawSync(b,{level:3}),expand:(b,n)=>z.inflateRawSync(b,{maxOutputLength:n})};
-  }else encoded=new Uint8Array(await new Response(new Blob([gzip]).stream().pipeThrough(new DecompressionStream('gzip'))).arrayBuffer());
-  if(meta.version!==1||meta.width!==320||meta.height!==320||meta.frames<1||meta.frames>128)throw Error('Invalid cat art metadata');
-  const store=readPackedFrames(encoded,codec?{codec}:undefined);
-  if(store.frameCount!==meta.frames)throw Error('Cat art frame count mismatch');
-  for(const motion of Object.values(meta.clips))if(!Array.isArray(motion)||!motion.length||motion.some(i=>!Number.isInteger(i)||i<0||i>=meta.frames))throw Error('Invalid cat clip');
-  return {meta,store};
- })().then(value=>{shared=value;pending=null;return value;},error=>{pending=null;throw error;});
- const value=shared??await pending;leases++;return value;
-}
-function release(){if(--leases===0)shared=null;}
-export async function createCat({seed=731}={}){
+export function createCatFromAssets({seed=731}={},lease,kernel=null){
  if(!Number.isInteger(seed)||seed<0||seed>0xffffffff)throw TypeError('Invalid cat seed');
- let asset=await acquire();const motion=createCatMotion(),life=createCatLife({seed}),contacts=createCatContacts(asset.meta.walk),sourcePoint={x:0,y:0};
+ let asset=lease.data;const release=lease.release,motion=createCatMotion(),life=createCatLife({seed}),contacts=createCatContacts(asset.meta.walk),sourcePoint={x:0,y:0};
  let pixels=null,disposed=false,lastClip='sit',lastFrame=null,prep=null,view='front',mirror=false,settle=null,lastMoving=false,lastLifeClip='sit',lastPaintKey='',lastText='',rasterizations=0,heldHits=0;
  const alive=()=>{if(disposed)throw Error('Cat is disposed');};
  const direct=command=>{
@@ -104,11 +81,11 @@ export async function createCat({seed=731}={}){
    const result=text=>({text,pixels,columns,rows,color:asset.meta.color,state:{...s,clip,frame:key},contacts:pins,report:r,placement:p,dish,mat});
    lastClip=clip;lastFrame=key;
    if(paintKey===lastPaintKey){heldHits++;return result(lastText);}
-   for(let i=0;i<n;i+=4)pixels[i]=pixels[i+1]=pixels[i+2]=0;
+   if(kernel?.clear)kernel.clear(pixels);else for(let i=0;i<n;i+=4)pixels[i]=pixels[i+1]=pixels[i+2]=0;
    const gray=asset.store.getFrame(key);
    if(p){
     const size=p.size,left=p.x-size*.5,top=p.y-size*(290/320),x0=Math.max(0,Math.floor(left)),y0=Math.max(0,Math.floor(top)),x1=Math.min(width,Math.ceil(left+size)),y1=Math.min(height,Math.ceil(top+size));
-    for(let y=y0;y<y1;y++)for(let x=x0;x<x1;x++){
+    if(kernel?.catBlit)kernel.catBlit(pixels,gray,{width,height,x:p.x,y:p.y,size:p.size,mirror,pins});else for(let y=y0;y<y1;y++)for(let x=x0;x<x1;x++){
      let u=(x+.5-left)*320/size-.5,v=(y+.5-top)*320/size-.5;if(mirror)u=319-u;
      if(v>225&&pins.length){const source=footSourcePoint(u,v,pins,sourcePoint);u=source.x;v=source.y;}
      if(u<0||v<0||u>319||v>319)continue;
@@ -142,12 +119,12 @@ export async function createCat({seed=731}={}){
     }
    }
    paintHabitat(pixels,width,height,wheelAngle);
-   rasterizations++;lastPaintKey=paintKey;lastText=rgbaToBraille(pixels,width,height,{method:'stable',brightness:1.22,contrast:1.08}).text;
+   rasterizations++;lastPaintKey=paintKey;lastText=(kernel?.braille?kernel.braille(pixels,width,height,1.22,1.08):rgbaToBraille(pixels,width,height,{method:'stable',brightness:1.22,contrast:1.08})).text;
    return result(lastText);
   },
   interact(kind,options){alive();if(!['treat','toy','call','stretch','tail','greet','company','tower','wheel'].includes(kind))throw TypeError('Invalid cat interaction');const accepted=life.interact(kind,options);if(accepted&&prep){prep=null;}return accepted;},
   get report(){alive();return life.report;},
-  get stats(){alive();return {residentPixelBytes:asset.store.residentPixelBytes??asset.store.residentBytes,cachedFrames:asset.store.stats().cachedFrames,rgbaBytes:pixels?.byteLength??0,lastClip,lastFrame,leases,rasterizations,heldHits};},
+  get stats(){alive();return {residentPixelBytes:asset.store.residentPixelBytes??asset.store.residentBytes,cachedFrames:asset.store.stats().cachedFrames,rgbaBytes:pixels?.byteLength??0,lastClip,lastFrame,leases:lease.users?.()??1,rasterizations,heldHits};},
   dispose(){if(disposed)return;disposed=true;pixels=null;prep=null;contacts.reset();asset=null;lastText=lastPaintKey='';release();}
  };
 }

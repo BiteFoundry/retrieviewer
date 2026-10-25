@@ -6,3 +6,5 @@
 *.mp4 binary
 *.ttf binary
 *.woff2 binary
+*.rvz binary
+*.exe binary

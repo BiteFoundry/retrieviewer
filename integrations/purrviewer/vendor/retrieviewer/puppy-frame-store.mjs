@@ -11,6 +11,12 @@ import {isPredictiveFrames,readPredictiveFrames} from './puppy-frame-predictive.
 const MAGIC=[0x52,0x56,0x46,0x31],HEADER=20,RECORD=24,MAX_SIDE=16384;
 const stores=new WeakSet();
 
+// Indexed local files obey the same borrowed two-frame contract as memory stores.
+export function registerFrameStore(store){
+ if(!store||typeof store.getFrame!=='function'||typeof store.stats!=='function'||!Number.isInteger(store.width)||!Number.isInteger(store.height)||!Number.isInteger(store.frameCount))throw Error('Invalid frame store');
+ stores.add(store);return store;
+}
+
 export function isPackedFrames(value){return stores.has(value);}
 export function isGrayFrameSource(value){return value instanceof Uint8Array||stores.has(value);}
 

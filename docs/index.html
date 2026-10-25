@@ -29,7 +29,7 @@
     <meta name="twitter:card" content="summary_large_image" />
     <link rel="canonical" href="https://bitefoundry.github.io/retrieviewer/" />
     <link rel="icon" href="./assets/icon.svg" type="image/svg+xml" />
-    <link rel="stylesheet" href="./style.css?v=0.0.17-cat-9da9e42" />
+    <link rel="stylesheet" href="./style.css?v=0.0.18-cat-5452da3" />
     <link
       rel="preload"
       href="./assets/fonts/Manrope.ttf"
@@ -44,8 +44,8 @@
       type="font/woff2"
       crossorigin
     />
-    <script type="module" src="./app.mjs?v=0.0.17"></script>
-    <script type="module" src="./purrviewer/demo.mjs?v=9da9e42"></script>
+    <script type="module" src="./app.mjs?v=0.0.18"></script>
+    <script type="module" src="./purrviewer/demo.mjs?v=5452da3-0.0.18"></script>
   </head>
   <body>
     <a class="skip" href="#main" data-i18n="skip">Skip to content</a>
@@ -241,7 +241,7 @@
           <button type="button" class="button" data-cat-full data-cat-copy="fullscreen">Full screen</button>
         </div>
         <p class="cat-status muted" role="status" aria-live="polite" data-cat-status>Meet the cat to begin. Nothing to install.</p>
-        <p class="quiet cat-note" data-cat-copy="catNote">Browser preview · Cat artwork loads when you start (about0.4MB). Desktop installation is not available yet.</p>
+        <p class="quiet cat-note" data-cat-copy="catNote">Browser preview · About0.4MB of cat artwork. On desktop: retrieviewer desktop --pet cat.</p>
         <a class="cat-terms quiet" href="./purrviewer/NOTICE.txt" data-cat-copy="catTerms">Cat demo credits & artwork terms</a>
       </section>
       <section
@@ -256,7 +256,7 @@
           <a
             href="https://www.npmjs.com/package/@bitefoundry/retrieviewer"
             class="text-link"
-            >npm · v0.0.17 <span aria-hidden="true">↗</span></a
+            >npm · v0.0.18 <span aria-hidden="true">↗</span></a
           >
         </div>
         <p class="install-location" data-i18n="installLocation">
@@ -301,7 +301,7 @@
           The desktop window picker and controls use English.
         </p>
         <p class="quiet" data-i18n="latestUpdate">
-          0.0.17 · Same dog, lighter local runtime. Artwork stays on disk until a frame is needed.
+          0.0.18 · Same dog, lighter Windows runtime. A ginger cat joins the desktop, too.
           <a href="https://github.com/BiteFoundry/retrieviewer/blob/main/RELEASING.md">Update notes</a>
         </p>
         <p
@@ -389,7 +389,7 @@
           <div>
             <dt>Windows 10/11</dt>
             <dd data-i18n="windows">
-              Live tested · x64, Node and the .NET Framework 4 compiler.
+              Live tested · x64, Node20+. Basic mode uses the bundled native engine.
             </dd>
           </div>
           <div>
@@ -414,9 +414,10 @@
           </div>
         </dl>
         <p class="resource-note" data-i18n="resource">
-          Same artwork, different defaults: Windows uses 8px cells / 30fps;
-          Linux uses coarser 16px cells / 15fps. The package is about 19 MB.
-          Memory use varies with window size and activity.
+          Windows basic mode uses one native process. StackBite/LLM watching uses
+          the higher-memory compatibility engine. Linux keeps Node/Python.
+          4K tests: dog median29MiB / peak40MiB; cat44MiB /65MiB.
+          Memory depends on window size and activity.
         </p>
         <a
           class="text-link"

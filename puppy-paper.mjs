@@ -354,9 +354,9 @@ export function createPaperActor(animal,info,{manualTricks=false,trickTimings=nu
  };
 }
 
-export function createPaperRenderer(cache,info,meta,width,height,{rear,approach,seat,arrivalSeat,behaviors,actions,interactions,comfort,contacts=true,pawTransport=false,motionTables=null}={}){
+export function createPaperRenderer(cache,info,meta,width,height,{rear,approach,seat,arrivalSeat,behaviors,actions,interactions,comfort,contacts=true,pawTransport=false,motionTables=null,kernel=null}={}){
  if(![width,height].every(Number.isInteger)||width<2||height<2||width*height>1_000_000)throw Error('Invalid paper grid');
- const tween=createCachedTween(cache,info),renderMeta={...meta,pairs:info.pair_map,run_sequence:info.run_sequence};
+ const tween=createCachedTween(cache,info,kernel),renderMeta={...meta,pairs:info.pair_map,run_sequence:info.run_sequence};
  const out=new Uint8ClampedArray(width*height*4),area=createPaperAreaSampler();
  // Only one authored source is drawn at a time. Small samplers borrow a view of
  // the action-sized scratch. A sleep blend reads each base pixel before writing
@@ -364,14 +364,14 @@ export function createPaperRenderer(cache,info,meta,width,height,{rear,approach,
  const actionScratch=new Uint8ClampedArray(Math.max(320*320,(actions?.info.width??320)*(actions?.info.height??320))*4);
  const spriteScratch=actionScratch.subarray(0,320*320*4);
  for(let i=3;i<actionScratch.length;i+=4)actionScratch[i]=255;
- const rearSample=rear?createRearSampler(rear.bytes,rear.info,spriteScratch):null,lock=createPaperFootLock({maxImageStretch:pawTransport?1.45:Infinity});
- const approachSample=approach?createRearSampler(approach.bytes,approach.info,spriteScratch):null;
- const seatSample=seat?createPaperSeatSampler(seat.bytes,seat.info,spriteScratch):null;
- const arrivalSeatSample=arrivalSeat?createPaperSeatSampler(arrivalSeat.bytes,arrivalSeat.info,spriteScratch):null;
- const behaviorSample=behaviors?createPaperBehaviorSampler(behaviors.bytes,behaviors.info,spriteScratch):null;
- const interactionSample=interactions?createCompanionSpriteSampler(interactions.bytes,interactions.info,spriteScratch):null;
+ const rearSample=rear?createRearSampler(rear.bytes,rear.info,spriteScratch,kernel):null,lock=createPaperFootLock({maxImageStretch:pawTransport?1.45:Infinity});
+ const approachSample=approach?createRearSampler(approach.bytes,approach.info,spriteScratch,kernel):null;
+ const seatSample=seat?createPaperSeatSampler(seat.bytes,seat.info,spriteScratch,kernel):null;
+ const arrivalSeatSample=arrivalSeat?createPaperSeatSampler(arrivalSeat.bytes,arrivalSeat.info,spriteScratch,kernel):null;
+ const behaviorSample=behaviors?createPaperBehaviorSampler(behaviors.bytes,behaviors.info,spriteScratch,kernel):null;
+ const interactionSample=interactions?createCompanionSpriteSampler(interactions.bytes,interactions.info,spriteScratch,kernel):null;
  const comfortSample=comfort?createComfortSpriteSampler(comfort.bytes,comfort.info,spriteScratch):null;
- const actionSample=actions?createPaperActionSampler(actions.bytes,actions.info,actionScratch.subarray(0,actions.info.width*actions.info.height*4),motionTables?.actionClips):null,actionArea=actions?createPaperAreaSampler(actions.info.width):null;
+ const actionSample=actions?createPaperActionSampler(actions.bytes,actions.info,actionScratch.subarray(0,actions.info.width*actions.info.height*4),motionTables?.actionClips,kernel):null,actionArea=actions?createPaperAreaSampler(actions.info.width):null;
  const episodes=(key,labels,indices,samples,options)=>motionTables?.support[key]?createBakedSupportEpisodes(motionTables.support[key]):createPaperSupportEpisodes(labels,indices,samples,options);
  const walkEpisodes=actions?episodes('walk',actions.info.feet,actions.info.clips.walk,9):null;
  const sourceEpisodes=rear?{
@@ -415,8 +415,8 @@ export function createPaperRenderer(cache,info,meta,width,height,{rear,approach,
    let sx=Math.floor(rawX);if(state.flip)sx=sourceN-1-sx;
    return image[(Math.floor(rawY)*sourceN+sx)*4]>16;
   }}):null;render.lastTransport=transport;
-  const minify=side<320||sideX<320,filter=isAction?actionArea:area;if(minify)filter.prepare(image);
-  out.fill(0);for(let i=3;i<out.length;i+=4)out[i]=255;
+  const minify=side<320||sideX<320,filter=isAction?actionArea:area;if(minify&&!(kernel?.blit&&transport))filter.prepare(image);
+  if(kernel?.clear)kernel.clear(out);else{out.fill(0);for(let i=3;i<out.length;i+=4)out[i]=255;}
   render.lastPlacement={left,top,side,sideX};
   // Measured drawn mouth of the EXACT sample above (same priority, quantization,
   // placement and mirror). Side/rear/action/interaction stay null: unsupported.
@@ -430,7 +430,7 @@ export function createPaperRenderer(cache,info,meta,width,height,{rear,approach,
   }
   const drawTop=top-originY/320*side,bottom=top+Math.max(sourceN-originY,...pins.map(p=>p.target.y+20))/320*side;
   const drawLeft=left+Math.min(-originX,...pins.map(p=>p.target.x-20))/320*sideX,drawRight=left+Math.max(sourceN-originX,...pins.map(p=>p.target.x+20))/320*sideX;
-  for(let dy=Math.max(0,minify?Math.floor(drawTop):Math.ceil(drawTop-.5));dy<Math.min(height,minify?Math.ceil(bottom):Math.ceil(bottom-.5));dy++)for(let dx=Math.max(0,minify?Math.floor(drawLeft):Math.ceil(drawLeft-.5));dx<Math.min(width,minify?Math.ceil(drawRight):Math.ceil(drawRight-.5));dx++){
+  if(kernel?.blit&&transport)kernel.blit(out,image,{width,height,sourceN,left,top,side,sideX,originX,originY,drawTop,bottom,drawLeft,drawRight,flip:state.flip,layers:transport.layers});else for(let dy=Math.max(0,minify?Math.floor(drawTop):Math.ceil(drawTop-.5));dy<Math.min(height,minify?Math.ceil(bottom):Math.ceil(bottom-.5));dy++)for(let dx=Math.max(0,minify?Math.floor(drawLeft):Math.ceil(drawLeft-.5));dx<Math.min(width,minify?Math.ceil(drawRight):Math.ceil(drawRight-.5));dx++){
    const px=(dx+.5-left)/sideX*320,py=(dy+.5-top)/side*320;
    const warped=transport?transport(px,py):footSourcePoint(px,py,pins);if(!warped)continue;
    const rawX=warped.x+originX,rawY=warped.y+originY;

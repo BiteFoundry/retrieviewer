@@ -93,3 +93,10 @@ npx --yes --package @bitefoundry/retrieviewer@latest retrieviewer desktop
 
 `npx` still needs Node/npm and a compatible GUI desktop, and may download the
 package into npm's cache. It does not create a permanent global command.
+
+## Windows native basic mode (0.0.18)
+
+Windows10/11 x64 + Node20+ for npm/launch. The shipped QuickJS/Win32 runtime
+needs no compiler, CLR or additional runtime download. Node exits after launch.
+Optional StackBite/LLM watching or --engine node keeps the existing .NET helper
+and Node worker; that compatibility mode needs the Windows Framework4 compiler.

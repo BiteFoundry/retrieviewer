@@ -7,8 +7,8 @@ if(root){
  const words={en:{start:'Meet the cat',loading:'Loading the cat…',retry:'Try loading again',greet:'Slow blink',treat:'Offer a treat',company:'Keep me company',tower:'Cat tower',wheel:'Exercise wheel',pause:'Pause',resume:'Resume',fullscreen:'Full screen',exit:'Exit full screen',scene:'Live ginger-cat preview with a cat tower and exercise wheel',controls:'Spend time with the cat',initial:'Meet the cat to begin. Nothing to install.',running:'Offer a treat, say hello, or just let the cat do its thing.',paused:'Taking a breather. Resume whenever you like.',failed:'Could not load the cat. Check your connection and try again.',unsupported:'This preview needs a browser with DecompressionStream support. Try a current Chrome, Edge, Firefox or Safari.',fullUnavailable:'Full screen is not available here. You can keep playing on this page.'},
  ko:{start:'고양이 만나기',loading:'고양이를 불러오고 있어요…',retry:'다시 불러오기',greet:'눈인사',treat:'간식 주기',company:'같이 쉬기',tower:'캣타워',wheel:'캣휠',pause:'잠깐 쉬기',resume:'다시 놀기',fullscreen:'전체 화면',exit:'전체 화면 닫기',scene:'캣타워와 캣휠이 있는 치즈 고양이 실시간 체험',controls:'고양이와 함께하기',initial:'설치 없이 여기서 만나보세요.',running:'간식을 주거나 눈인사해 보세요. 그냥 지켜봐도 좋아요.',paused:'잠깐 쉬고 있어요. 다시 놀기를 누르면 이어집니다.',failed:'고양이를 불러오지 못했어요. 연결을 확인하고 다시 시도해 주세요.',unsupported:'이 체험은 DecompressionStream을 지원하는 브라우저가 필요해요. 최신 Chrome, Edge, Firefox 또는 Safari로 열어주세요.',fullUnavailable:'여기서는 전체 화면을 사용할 수 없어요. 이 페이지에서 계속 놀 수 있어요.'}};
  const bits=[[1,8],[2,16],[4,32],[64,128]];
- Object.assign(words.en,{meetCatLink:'There is a cat here, too.',catTitle:'I made a cat, too.',catIntro:'A slow blink, a little kneading. Then off to the cat tower or exercise wheel.',catNote:'Browser preview · Cat artwork loads when you start (about0.4MB). Desktop installation is not available yet.',catTerms:'Cat demo credits & artwork terms'});
- Object.assign(words.ko,{meetCatLink:'고양이 친구도 만나보기',catTitle:'고양이도 만들었습니다.',catIntro:'느리게 눈인사하고, 꾹꾹이하다가. 캣타워에 올라가 쉬거나 캣휠에서 달립니다.',catNote:'브라우저 체험 · 시작할 때 고양이 그림 약0.4MB를 불러와요. 고양이 데스크톱 설치는 아직 준비 중입니다.',catTerms:'고양이 체험 크레딧 · 그림 이용 조건'});
+ Object.assign(words.en,{meetCatLink:'There is a cat here, too.',catTitle:'I made a cat, too.',catIntro:'A slow blink, a little kneading. Then off to the cat tower or exercise wheel.',catNote:'Browser preview · Cat artwork loads when you start (about0.4MB). On desktop: retrieviewer desktop --pet cat.',catTerms:'Cat demo credits & artwork terms'});
+ Object.assign(words.ko,{meetCatLink:'고양이 친구도 만나보기',catTitle:'고양이도 만들었습니다.',catIntro:'느리게 눈인사하고, 꾹꾹이하다가. 캣타워에 올라가 쉬거나 캣휠에서 달립니다.',catNote:'브라우저 체험 · 시작할 때 고양이 그림 약0.4MB를 불러와요. 데스크톱에서는 retrieviewer desktop --pet cat으로 실행하세요.',catTerms:'고양이 체험 크레딧 · 그림 이용 조건'});
  let cat=null,playing=false,loading=false,closed=false,timer=null,last=0,visible=true,columns=160,rows=90,painted='',statusKey='initial',failed=false;
  const t=key=>words[document.documentElement.lang==='ko'?'ko':'en'][key];
  function localize(){
@@ -48,7 +48,7 @@ if(root){
   if(typeof DecompressionStream==='undefined'){setStatus('unsupported');return;}
   loading=true;failed=false;setStatus('loading');sync();
   try{
-   const {createCat}=await import('./runtime/9da9e42/src/purrviewer.mjs');
+   const {createCat}=await import('./runtime/5452da3/src/purrviewer.mjs');
    const loaded=await createCat({seed:731});if(closed){loaded.dispose();return;}
    cat=loaded;playing=true;poster.hidden=true;canvas.hidden=false;root.dataset.ready='true';fit();setStatus('running');schedule();
   }catch{if(!closed){failed=true;setStatus('failed');}}

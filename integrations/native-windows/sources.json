@@ -1,0 +1,23 @@
+[
+  {
+    "name": "QuickJS-NG",
+    "version": "0.17.0",
+    "commit": "6d46d07d04041b40f4f49eaa7fdebe44c314c699",
+    "url": "https://github.com/quickjs-ng/quickjs",
+    "license": "MIT"
+  },
+  {
+    "name": "zlib",
+    "version": "1.3.2",
+    "commit": "da607da739fa6047df13e66a2af6b8bec7c2a498",
+    "url": "https://github.com/madler/zlib",
+    "license": "Zlib"
+  },
+  {
+    "name": "fflate",
+    "version": "0.8.3",
+    "url": "https://github.com/101arrowz/fflate",
+    "license": "MIT",
+    "usage": "portable benchmark baseline; native path uses zlib"
+  }
+]

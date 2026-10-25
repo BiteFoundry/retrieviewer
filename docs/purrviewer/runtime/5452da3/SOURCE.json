@@ -1,18 +1,22 @@
 {
   "project": "Purrviewer",
-  "commit": "9da9e428315126c6eb2a76e4a450e652c743937a",
+  "commit": "5452da3569623b26f1ea87f1097735a1606c5c67",
   "files": {
-    "src/purrviewer.mjs": "c74e993f756275578447fddc92f783f00dea106ed1548ba050ebe480d933f9dd",
+    "src/purrviewer.mjs": "4613a02f0961e5abc24cdcc163040125cc0589e7016533bd4323af6c52f05981",
+    "src/purrviewer-core.mjs": "f7f83f74ba7b4a333b6624981c3b935142f1c664636f23b7980c9cc7b81ce821",
     "src/world.mjs": "a9ce791b1fc2c9b45eb58dd8a77223e3ae05afc3cb7e627c6a543f922c177753",
     "src/walk-cycle.mjs": "bedf0faf4b470133cfbde0fa5119b27e9e8447fa2fd270416079cdd324b6dfa4",
     "src/life.mjs": "5e6fcce8731883d548c2827314691b9762d683ab58810e96f458d6b357580b01",
     "src/contact.mjs": "83daf495910d5741885532523e24d7c0a1de9511cf2bc1cd21683fdfc2629adb",
     "src/habitat.mjs": "1208ee7330f6b4f37ecbc32ccbd55a6e519add836e3f04888f15ae2aa967b57a",
     "vendor/retrieviewer/braille.mjs": "c932988b353e50dad8f9e4d5b01692bc61d369e72ebe6c069de19240ac9eac01",
-    "vendor/retrieviewer/puppy-frame-store.mjs": "e47a3e6040a30ae5263f09e5c7dc9af8d8070d655419265042216def13da3668",
-    "vendor/retrieviewer/puppy-frame-predictive.mjs": "2d004ccd7a0e13dddd30fb781b723219b906068ec42e884522851eae29c9c6d9",
+    "vendor/retrieviewer/puppy-frame-store.mjs": "bd9a29402d4f55696601b598989fcac28f41eed81f5c1bf25b00c0e07a5f97cf",
+    "vendor/retrieviewer/puppy-frame-predictive.mjs": "b16eae14f851c66cb196d3607d76c7d6aa16e8db632b27c799850b84edad44a8",
+    "vendor/retrieviewer/puppy-frame-file.mjs": "0b46720eff5bc313b993bd986718ce2ca596c098aba63f7e6dcf9f28af9a3e3d",
+    "vendor/retrieviewer/puppy-frame-indexed.mjs": "7f1ffb1b1122a04307f68f385c3f6b7c1576f028b01ee8dd04cbc8aefce78e20",
     "vendor/retrieviewer/LICENSE-CODE": "9efad605c3d72a713cd7f0e59afb664274ee934e75976e67e8069bde65ea7fe0",
     "LICENSE": "8138b4f29dd09304be8cb9dcf3dc81a1941de26900514f77bef5e00c1acedc92",
+    "ASSETS-LICENSE.md": "307810fdb3782e26cd0c68e21648f94f9bfe32f1110538fbec73a29acc407c03",
     "art/ginger.json": "fe13830036ccf0568c2f392b32769f1a49557fc717d0b1bd83f838b5b00b85c6",
     "art/ginger.bin.gz": "b999ce67c7d02760b4beb179be1eec8506d44fb710116c3f6246f697db06584f"
   }

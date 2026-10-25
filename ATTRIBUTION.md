@@ -57,3 +57,11 @@ Reference photo collections, YouTube footage, experimental Meshy models,
 noncommercial motion research/datasets, interpolation tools/model weights and
 worker logs are not distributed in this package. No exclusive copyright in
 otherwise unprotected AI output is claimed. Code has its own MIT license.
+
+## Purrviewer ginger cat
+
+Ginger-cat artwork and motion assembly: BiteFoundry project maintainer, 2026.
+AI-generated poses, registered and quantized into grayscale Q5 crops.
+CC BY-SA 4.0; attribution and creation record in
+[integrations/purrviewer/ASSETS-LICENSE.md](integrations/purrviewer/ASSETS-LICENSE.md)
+and [ART.md](integrations/purrviewer/ART.md).

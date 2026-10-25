@@ -13,7 +13,8 @@ mask and native painter, without new color sprites or screen capture.
 Windows and AlmaLinux8/GLIBC2.28 X11 have live test evidence. macOS support is
 experimental and not runtime verified; native Wayland is unsupported. Linux needs
 system Python3.6+, X11/Xrender/Xext and a compositor; Windows needs the .NET
-Framework4 compiler. See [Windows controls and removal](WINDOWS-COMPANION.md).
+Framework4 compiler only for the optional compatibility engine. Windows x64
+basic mode uses the bundled native engine. See [Windows controls and removal](WINDOWS-COMPANION.md).
 
 ## Optional native OpenCode integration
 

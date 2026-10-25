@@ -31,7 +31,7 @@ export function cleanGroundOffset(state,meta){
  const a=v[Math.max(30,i-1)],b=v[i],c=v[i+1],d=v[Math.min(41,i+2)];
  return .5*(2*b+(-a+c)*p+(2*a-5*b+4*c-d)*p*p+(-a+3*b-3*c+d)*p*p*p);
 }
-export function createCachedTween(cache,info){
+export function createCachedTween(cache,info,kernel=null){
  if(!isGrayFrameSource(cache)||cache.byteLength!==CLEAN_BYTES||info.pairs!==47||info.samples!==17||info.width!==320||info.height!==320||info.channels!==1||info.bytes!==CLEAN_BYTES)throw Error('Invalid baked tween cache');
  const frames=grayFrameReader(cache,320,320,47*17),output=new Uint8ClampedArray(320*320*4),stride=320*320;
  for(let i=3;i<output.length;i+=4)output[i]=255;
@@ -39,7 +39,7 @@ export function createCachedTween(cache,info){
   if(!Number.isInteger(state.pair)||state.pair<0||state.pair>=47||!Number.isFinite(state.blend))throw Error('Invalid baked tween state');
   const phase=Math.max(0,Math.min(1,state.blend))*16,index=Math.min(15,Math.floor(phase)),alpha=phase-index;
   const a=frames.getFrame(state.pair*17+index),b=frames.getFrame(state.pair*17+index+1);
-  for(let i=0,j=0;i<stride;i++,j+=4){const value=a[i]*(1-alpha)+b[i]*alpha;output[j]=output[j+1]=output[j+2]=value;}
+  if(kernel?.blendGray)kernel.blendGray(output,a,b,alpha);else for(let i=0,j=0;i<stride;i++,j+=4){const value=a[i]*(1-alpha)+b[i]*alpha;output[j]=output[j+1]=output[j+2]=value;}
   return output;
  };
 }

@@ -9,9 +9,10 @@ wrapper. Version0.0.2 includes it; version0.0.1 does not. Setup is two steps:
 Choose a supported ordinary Windows app window (including a terminal containing
 Codex). Then use your app normally, without a
 wrapper, shell alias, patched binary, changed credentials, or agent configuration.
-The helper uses native Windows/.NET Framework facilities and the existing Node
-pet engine. No Electron, Chromium, downloaded helper binary or new npm dependency.
-Windows10/11 x64 with Node20+ and the .NET Framework4 compiler is required. Other
+Basic mode uses the bundled QuickJS/Win32 engine in one process; Node exits
+after launch. No Electron, Chromium, extra npm dependency or compiler is needed.
+Windows10/11 x64 with Node20+ is required. Optional watch/brain or --engine node
+keeps the existing Node/.NET compatibility path and its Framework4 compiler. Other
 desktop platforms and exclusive fullscreen/security surfaces are not certified.
 Launch reports
 that the picker is ready, **not** that the user has selected a window or visually
@@ -35,8 +36,8 @@ approved the pet.
   The picker locally reads window titles/process names; tracking reads window
   geometry, foreground state, visibility and owning process ID.
 - No automatic startup, background scheduled task, registry entry or MCP is added.
-  Exit stops both the painter and engine. If either process closes, its counterpart
-  exits too. Losing the target hides the pet; tray selection can attach another.
+  Exit stops the native process. The compatibility path stops both painter and engine;
+  if either closes, its counterpart exits too. Losing the target hides the pet; tray selection can attach another.
 
 ## Stop, remove, and recover
 
@@ -52,7 +53,8 @@ One-command companion removal (stop, wait for exit, remove only its cache):
 retrieviewer desktop-remove --yes
 ```
 
-The tray icon also provides window selection, hide/resume and exit. `desktop-stop`
+The control strip provides window selection, pause/resume and exit. The older
+compatibility helper also has a tray menu. `desktop-stop`
 asks the companion to exit through an authenticated local named pipe; it never
 kills a PID from a stale file. The worker may terminate only its own stuck child
 painter after a graceful timeout. Cache cleanup refuses a live/unreachable worker,
@@ -111,3 +113,10 @@ check (not total app memory or a4K performance claim). A Windows GUI startup bug
 was fixed by building a GUI-subsystem helper and not applying SW_HIDE to it; the
 real user picker was verified in Windows' visible main-window list. User visual
 approval after selecting a terminal remains separate.
+
+## Pet selection
+
+Use retrieviewer desktop --pet cat, or select Ginger cat in the native picker
+or control strip. Only one pet is loaded; the previous asset lease is disposed
+on switch. Cat controls include greeting, treat, company, tower and wheel.
+See [native runtime](NATIVE-RUNTIME.md) for measurements and scope.

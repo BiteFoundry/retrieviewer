@@ -23,7 +23,7 @@ function leakReason(path){
   if(dir)return `${dir}/ is not distributable`;
   if(base==='.env'||base.startsWith('.env.'))return 'environment file';
   if(base==='.npmrc')return 'npm credentials/config file';
-  if((base.endsWith('.bin.gz')||base.endsWith('.rvz'))&&!base.endsWith('-q5.bin.gz')&&!base.endsWith('-q5.rvz'))return 'non-Q5 art archive (Q5 is the packaged default)';
+  if(!['integrations/purrviewer/art/ginger.bin.gz','integrations/purrviewer/art/ginger.rvz'].includes(path)&&(base.endsWith('.bin.gz')||base.endsWith('.rvz'))&&!base.endsWith('-q5.bin.gz')&&!base.endsWith('-q5.rvz'))return 'non-Q5 art archive (Q5 is the packaged default)';
   return null;
 }
 

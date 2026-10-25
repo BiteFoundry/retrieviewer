@@ -1,3 +1,14 @@
+# 0.0.18 native desktop result
+
+Windows x64 basic mode now uses a single QuickJS/Win32 process. In real4K
+150second tests the dog median RSS was29.4MiB (OS lifetime peak39.9MiB),
+and cat median44.2MiB (peak65.3MiB). Same artwork/motion; no forced GC/trim.
+The cat typically fits50MiB here but peaks exceed it. These figures exclude
+optional StackBite/LLM watching, other OS hosts and browser tabs.
+See [method, architecture and compatibility scope](NATIVE-RUNTIME.md).
+
+## Earlier Node measurements (historical)
+
 # Runtime weight and performance
 
 ## Indexed local art (local candidate, 2026-10-25)

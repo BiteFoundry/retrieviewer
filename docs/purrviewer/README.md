@@ -1,12 +1,11 @@
 # Purrviewer web demo
 
-The homepage's #purrviewer section embeds the reviewed ginger-cat core9da9e42.
-It is a browser preview; there is no cat desktop/npm install offered here.
-The owner authorized public display. Cat artwork terms remain separate from
-the retriever artwork; see NOTICE.txt. No raw sheets/research media are included.
+The homepage's #purrviewer section embeds the reviewed ginger-cat core5452da3.
+Desktop cat: retrieviewer desktop --pet cat (same npm package).
+The owner authorized CC BY-SA4.0 for cat artwork; code is MIT. See NOTICE.txt. No raw sheets/research media are included.
 
 The shared page's EN/KO control also translates this section. Start imports
-only the pinned six core modules, three reused Braille/Q5 modules and two art
+only the pinned seven core modules, three reused Braille/Q5 modules and two art
 files (391,476bytes of compressed artwork). The static poster is a capture of
 the actual reviewed cat core, not an illustration or a research photograph.
 

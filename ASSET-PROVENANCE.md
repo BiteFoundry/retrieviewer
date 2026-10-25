@@ -121,3 +121,14 @@ domestic trademark research records possible similar marks; owning an npm scope
 does not resolve them. No trademark filing or legal service is part of this
 release. The review records provenance, compatible release terms and exclusions;
 it must not be advertised as comprehensive IP clearance.
+
+## Ginger cat release · 2026-10-25
+
+The owner explicitly selected CC BY-SA4.0 for the approved ginger cat and
+authorized including it in this npm/website release. Code stays MIT.
+Purrviewer source commit5452da3569623b26f1ea87f1097735a1606c5c67 records
+the65-key artwork and code. The included ART.md records source-sheet hashes,
+registration and approved extensions; research photos were observation only,
+not generation inputs or bundled runtime assets. Original source sheets,
+research media and the unused tuxedo prototype are excluded. Alternative RVZ5
+encoding preserves every decoded Q5 pixel. See the cat ASSETS-LICENSE.md.

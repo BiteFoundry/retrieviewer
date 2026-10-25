@@ -17,3 +17,11 @@ photographers (Scott, CC BY 2.0; Stefan Bauer, CC BY-SA 2.5) and adaptation hist
 are credited in ATTRIBUTION.md. Original photographs are not bundled. See LICENSE,
 LICENSE-CODE, ASSETS-LICENSE.md and the bounded ASSET-PROVENANCE.md review. No
 comprehensive legal-clearance or exclusive AI-output ownership claim is made.
+
+## Native Windows runtime
+
+The prebuilt Windows x64 engine includes QuickJS-NG 0.17.0 (MIT) and zlib
+1.3.2 (Zlib). Exact source commits and complete license notices are in
+`integrations/native-windows/sources.json` and `THIRD-PARTY-LICENSES.txt`.
+The optimized kernels and host are MIT. No downloaded runtime is installed
+at launch; no additional npm runtime dependency was added.

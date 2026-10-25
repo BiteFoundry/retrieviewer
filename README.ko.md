@@ -80,7 +80,7 @@ PATH에 넣어야 해요. [bash·csh/tcsh·Windows별 안내](PREREQUISITES.md#c
 
 | 환경 | 상태와 필요 조건 |
 | --- | --- |
-| Windows10/11 x64 | 실제 실행 검증. Node + .NET Framework4 컴파일러. 처음 실행 시 헬퍼 자동 빌드. |
+| Windows10/11 x64 | 실제 실행 검증. Node20+. 기본 실행은 포함된 네이티브 엔진, 선택형 감시는 .NET 호환 엔진. |
 | Linux X11 | AlmaLinux8 / GLIBC2.28 / Python3.6.8 / Node22.23.4를 격리된 GUI에서 검증. Python3.6+, X11/Xrender/Xext, compositor 필요. |
 | macOS | **실험적 지원. 실제 Mac 실행 미검증.** 기본 osascript/AppKit 사용. |
 | 네이티브 Wayland·화면 없는 SSH | 데스크톱 오버레이 미지원. 세션·보안 설정을 자동 변경하지 않아요. |
@@ -147,3 +147,12 @@ JS 플러그인과 JSONL 브리지를 제공해요. 화면·입력·시간 제�
 
 AI로 생성한 그림에 자세 정렬·접지·프레임 처리를 적용한 애니메이션입니다.
 실제 모션 캡처나 자의식이 있는 강아지라고 주장하지 않아요.
+
+## 0.0.18
+
+Windows x64 기본 실행은 네이티브 프로세스 하나만 남고 Node는 종료돼요.
+그림과 움직임은 그대로예요. `retrieviewer desktop --pet cat` 또는 창 선택창에서
+치즈 고양이를 고를 수 있어요. 둘 중 선택한 펫만 불러옵니다.
+StackBite·LLM 감시는 메모리를 더 쓰는 기존 Node 호환 엔진을 유지해요.
+Linux·macOS·브라우저의 호스트 구조는 그대로이며, 로컬 그림은 두 펫 모두
+필요한 프레임만 파일에서 읽어요. [지원 범위와 측정](NATIVE-RUNTIME.md).

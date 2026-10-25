@@ -14,6 +14,7 @@ let attention=null,brain=null,attentionLabel=null;
 const returnStyle=process.env.RETRIEVIEWER_RETURN_STYLE??'auto';
 const watchSource=process.env.RETRIEVIEWER_WATCH??'off';
 const brainSource=process.env.RETRIEVIEWER_BRAIN??'off';
+const petKind=process.env.RETRIEVIEWER_PET??'dog';
 let nativeStderr='';
 const sendParent=message=>{if(process.connected)try{process.send(message,error=>{if(error&&!detached)stop();});}catch{if(!detached)stop();}};
 const starting=()=>{if(stopping||(!process.connected&&!detached))throw Error('Desktop launcher closed during startup');};
@@ -44,7 +45,7 @@ try{
    body+=bytes.toString('utf8');if(body.length>2048)return socket.destroy();if(!body.includes('\n'))return;
    let command;try{command=JSON.parse(body.split('\n')[0]);}catch{return socket.destroy();}
    if(command.token!==session.token||!['status','stop'].includes(command.command))return socket.destroy();
-   socket.end(JSON.stringify(command.command==='stop'?{stopped:true}:{running:true,reachable:true,selected,visible,pickerVisible,frames,paintedFrames,lastInteraction,returnStyle,attentionLabel,watch:{source:watchSource,...attention?.status??{state:'off',pendingCount:0}},brain:brain?.status??{provider:'off',state:'off'},pid:process.pid,painterPid:helper?.pid,rssBytes:process.memoryUsage().rss})+'\n');
+   socket.end(JSON.stringify(command.command==='stop'?{stopped:true}:{running:true,reachable:true,pet:petKind,engine:"node-compat",selected,visible,pickerVisible,frames,paintedFrames,lastInteraction,returnStyle,attentionLabel,watch:{source:watchSource,...attention?.status??{state:'off',pendingCount:0}},brain:brain?.status??{provider:'off',state:'off'},pid:process.pid,painterPid:helper?.pid,rssBytes:process.memoryUsage().rss})+'\n');
    if(command.command==='stop')stop();
   });
  });
@@ -72,7 +73,13 @@ try{
    else if(m.type==='quit')stop();
   }catch(error){write({type:'error',message:error.message});stop();}
  });
- starting();const {createPet}=await import('../../retrieviewer.mjs');starting();const pet=await createPet({returnStyle});
+ starting();let pet;
+ if(petKind==='cat'){
+  const {createCat}=await import('../purrviewer/src/purrviewer.mjs');starting();const cat=await createCat();
+  pet={step:dt=>cat.step(dt),frame:o=>cat.frame(o),dispose:()=>cat.dispose(),
+   interact:kind=>cat.interact(({ball:'toy',tug:'company'})[kind]??kind),
+   notify:()=>cat.interact('greet'),clearNotice:()=>{}};
+ }else {const {createPet}=await import('../../retrieviewer.mjs');starting();pet=await createPet({returnStyle});}
  if(stopping)pet.dispose();else{
   pump=createFramePump({pet,send:write});if(pendingViewport)pump.viewport(pendingViewport);
   if(!['off','stackbite'].includes(watchSource))throw Error('Invalid desktop watch source');

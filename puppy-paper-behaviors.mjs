@@ -5,4 +5,4 @@ export function paperBehaviorPose(state,info){
  const q=Math.min(list.length-1e-9,progress*list.length),i=Math.floor(q),blend=Math.round((q-i)*8)/8;
  return{pair:list[i],blend};
 }
-export function createPaperBehaviorSampler(bytes,info,output){const sample=createRearSampler(bytes,info,output);return state=>{const p=paperBehaviorPose(state,info);return sample(p.pair,p.blend);};}
+export function createPaperBehaviorSampler(bytes,info,output,kernel=null){const sample=createRearSampler(bytes,info,output,kernel);return state=>{const p=paperBehaviorPose(state,info);return sample(p.pair,p.blend);};}

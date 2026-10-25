@@ -101,7 +101,7 @@ export function footSourcePoint(x,y,pins){
  return chosen?{x:x-chosen.dx*best,y:y-chosen.dy*best}:{x,y};
 }
 
-export function createRearSampler(bytes,info,output){
+export function createRearSampler(bytes,info,output,kernel=null){
  if(!isGrayFrameSource(bytes)||info.pairs!==18||info.samples!==9||bytes.byteLength!==18*9*320*320)throw Error('Invalid rear sprite cache');
  const frames=grayFrameReader(bytes,320,320,18*9),out=output??new Uint8ClampedArray(320*320*4);
  if(!(out instanceof Uint8ClampedArray)||out.length!==320*320*4)throw Error('Invalid rear output');
@@ -109,7 +109,7 @@ export function createRearSampler(bytes,info,output){
  return(pair,blend)=>{
   if(!Number.isInteger(pair)||pair<0||pair>=18||!Number.isFinite(blend)||blend<0||blend>1)throw Error('Invalid rear pose');
   const frame=frames.getFrame(pair*9+Math.round(blend*8));
-  for(let j=0,i=0;i<320*320;i++,j+=4)out[j]=out[j+1]=out[j+2]=frame[i];
+  if(kernel?.copyGray)kernel.copyGray(out,frame);else for(let j=0,i=0;i<320*320;i++,j+=4)out[j]=out[j+1]=out[j+2]=frame[i];
   return out;
  };
 }

@@ -57,3 +57,9 @@ unrestricted. No warranty or legal-clearance certification is supplied.
 사용·수정·재배포도 가능하며, 변경한 그림을 배포할 때는 동일조건을 지켜야
 합니다. 코드에는 별도의 MIT 라이선스가 적용됩니다. 사진 참고 출처와 가공
 경위는 ATTRIBUTION.md에 포함되며, 원본 사진은 패키지에 포함하지 않습니다.
+
+## Ginger cat (0.0.18)
+
+The included Purrviewer ginger-cat artwork and metadata also use CC BY-SA 4.0,
+explicitly selected by the owner on 2026-10-25. See
+[integrations/purrviewer/ASSETS-LICENSE.md](integrations/purrviewer/ASSETS-LICENSE.md).

@@ -93,6 +93,8 @@ export async function desktopHelper(options={}){
  throw Error('Linux desktop needs system Python3.6+ (AlmaLinux8 platform-python is supported). No packages or system settings were installed.');
 }
 export async function startDesktop(options={}){
+ const pet=options.pet??'dog';if(!['dog','cat'].includes(pet))throw Error('Invalid desktop pet');
+ const engine=options.engine??'auto';if(!['auto','native','node'].includes(engine))throw Error('Invalid desktop engine');
  const watch=options.watch??'off';if(!['off','stackbite'].includes(watch))throw Error('Invalid desktop watch source');
  const brain=options.brain??'off';if(!['off','openrouter'].includes(brain))throw Error('Invalid desktop brain');
  if(brain==='openrouter'){
@@ -100,14 +102,20 @@ export async function startDesktop(options={}){
   const {createOpenRouterBrain}=await import('../openrouter/brain.mjs');createOpenRouterBrain().dispose();
  }
  if(watch==='stackbite'){const {stackBiteBinding}=await import('../stackbite/attention.mjs');stackBiteBinding();}
- const ink=options.ink??'cream';if(!['cream','gold','dark'].includes(ink))throw Error('Invalid desktop ink');
+ const ink=options.ink??(pet==='cat'?'gold':'cream');if(!['cream','gold','dark'].includes(ink))throw Error('Invalid desktop ink');
  const returnStyle=options.returnStyle??'auto';if(!['auto','brake','trot','run-trot'].includes(returnStyle))throw Error('Invalid return style');
  // Fail before creating any cache/session on unsupported desktops (e.g. Wayland).
  desktopPlatform(options);
- const status=await desktopStatus(options);if(status.running)return {...status,alreadyRunning:true,...status.returnStyle!==returnStyle?{requestedReturnStyle:returnStyle,restartRequired:true}:{},...(status.watch?.source??'off')!==watch?{requestedWatch:watch,restartRequired:true}:{},...(status.brain?.provider??'off')!==brain?{requestedBrain:brain,restartRequired:true}:{}};
+ const native=process.platform==='win32'&&process.arch==='x64'&&engine!=='node'&&watch==='off'&&brain==='off';
+ if(engine==='native'&&!native)throw Error('Native mode requires Windows x64 with watch/brain off; use --engine node for compatibility features');
+ const status=await desktopStatus(options);if(status.running){
+  if(native&&status.engine==='quickjs-native'&&status.pet!==pet){const {switchNativePet}=await import('../native-windows/desktop.mjs');return switchNativePet(options,await readSession(options),pet);}
+  return {...status,alreadyRunning:true,...(status.pet??'dog')!==pet?{requestedPet:pet,restartRequired:true}:{},...status.returnStyle!==returnStyle?{requestedReturnStyle:returnStyle,restartRequired:true}:{},...(status.watch?.source??'off')!==watch?{requestedWatch:watch,restartRequired:true}:{},...(status.brain?.provider??'off')!==brain?{requestedBrain:brain,restartRequired:true}:{}};
+ }
  if(status.stale)await stopDesktop(options);
+ if(native){const {startNativeDesktop}=await import('../native-windows/desktop.mjs');return startNativeDesktop(options);}
  const helper=await desktopHelper(options);
- const workerEnv={...process.env,RETRIEVIEWER_HOME:getConfigPaths(options).root,RETRIEVIEWER_INK:ink,RETRIEVIEWER_RETURN_STYLE:returnStyle,RETRIEVIEWER_WATCH:watch,RETRIEVIEWER_BRAIN:brain};
+ const workerEnv={...process.env,RETRIEVIEWER_HOME:getConfigPaths(options).root,RETRIEVIEWER_PET:pet,RETRIEVIEWER_INK:ink,RETRIEVIEWER_RETURN_STYLE:returnStyle,RETRIEVIEWER_WATCH:watch,RETRIEVIEWER_BRAIN:brain};
  if(brain==='off')delete workerEnv.OPENROUTER_API_KEY;
  return new Promise((resolve,reject)=>{
   const child=spawn(process.execPath,[fileURLToPath(new URL('./worker.mjs',import.meta.url)),'--helper-spec',JSON.stringify(helper)],{detached:true,windowsHide:true,stdio:['ignore','ignore','ignore','ipc'],env:workerEnv});

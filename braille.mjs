@@ -37,10 +37,10 @@ function stableBraille(rgba,width,height,brightness,contrast){
   for(let y=0;y<rows;y++){for(let x=0;x<columns;x++)cells[x]=GLYPHS[masks[y*columns+x]];lines[y]=cells.join('');}
   return{text:lines.join('\n'),columns,rows,dots};
 }
-export function rgbaToBraille(rgba,width,height,{brightness=1,contrast=1,method='floyd'}={}){
+export function rgbaToBraille(rgba,width,height,{brightness=1,contrast=1,method='floyd',kernel=null}={}){
   if(!Number.isInteger(width)||!Number.isInteger(height)||width<1||height<1||width*height>1_000_000||rgba.length!==width*height*4)throw Error('Invalid RGBA image');
   if(!Number.isFinite(brightness)||brightness<=0||brightness>4||!Number.isFinite(contrast)||contrast<=0||contrast>4||!['floyd','bayer','stable'].includes(method))throw Error('Invalid dithering options');
-  if(method==='stable')return stableBraille(rgba,width,height,brightness,contrast);
+  if(method==='stable')return kernel?.braille?kernel.braille(rgba,width,height,brightness,contrast):stableBraille(rgba,width,height,brightness,contrast);
   const values=new Float32Array(width*height),bits=new Uint8Array(width*height);
   for(let i=0;i<values.length;i++){
     const p=i*4,luma=(.2126*rgba[p]+.7152*rgba[p+1]+.0722*rgba[p+2])/255*(rgba[p+3]/255);

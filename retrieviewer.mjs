@@ -123,7 +123,7 @@ async function acquireAssets(loadAsset,artProfile){
  try{const data=await entry.promise;entry.data=data;return{data,release};}catch(error){release();throw error;}
 }
 
-export async function createPet({loadAsset=defaultLoadAsset,seed,energy,pawTransport=true,artProfile=DEFAULT_ART_PROFILE,returnStyle='auto'}={}){
+function petOptions({loadAsset=defaultLoadAsset,seed,energy,pawTransport=true,artProfile=DEFAULT_ART_PROFILE,returnStyle='auto'}={}){
  if(typeof loadAsset!=='function')throw TypeError('loadAsset must be a function');
  if(seed===undefined)seed=globalThis.crypto?.getRandomValues?globalThis.crypto.getRandomValues(new Uint32Array(1))[0]:731;
  if(!Number.isInteger(seed)||seed<0||seed>0xffffffff)throw RangeError('seed must be a uint32');
@@ -131,7 +131,16 @@ export async function createPet({loadAsset=defaultLoadAsset,seed,energy,pawTrans
  if(typeof pawTransport!=='boolean')throw TypeError('pawTransport must be boolean');
  if(!ART_PROFILES.includes(artProfile))throw RangeError('artProfile must be original or q5');
  if(!FETCH_RETURN_STYLES.includes(returnStyle))throw RangeError('returnStyle must be auto, brake, trot or run-trot');
- let lease=await acquireAssets(loadAsset,artProfile),data=lease.data;
+ return {loadAsset,seed,energy,pawTransport,artProfile,returnStyle};
+}
+export async function createPet(options={}){
+ const normalized=petOptions(options),lease=await acquireAssets(normalized.loadAsset,normalized.artProfile);
+ return createPetFromAssets(normalized,lease);
+}
+// Shared simulation/render core for local native hosts. The provider owns I/O.
+export function createPetFromAssets(options,lease,kernel=null){
+ const {loadAsset,seed,energy,pawTransport,artProfile,returnStyle}=petOptions(options);
+ let data=lease.data;
  const release=lease.release;lease=null;
  let {cache,info,meta}=data;const assets={...data.assets};data=null;
  // Baked tables describe the bundled Q5 source only. External/optional artwork
@@ -166,14 +175,14 @@ export async function createPet({loadAsset=defaultLoadAsset,seed,energy,pawTrans
    if(typeof cellAspect!=='number'||!Number.isFinite(cellAspect)||cellAspect<=0)throw RangeError('cellAspect must be a positive number');
    if(![12,24,30].includes(poseFps))throw RangeError('poseFps must be 12, 24 or 30');
    const width=columns*2,height=rows*4,key=`${width}x${height}`;
-   if(paintKey!==key){paint=createPaperRenderer(cache,info,meta,width,height,{...assets,pawTransport,motionTables});paintKey=key;}
+   if(paintKey!==key){paint=createPaperRenderer(cache,info,meta,width,height,{...assets,pawTransport,motionTables,kernel});paintKey=key;}
    const viewportWidth=camera?.viewportWidth??columns*cellAspect,viewportHeight=camera?.viewportHeight??rows;
    const projection=createPaperProjection({viewportWidth,viewportHeight,rect:camera?.rect??{left:0,top:0,width:viewportWidth,height:viewportHeight},width,height});
    const state=actor.sample(time,{poseFps}),report=life.report;
    if(report.gesture)state.interactionPose=report.gesture;
    const placement=projection.placement(state.x,state.z,state.bodyLift??0),pixels=paint(state,{...placement,contactEnabled:!!contactEnabled});
    paintCompanionObjects(pixels,width,height,projection,report,state,paint.lastMouth);
-   const {text}=rgbaToBraille(pixels,width,height,{method:'stable',brightness:1.18,contrast:1.1});
+   const {text}=rgbaToBraille(pixels,width,height,{method:'stable',brightness:1.18,contrast:1.1,kernel});
    lastHeldFrameKey=heldFrameKey(state,report,{columns,rows,cellAspect,camera,poseFps,contactEnabled});
    return {text,columns,rows,pixels,state,report,placement,projection,artProfile,mouth:paint.lastMouth,contacts:paint.report()};
   },

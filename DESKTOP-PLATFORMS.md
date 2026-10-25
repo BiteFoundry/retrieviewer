@@ -14,7 +14,7 @@ earlier0.0.3 baseline. macOS remains experimental.
 
 | Platform | Adapter | Current verification boundary |
 | --- | --- | --- |
-| Windows10/11 | .NET Framework/Win32 layered window | Live verified; shared-adapter regression checks passed on this host |
+| Windows10/11 | QuickJS/Win32 basic; Node/.NET optional watching | Live verified; shared-adapter regression checks passed on this host |
 | macOS | Built-in osascript/JXA AppKit, no Python/Xcode/browser runtime | Experimental; no macOS runtime available on this Windows host |
 | Linux X11 | Python3.6+ stdlib ctypes + X11/Xrender/Xext | AlmaLinux8 GLIBC2.28/Python3.6.8/Node22.23.4 live checks passed on owned Xvfb + Openbox + xcompmgr |
 | Linux native Wayland | No arbitrary-window tracking adapter | Refused, including sessions exposing an Xwayland DISPLAY; no insecure compositor workaround |

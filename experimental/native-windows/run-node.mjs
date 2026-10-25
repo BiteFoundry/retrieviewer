@@ -1,0 +1,4 @@
+import fs from 'node:fs';import {runProbe} from '../../dist/native-memory/bundle/probe-entry.js';
+const root=process.argv[2],sleep=ms=>Atomics.wait(new Int32Array(new SharedArrayBuffer(4)),0,0,ms);
+const record=process.argv[3]?fs.openSync(process.argv[3],'w'):null;
+try{await runProbe({recordFrame:record!==null?f=>{if(fs.writeSync(record,f.pixels)!==f.pixels.byteLength)throw Error('Short pixel write');}:undefined,now:()=>performance.now(),sleep,log:o=>console.log(JSON.stringify(o)),json:name=>JSON.parse(fs.readFileSync(root+'/'+name)),open:name=>{const fd=fs.openSync(root+'/'+name,'r');return {size:fs.fstatSync(fd).size,read:(at,n)=>{const b=new Uint8Array(n);if(fs.readSync(fd,b,0,n,at)!==n)throw Error('Short read');return b;},close:()=>fs.closeSync(fd)};}});}finally{if(record!==null)fs.closeSync(record);}
