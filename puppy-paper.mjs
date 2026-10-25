@@ -315,8 +315,11 @@ export function createPaperActor(animal,info,{manualTricks=false,trickTimings=nu
    if(activeAction?.comfort)kind=activeAction.comfort;
    let actionName=activeAction?.name??(state==='run'&&movementMode==='walk'?'walk':null),actionProgress=activeAction?(activeAction.timing?activeAction.timing.progressAt(age):Math.min(1,age/activeAction.duration)):phase;
    if(manualDown&&state==='down'){actionName='lie-down';actionProgress=1;}
-   if(walkTransitions&&state==='view-turn'&&turnView==='front'){
-    actionName=view==='approach'?'walk-face-front':'walk-face-rear';actionProgress=Math.min(1,age/viewTurnSeconds());
+   if(walkTransitions&&state==='view-turn'){
+    // Both directions share the same standing endpoints. The old outbound
+    // material began crouched, so reversing a journey changed the dog's mass.
+    actionName=(view==='approach'||turnView==='approach')?'walk-face-front':'walk-face-rear';
+    const t=Math.min(1,age/viewTurnSeconds());actionProgress=turnView==='front'?t:1-t;
    }
    // This clip is a calibrated standing half-turn, not walk-specific motion.
    // The old turn's intro/outro added an unrelated squat to every reversal.
@@ -419,9 +422,9 @@ export function createPaperRenderer(cache,info,meta,width,height,{rear,approach,
   if(kernel?.clear)kernel.clear(out);else{out.fill(0);for(let i=3;i<out.length;i+=4)out[i]=255;}
   render.lastPlacement={left,top,side,sideX};
   // Measured drawn mouth of the EXACT sample above (same priority, quantization,
-  // placement and mirror). Side/rear/action/interaction stay null: unsupported.
-  const mouthFamily=isInteraction||isAction?null:isBehavior?'behaviors':isSeat?(state.seatVariant==='arrival'&&arrivalSeatSample?'arrivalSeat':'seat'):isApproach?'approach':null;
-  const mouthInfo={behaviors:behaviors?.info,seat:seat?.info,arrivalSeat:arrivalSeat?.info,approach:approach?.info}[mouthFamily];
+  // placement and mirror). Unmeasured or occluded samples remain unsupported.
+  const mouthFamily=isInteraction?null:isAction?'actions':isBehavior?'behaviors':isSeat?(state.seatVariant==='arrival'&&arrivalSeatSample?'arrivalSeat':'seat'):isApproach?'approach':null;
+  const mouthInfo={actions:actions?.info,behaviors:behaviors?.info,seat:seat?.info,arrivalSeat:arrivalSeat?.info,approach:approach?.info}[mouthFamily];
   const mouthFrame=mouthFamily?mouthSourceFrame(mouthFamily,state,mouthInfo):null;
   render.lastMouth=projectMouth(mouthFamily?mouthAnchor(mouthFamily,mouthFrame,mouthInfo?.sha256):null,{left,top,side,sideX},state.flip,{family:mouthFamily,frame:mouthFrame});
   if(motion?.mouth){

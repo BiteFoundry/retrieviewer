@@ -274,7 +274,7 @@ export function createCatLife({seed = 731} = {}) {
         food: phase.clip.startsWith('feed-') ? {remaining: phase.clip === 'feed-lick' ? 1-phase.progress :
           ['feed-finish','feed-leave'].includes(phase.clip) ? 0 : 1} : null,
         mat: Boolean(phase.mat),facing:phase.facing??null,resting:['sleep','loaf-rest'].includes(phase.clip)&&!pending,
-        sleeping: phase.clip === 'sleep'};
+        sleeping: phase.clip === 'sleep',restSeconds:phase.clip==='sleep'?phase.elapsed:0};
     }
   };
 }

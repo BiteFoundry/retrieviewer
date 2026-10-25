@@ -2,11 +2,11 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync,readdirSync} from 'node:fs';
 import {createHash} from 'node:crypto';
-const base=new URL('./docs/purrviewer/runtime/5452da3/',import.meta.url);
+const base=new URL('./docs/purrviewer/runtime/79a47c2/',import.meta.url);
 test('public cat demo contains exactly the reviewed runtime allowlist with intact assets and licenses',()=>{
  const manifest=JSON.parse(readFileSync(new URL('SOURCE.json',base)));
- assert.equal(manifest.commit,'5452da3569623b26f1ea87f1097735a1606c5c67');
- assert.deepEqual(Object.keys(manifest.files).sort(),['LICENSE','ASSETS-LICENSE.md','art/ginger.bin.gz','art/ginger.json','src/contact.mjs','src/habitat.mjs','src/life.mjs','src/purrviewer.mjs','src/purrviewer-core.mjs','src/walk-cycle.mjs','src/world.mjs','vendor/retrieviewer/puppy-frame-file.mjs','vendor/retrieviewer/puppy-frame-indexed.mjs','vendor/retrieviewer/LICENSE-CODE','vendor/retrieviewer/braille.mjs','vendor/retrieviewer/puppy-frame-predictive.mjs','vendor/retrieviewer/puppy-frame-store.mjs'].sort());
+ assert.equal(manifest.commit,'79a47c2d618b91945997035e6c7502c43f471f62');
+ assert.deepEqual(Object.keys(manifest.files).sort(),['ART.md','LICENSE','ASSETS-LICENSE.md','art/ginger.bin.gz','art/ginger.json','src/contact.mjs','src/facing.mjs','src/habitat.mjs','src/life.mjs','src/purrviewer.mjs','src/purrviewer-core.mjs','src/walk-cycle.mjs','src/world.mjs','vendor/retrieviewer/puppy-frame-file.mjs','vendor/retrieviewer/puppy-frame-indexed.mjs','vendor/retrieviewer/LICENSE-CODE','vendor/retrieviewer/braille.mjs','vendor/retrieviewer/puppy-frame-predictive.mjs','vendor/retrieviewer/puppy-frame-store.mjs'].sort());
  for(const [path,sha] of Object.entries(manifest.files))assert.equal(createHash('sha256').update(readFileSync(new URL(path,base))).digest('hex'),sha,path);
  const actual=[];function visit(url,prefix=''){for(const ent of readdirSync(url,{withFileTypes:true})){const path=prefix+ent.name;if(ent.isDirectory())visit(new URL(ent.name+'/',url),path+'/');else actual.push(path);}}
  visit(base);assert.deepEqual(actual.sort(),[...Object.keys(manifest.files),'SOURCE.json'].sort());

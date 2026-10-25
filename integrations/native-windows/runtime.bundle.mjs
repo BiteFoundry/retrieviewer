@@ -1240,8 +1240,12 @@ function createComfortSpriteSampler(bytes, info, output) {
 }
 
 // puppy-mouth-anchor.mjs
-var MOUTH_ANCHORS = { version: 1, ballRadiusPx: 17.5, families: { approach: { sha256: "f5558c57d5a445d396e06c060f9f8d64e6ce0ff5b9b92fa6d77ef9bb2984a2fe", frames: [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, [224.66, 147.5, 0.9, 0.904], [222.44, 147.33, 0.9, 0.915], [219.17, 148.34, 0.9, 0.934], [215.72, 149.59, 0.92, 0.945], [212.89, 150.36, 0.92, 0.957], [209.34, 151.71, 0.94, 0.966], [206.61, 152.52, 0.94, 0.972], [202.85, 153.49, 0.94, 0.965], [202.85, 153.49, 0.94, 0.965], [198.71, 154.18, 0.96, 0.966], [195.56, 154.22, 0.96, 0.97], [191.82, 155.11, 0.98, 0.967], [188.11, 155.2, 0.98, 0.966], [184.12, 154.72, 0.96, 0.966], [180.5, 154.77, 0.96, 0.968], [177.45, 154.9, 0.96, 0.97], [173.13, 154.91, 0.96, 0.965], [173.13, 154.91, 0.96, 0.965], [175.53, 155.91, 0.96, 0.974], [177.69, 157.9, 0.98, 0.976], [179.97, 159.24, 0.98, 0.983], [182.41, 161.16, 0.98, 0.988], [184.55, 162.2, 0.98, 0.987], [186.96, 165.39, 1, 0.991], [189.54, 166, 0.98, 0.986], [191.7, 168.3, 1, 1], [191.7, 168.3, 1, 1], [190.78, 168.33, 1, 0.999], [190.26, 168.08, 0.98, 0.983], [189.46, 169.24, 1, 0.994], [188.66, 169.45, 1, 0.988], [187.9, 169.62, 1, 0.977], [187.07, 168.92, 0.98, 0.971], [186.15, 171.37, 1.02, 0.964], [185.12, 171.44, 1.02, 0.959], [185.12, 171.44, 1.02, 0.959], [183.01, 167.4, 0.98, 0.967], [180.53, 166.1, 1, 0.965], [178.7, 163.98, 0.98, 0.962], [176.6, 160.9, 0.96, 0.958], [174.17, 158.89, 0.96, 0.958], [172.42, 158.03, 0.98, 0.948], [170.58, 155.84, 0.96, 0.945], [168.27, 154.8, 0.98, 0.932], [168.27, 154.8, 0.98, 0.932], [168.28, 154.25, 0.98, 0.941], [167.82, 153.76, 0.98, 0.938], [167.36, 153.07, 0.98, 0.941], [167.1, 151.76, 0.96, 0.941], [166.97, 152.2, 0.98, 0.947], [166.89, 151.46, 0.98, 0.944], [166.21, 151.32, 0.98, 0.944], [166.05, 150.38, 0.98, 0.943], [166.05, 150.38, 0.98, 0.943], [168.13, 148.79, 0.96, 0.945], [169.85, 149.25, 0.98, 0.951], [172.04, 147.99, 0.98, 0.948], [174.87, 146.91, 0.98, 0.947], [176.38, 147.11, 1, 0.947], [179.35, 146.95, 1.02, 0.941], [181.18, 146.19, 1.02, 0.943], [183.86, 145.25, 1.02, 0.942], [183.86, 145.25, 1.02, 0.942], [182.95, 145.34, 1.02, 0.946], [182.65, 145.38, 1.02, 0.953], [181.7, 145.7, 1.02, 0.948], [181.06, 145.96, 1.02, 0.949], [180.46, 145.26, 1, 0.954], [179.53, 146.46, 1.02, 0.949], [179.36, 146.51, 1.02, 0.948], [178.41, 146.53, 1.02, 0.947], [178.41, 146.53, 1.02, 0.947], [180.31, 147.47, 1.02, 0.952], [181.26, 147.72, 1.02, 0.954], [183.14, 147.04, 0.98, 0.957], [184.8, 149.17, 1, 0.967], [186.42, 150.19, 1, 0.966], [188.41, 150.46, 1, 0.966], [189.95, 151.41, 1, 0.971], [191.61, 152.4, 1, 0.971], [191.61, 152.4, 1, 0.971], [189.01, 151.48, 1, 0.971], [186.85, 151.25, 1, 0.979], [184.64, 150.57, 1, 0.975], [182.06, 149.13, 0.98, 0.974], [179.48, 149.48, 1, 0.976], [177.17, 149.61, 1.02, 0.976], [175.2, 149.27, 1.02, 0.979], [172.3, 148.6, 1.02, 0.975], [172.3, 148.6, 1.02, 0.975], [175.21, 151.35, 1.02, 0.979], [177.27, 153.34, 1.02, 0.982], [179.97, 155.12, 1, 0.983], [181.35, 158.65, 1.02, 0.988], [184.96, 160.94, 1, 0.987], [187.54, 163.29, 1, 0.996], [189.22, 166.33, 1.02, 0.992], [191.7, 168.3, 1, 1], [191.7, 168.3, 1, 1], [189.18, 166.28, 1, 0.99], [186.95, 164.07, 0.98, 0.991], [184.75, 163.57, 1, 0.987], [182.21, 160.91, 0.98, 0.986], [180.15, 158.8, 0.96, 0.98], [177.73, 156.71, 0.96, 0.974], [175.67, 155.87, 0.96, 0.97], [173.13, 154.91, 0.96, 0.965], [173.13, 154.91, 0.96, 0.965], [176.75, 154.83, 0.96, 0.966], [180.19, 154.77, 0.96, 0.966], [183.7, 154.69, 0.96, 0.966], [187.78, 153.74, 0.94, 0.965], [191.91, 155.07, 0.98, 0.968], [195.35, 154.27, 0.96, 0.969], [199.09, 154.17, 0.96, 0.968], [202.85, 153.49, 0.94, 0.965], [202.85, 153.49, 0.94, 0.965], [206.07, 152.72, 0.94, 0.968], [209.04, 152.89, 0.96, 0.962], [211.97, 151.51, 0.94, 0.959], [215.45, 150.92, 0.94, 0.941], [218.71, 149.41, 0.92, 0.933], [221.75, 148.5, 0.9, 0.92], [224.95, 147.58, 0.9, 0.903], null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null] }, behaviors: { sha256: "7918261fb64c57a91739729841fd84c6dd53891196c7fb76ee9c27712ab6ef5d", frames: [[201.21, 166.15, 0.98, 0.959], [200.4, 166.14, 0.98, 0.961], [200.13, 166.16, 0.98, 0.963], [199.21, 166.15, 0.98, 0.964], [198.65, 166.13, 0.98, 0.964], [197.98, 166.12, 0.98, 0.967], [197.08, 166.1, 0.98, 0.966], [196.87, 166.13, 0.98, 0.966], [195.93, 166.1, 0.98, 0.965], [195.93, 166.1, 0.98, 0.965], [196.01, 166.1, 0.98, 0.967], [196.35, 166.05, 0.98, 0.96], [196.85, 166.1, 0.98, 0.966], [197.08, 166.07, 0.98, 0.964], [197.25, 166.07, 0.98, 0.96], [197.72, 166.12, 0.98, 0.963], [198.13, 166.05, 0.98, 0.957], [198.18, 166.04, 0.98, 0.954], [198.18, 166.04, 0.98, 0.954], [198.23, 166.06, 0.98, 0.957], [198.26, 166.09, 0.98, 0.957], [198.28, 166.12, 0.98, 0.958], [198.81, 167.29, 1, 0.968], [198.92, 167.34, 1, 0.966], [198.98, 167.37, 1, 0.964], [199.06, 167.41, 1, 0.962], [199.07, 167.42, 1, 0.96], [199.07, 167.42, 1, 0.96], [199.16, 167.39, 1, 0.96], [199.43, 167.35, 1, 0.96], [199.96, 167.33, 1, 0.965], [200.14, 166.34, 0.98, 0.965], [200.28, 166.27, 0.98, 0.963], [200.84, 166.24, 0.98, 0.965], [201.14, 166.17, 0.98, 0.962], [201.21, 166.15, 0.98, 0.959], [191.7, 168.3, 1, 1], [192.77, 168.21, 1, 0.999], [194.11, 167.32, 0.98, 0.992], [195.54, 167.92, 1, 0.986], [196.71, 166.87, 0.98, 0.982], [197.88, 167.48, 1, 0.978], [199.08, 166.37, 0.98, 0.973], [200.32, 166.2, 0.98, 0.965], [201.21, 166.15, 0.98, 0.959], [201.21, 166.15, 0.98, 0.959], [201.8, 170.56, 1, 0.964], [202.18, 172.74, 0.98, 0.965], [202.46, 176.13, 0.98, 0.966], [203.09, 179.85, 0.98, 0.968], [203.28, 183.55, 0.98, 0.961], [203.98, 187.56, 1, 0.963], [204.72, 190.66, 1, 0.967], [204.91, 194.05, 1, 0.954], [204.91, 194.05, 1, 0.954], [203.9, 194.08, 1, 0.956], [202.88, 194.15, 0.98, 0.958], [201.8, 195, 1, 0.958], [200.65, 195.45, 1, 0.961], [199.66, 196.08, 1, 0.957], [198.46, 196.15, 1, 0.953], [197.37, 196.24, 0.98, 0.95], [196.35, 196.3, 0.98, 0.947], [196.35, 196.3, 0.98, 0.947], [192.86, 196.11, 1, 0.951], [190.53, 196.01, 1, 0.951], [187.51, 196, 1, 0.949], [184.08, 194.32, 0.98, 0.952], [180.99, 193.88, 0.98, 0.949], [177.81, 194.62, 1, 0.949], [175.36, 194.61, 1.02, 0.95], [171.67, 193.62, 1, 0.944], [171.67, 193.62, 1, 0.944], [174.59, 193.5, 1.02, 0.952], [177.38, 192.46, 1.02, 0.95], [180.43, 190.38, 1, 0.957], [183.32, 188.01, 0.98, 0.95], [186.05, 187, 0.98, 0.954], [189.53, 187.6, 1.02, 0.95], [192.59, 185.84, 1, 0.945], [195.46, 183.93, 0.98, 0.942], [195.46, 183.93, 0.98, 0.942], [195.23, 182.08, 0.98, 0.958], [194.56, 180.73, 1, 0.963], [194.34, 179.26, 1, 0.974], [193.93, 177.12, 1, 0.982], [193.33, 175.54, 1.02, 0.983], [192.7, 173.2, 1, 0.996], [192.66, 170.55, 1, 0.992], [191.7, 168.3, 1, 1], null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null] }, seat: { sha256: "613dbeeeaec11804e80db0216922c8f62294745514ee6283bdce61a6d784dd5e", frames: [[191.7, 168.3, 1, 1], [187.28, 167.83, 0.98, 0.992], [186.01, 168.11, 0.98, 0.997], [184.36, 167.85, 0.96, 0.997], [182.14, 168.27, 0.96, 0.99], [179.4, 167.97, 0.94, 0.989], [177.05, 167.47, 0.92, 0.991], [174.39, 167.11, 0.9, 0.982], [171.52, 167.84, 0.9, 0.977], [169.74, 168.03, 0.9, 0.978], [166.37, 168.27, 0.9, 0.98], [163.95, 166.65, 0.86, 0.975], [161.1, 167.16, 0.86, 0.973], [158.82, 167.1, 0.86, 0.97], [157.06, 167.85, 0.86, 0.97], [155.39, 167.09, 0.84, 0.966], [152.19, 167.86, 0.84, 0.951], [152.19, 167.86, 0.84, 0.951], [152.24, 167.87, 0.84, 0.952], [152.26, 167.86, 0.84, 0.953], [152.26, 167.85, 0.84, 0.953], [152.27, 167.85, 0.84, 0.953], [152.3, 167.84, 0.84, 0.954], [152.33, 167.83, 0.84, 0.954], [152.69, 166.08, 0.8, 0.956], [152.75, 166.06, 0.8, 0.956], [152.77, 166.04, 0.8, 0.957], [153.16, 166.03, 0.8, 0.957], [153.19, 166.03, 0.8, 0.956], [153.21, 166.02, 0.8, 0.955], [153.23, 166.02, 0.8, 0.955], [153.27, 166.02, 0.8, 0.953], [153.37, 166.03, 0.8, 0.952], [153.28, 166.02, 0.8, 0.952], [153.28, 166.02, 0.8, 0.952], [154.28, 166.02, 0.8, 0.954], [154.49, 166.87, 0.82, 0.951], [155.31, 165.99, 0.8, 0.953], [156.08, 165.96, 0.8, 0.956], [156.67, 166.83, 0.82, 0.958], [157.34, 166.82, 0.82, 0.955], [158.31, 166.73, 0.82, 0.956], [158.83, 166.62, 0.82, 0.96], [159.42, 166.54, 0.82, 0.958], [160.23, 166.48, 0.82, 0.952], [160.85, 166.5, 0.82, 0.954], [161.4, 166.49, 0.82, 0.954], [162.04, 166.45, 0.82, 0.947], [162.98, 166.47, 0.82, 0.947], [163.19, 166.46, 0.82, 0.946], [164.02, 166.47, 0.82, 0.945]] }, arrivalSeat: { sha256: "13acb62fd573ff7ef97bcf59be80757897fe9d1784f187ab278990ff94a643b9", frames: [[195.46, 183.93, 0.98, 0.942], [191.05, 182.87, 0.98, 0.955], [189.92, 182.76, 0.98, 0.95], [187.17, 181.29, 0.96, 0.954], [184.77, 179.89, 0.94, 0.954], [182.36, 179.93, 0.96, 0.955], [179.54, 177.85, 0.94, 0.96], [176.3, 176.4, 0.92, 0.959], [174.08, 175.36, 0.9, 0.966], [171.91, 174.25, 0.9, 0.958], [168.15, 172.23, 0.88, 0.953], [165.17, 170.82, 0.86, 0.963], [162.45, 171.28, 0.88, 0.959], [160.06, 170.01, 0.86, 0.965], [157.6, 169.78, 0.86, 0.959], [155.67, 167.31, 0.82, 0.96], [152.19, 167.86, 0.84, 0.951], [152.19, 167.86, 0.84, 0.951], [152.24, 167.87, 0.84, 0.952], [152.26, 167.86, 0.84, 0.953], [152.26, 167.85, 0.84, 0.953], [152.27, 167.85, 0.84, 0.953], [152.3, 167.84, 0.84, 0.954], [152.33, 167.83, 0.84, 0.954], [152.69, 166.08, 0.8, 0.956], [152.75, 166.06, 0.8, 0.956], [152.77, 166.04, 0.8, 0.957], [153.16, 166.03, 0.8, 0.957], [153.19, 166.03, 0.8, 0.956], [153.21, 166.02, 0.8, 0.955], [153.23, 166.02, 0.8, 0.955], [153.27, 166.02, 0.8, 0.953], [153.37, 166.03, 0.8, 0.952], [153.28, 166.02, 0.8, 0.952], [153.28, 166.02, 0.8, 0.952], [154.28, 166.02, 0.8, 0.954], [154.49, 166.87, 0.82, 0.951], [155.31, 165.99, 0.8, 0.953], [156.08, 165.96, 0.8, 0.956], [156.67, 166.83, 0.82, 0.958], [157.34, 166.82, 0.82, 0.955], [158.31, 166.73, 0.82, 0.956], [158.83, 166.62, 0.82, 0.96], [159.42, 166.54, 0.82, 0.958], [160.23, 166.48, 0.82, 0.952], [160.85, 166.5, 0.82, 0.954], [161.4, 166.49, 0.82, 0.954], [162.04, 166.45, 0.82, 0.947], [162.98, 166.47, 0.82, 0.947], [163.19, 166.46, 0.82, 0.946], [164.02, 166.47, 0.82, 0.945]] } } };
+var MOUTH_ANCHORS = { version: 1, canonical: 320, ballRadiusPx: 17.5, mouthOffsetPx: 25, minScore: 0.9, seed: { family: "approach", frame: 45, box: [158, 108, 68, 50], nose: [191.7, 143.3] }, method: "cv2 TM_CCOEFF_NORMED multi-scale match of measured eyes+nose seed; mouth = nose + scale*offset (down)", unsupported: "front side-view tween, rear, actions (incl. walk-enter/walk), interactions, behaviors watch/rest", families: { approach: { cache: "puppy-paper-approach.bin.gz", sha256: "f5558c57d5a445d396e06c060f9f8d64e6ce0ff5b9b92fa6d77ef9bb2984a2fe", samples: 9, covered: 124, frames: [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, [224.66, 147.5, 0.9, 0.904], [222.44, 147.33, 0.9, 0.915], [219.17, 148.34, 0.9, 0.934], [215.72, 149.59, 0.92, 0.945], [212.89, 150.36, 0.92, 0.957], [209.34, 151.71, 0.94, 0.966], [206.61, 152.52, 0.94, 0.972], [202.85, 153.49, 0.94, 0.965], [202.85, 153.49, 0.94, 0.965], [198.71, 154.18, 0.96, 0.966], [195.56, 154.22, 0.96, 0.97], [191.82, 155.11, 0.98, 0.967], [188.11, 155.2, 0.98, 0.966], [184.12, 154.72, 0.96, 0.966], [180.5, 154.77, 0.96, 0.968], [177.45, 154.9, 0.96, 0.97], [173.13, 154.91, 0.96, 0.965], [173.13, 154.91, 0.96, 0.965], [175.53, 155.91, 0.96, 0.974], [177.69, 157.9, 0.98, 0.976], [179.97, 159.24, 0.98, 0.983], [182.41, 161.16, 0.98, 0.988], [184.55, 162.2, 0.98, 0.987], [186.96, 165.39, 1, 0.991], [189.54, 166, 0.98, 0.986], [191.7, 168.3, 1, 1], [191.7, 168.3, 1, 1], [190.78, 168.33, 1, 0.999], [190.26, 168.08, 0.98, 0.983], [189.46, 169.24, 1, 0.994], [188.66, 169.45, 1, 0.988], [187.9, 169.62, 1, 0.977], [187.07, 168.92, 0.98, 0.971], [186.15, 171.37, 1.02, 0.964], [185.12, 171.44, 1.02, 0.959], [185.12, 171.44, 1.02, 0.959], [183.01, 167.4, 0.98, 0.967], [180.53, 166.1, 1, 0.965], [178.7, 163.98, 0.98, 0.962], [176.6, 160.9, 0.96, 0.958], [174.17, 158.89, 0.96, 0.958], [172.42, 158.03, 0.98, 0.948], [170.58, 155.84, 0.96, 0.945], [168.27, 154.8, 0.98, 0.932], [168.27, 154.8, 0.98, 0.932], [168.28, 154.25, 0.98, 0.941], [167.82, 153.76, 0.98, 0.938], [167.36, 153.07, 0.98, 0.941], [167.1, 151.76, 0.96, 0.941], [166.97, 152.2, 0.98, 0.947], [166.89, 151.46, 0.98, 0.944], [166.21, 151.32, 0.98, 0.944], [166.05, 150.38, 0.98, 0.943], [166.05, 150.38, 0.98, 0.943], [168.13, 148.79, 0.96, 0.945], [169.85, 149.25, 0.98, 0.951], [172.04, 147.99, 0.98, 0.948], [174.87, 146.91, 0.98, 0.947], [176.38, 147.11, 1, 0.947], [179.35, 146.95, 1.02, 0.941], [181.18, 146.19, 1.02, 0.943], [183.86, 145.25, 1.02, 0.942], [183.86, 145.25, 1.02, 0.942], [182.95, 145.34, 1.02, 0.946], [182.65, 145.38, 1.02, 0.953], [181.7, 145.7, 1.02, 0.948], [181.06, 145.96, 1.02, 0.949], [180.46, 145.26, 1, 0.954], [179.53, 146.46, 1.02, 0.949], [179.36, 146.51, 1.02, 0.948], [178.41, 146.53, 1.02, 0.947], [178.41, 146.53, 1.02, 0.947], [180.31, 147.47, 1.02, 0.952], [181.26, 147.72, 1.02, 0.954], [183.14, 147.04, 0.98, 0.957], [184.8, 149.17, 1, 0.967], [186.42, 150.19, 1, 0.966], [188.41, 150.46, 1, 0.966], [189.95, 151.41, 1, 0.971], [191.61, 152.4, 1, 0.971], [191.61, 152.4, 1, 0.971], [189.01, 151.48, 1, 0.971], [186.85, 151.25, 1, 0.979], [184.64, 150.57, 1, 0.975], [182.06, 149.13, 0.98, 0.974], [179.48, 149.48, 1, 0.976], [177.17, 149.61, 1.02, 0.976], [175.2, 149.27, 1.02, 0.979], [172.3, 148.6, 1.02, 0.975], [172.3, 148.6, 1.02, 0.975], [175.21, 151.35, 1.02, 0.979], [177.27, 153.34, 1.02, 0.982], [179.97, 155.12, 1, 0.983], [181.35, 158.65, 1.02, 0.988], [184.96, 160.94, 1, 0.987], [187.54, 163.29, 1, 0.996], [189.22, 166.33, 1.02, 0.992], [191.7, 168.3, 1, 1], [191.7, 168.3, 1, 1], [189.18, 166.28, 1, 0.99], [186.95, 164.07, 0.98, 0.991], [184.75, 163.57, 1, 0.987], [182.21, 160.91, 0.98, 0.986], [180.15, 158.8, 0.96, 0.98], [177.73, 156.71, 0.96, 0.974], [175.67, 155.87, 0.96, 0.97], [173.13, 154.91, 0.96, 0.965], [173.13, 154.91, 0.96, 0.965], [176.75, 154.83, 0.96, 0.966], [180.19, 154.77, 0.96, 0.966], [183.7, 154.69, 0.96, 0.966], [187.78, 153.74, 0.94, 0.965], [191.91, 155.07, 0.98, 0.968], [195.35, 154.27, 0.96, 0.969], [199.09, 154.17, 0.96, 0.968], [202.85, 153.49, 0.94, 0.965], [202.85, 153.49, 0.94, 0.965], [206.07, 152.72, 0.94, 0.968], [209.04, 152.89, 0.96, 0.962], [211.97, 151.51, 0.94, 0.959], [215.45, 150.92, 0.94, 0.941], [218.71, 149.41, 0.92, 0.933], [221.75, 148.5, 0.9, 0.92], [224.95, 147.58, 0.9, 0.903], null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null] }, behaviors: { cache: "puppy-paper-behaviors.bin.gz", sha256: "7918261fb64c57a91739729841fd84c6dd53891196c7fb76ee9c27712ab6ef5d", samples: 9, covered: 90, frames: [[201.21, 166.15, 0.98, 0.959], [200.4, 166.14, 0.98, 0.961], [200.13, 166.16, 0.98, 0.963], [199.21, 166.15, 0.98, 0.964], [198.65, 166.13, 0.98, 0.964], [197.98, 166.12, 0.98, 0.967], [197.08, 166.1, 0.98, 0.966], [196.87, 166.13, 0.98, 0.966], [195.93, 166.1, 0.98, 0.965], [195.93, 166.1, 0.98, 0.965], [196.01, 166.1, 0.98, 0.967], [196.35, 166.05, 0.98, 0.96], [196.85, 166.1, 0.98, 0.966], [197.08, 166.07, 0.98, 0.964], [197.25, 166.07, 0.98, 0.96], [197.72, 166.12, 0.98, 0.963], [198.13, 166.05, 0.98, 0.957], [198.18, 166.04, 0.98, 0.954], [198.18, 166.04, 0.98, 0.954], [198.23, 166.06, 0.98, 0.957], [198.26, 166.09, 0.98, 0.957], [198.28, 166.12, 0.98, 0.958], [198.81, 167.29, 1, 0.968], [198.92, 167.34, 1, 0.966], [198.98, 167.37, 1, 0.964], [199.06, 167.41, 1, 0.962], [199.07, 167.42, 1, 0.96], [199.07, 167.42, 1, 0.96], [199.16, 167.39, 1, 0.96], [199.43, 167.35, 1, 0.96], [199.96, 167.33, 1, 0.965], [200.14, 166.34, 0.98, 0.965], [200.28, 166.27, 0.98, 0.963], [200.84, 166.24, 0.98, 0.965], [201.14, 166.17, 0.98, 0.962], [201.21, 166.15, 0.98, 0.959], [191.7, 168.3, 1, 1], [192.77, 168.21, 1, 0.999], [194.11, 167.32, 0.98, 0.992], [195.54, 167.92, 1, 0.986], [196.71, 166.87, 0.98, 0.982], [197.88, 167.48, 1, 0.978], [199.08, 166.37, 0.98, 0.973], [200.32, 166.2, 0.98, 0.965], [201.21, 166.15, 0.98, 0.959], [201.21, 166.15, 0.98, 0.959], [201.8, 170.56, 1, 0.964], [202.18, 172.74, 0.98, 0.965], [202.46, 176.13, 0.98, 0.966], [203.09, 179.85, 0.98, 0.968], [203.28, 183.55, 0.98, 0.961], [203.98, 187.56, 1, 0.963], [204.72, 190.66, 1, 0.967], [204.91, 194.05, 1, 0.954], [204.91, 194.05, 1, 0.954], [203.9, 194.08, 1, 0.956], [202.88, 194.15, 0.98, 0.958], [201.8, 195, 1, 0.958], [200.65, 195.45, 1, 0.961], [199.66, 196.08, 1, 0.957], [198.46, 196.15, 1, 0.953], [197.37, 196.24, 0.98, 0.95], [196.35, 196.3, 0.98, 0.947], [196.35, 196.3, 0.98, 0.947], [192.86, 196.11, 1, 0.951], [190.53, 196.01, 1, 0.951], [187.51, 196, 1, 0.949], [184.08, 194.32, 0.98, 0.952], [180.99, 193.88, 0.98, 0.949], [177.81, 194.62, 1, 0.949], [175.36, 194.61, 1.02, 0.95], [171.67, 193.62, 1, 0.944], [171.67, 193.62, 1, 0.944], [174.59, 193.5, 1.02, 0.952], [177.38, 192.46, 1.02, 0.95], [180.43, 190.38, 1, 0.957], [183.32, 188.01, 0.98, 0.95], [186.05, 187, 0.98, 0.954], [189.53, 187.6, 1.02, 0.95], [192.59, 185.84, 1, 0.945], [195.46, 183.93, 0.98, 0.942], [195.46, 183.93, 0.98, 0.942], [195.23, 182.08, 0.98, 0.958], [194.56, 180.73, 1, 0.963], [194.34, 179.26, 1, 0.974], [193.93, 177.12, 1, 0.982], [193.33, 175.54, 1.02, 0.983], [192.7, 173.2, 1, 0.996], [192.66, 170.55, 1, 0.992], [191.7, 168.3, 1, 1], null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null] }, seat: { cache: "puppy-paper-seat.bin.gz", sha256: "613dbeeeaec11804e80db0216922c8f62294745514ee6283bdce61a6d784dd5e", samples: 17, covered: 51, frames: [[191.7, 168.3, 1, 1], [187.28, 167.83, 0.98, 0.992], [186.01, 168.11, 0.98, 0.997], [184.36, 167.85, 0.96, 0.997], [182.14, 168.27, 0.96, 0.99], [179.4, 167.97, 0.94, 0.989], [177.05, 167.47, 0.92, 0.991], [174.39, 167.11, 0.9, 0.982], [171.52, 167.84, 0.9, 0.977], [169.74, 168.03, 0.9, 0.978], [166.37, 168.27, 0.9, 0.98], [163.95, 166.65, 0.86, 0.975], [161.1, 167.16, 0.86, 0.973], [158.82, 167.1, 0.86, 0.97], [157.06, 167.85, 0.86, 0.97], [155.39, 167.09, 0.84, 0.966], [152.19, 167.86, 0.84, 0.951], [152.19, 167.86, 0.84, 0.951], [152.24, 167.87, 0.84, 0.952], [152.26, 167.86, 0.84, 0.953], [152.26, 167.85, 0.84, 0.953], [152.27, 167.85, 0.84, 0.953], [152.3, 167.84, 0.84, 0.954], [152.33, 167.83, 0.84, 0.954], [152.69, 166.08, 0.8, 0.956], [152.75, 166.06, 0.8, 0.956], [152.77, 166.04, 0.8, 0.957], [153.16, 166.03, 0.8, 0.957], [153.19, 166.03, 0.8, 0.956], [153.21, 166.02, 0.8, 0.955], [153.23, 166.02, 0.8, 0.955], [153.27, 166.02, 0.8, 0.953], [153.37, 166.03, 0.8, 0.952], [153.28, 166.02, 0.8, 0.952], [153.28, 166.02, 0.8, 0.952], [154.28, 166.02, 0.8, 0.954], [154.49, 166.87, 0.82, 0.951], [155.31, 165.99, 0.8, 0.953], [156.08, 165.96, 0.8, 0.956], [156.67, 166.83, 0.82, 0.958], [157.34, 166.82, 0.82, 0.955], [158.31, 166.73, 0.82, 0.956], [158.83, 166.62, 0.82, 0.96], [159.42, 166.54, 0.82, 0.958], [160.23, 166.48, 0.82, 0.952], [160.85, 166.5, 0.82, 0.954], [161.4, 166.49, 0.82, 0.954], [162.04, 166.45, 0.82, 0.947], [162.98, 166.47, 0.82, 0.947], [163.19, 166.46, 0.82, 0.946], [164.02, 166.47, 0.82, 0.945]] }, arrivalSeat: { cache: "puppy-paper-arrival-seat.bin.gz", sha256: "13acb62fd573ff7ef97bcf59be80757897fe9d1784f187ab278990ff94a643b9", samples: 17, covered: 51, frames: [[195.46, 183.93, 0.98, 0.942], [191.05, 182.87, 0.98, 0.955], [189.92, 182.76, 0.98, 0.95], [187.17, 181.29, 0.96, 0.954], [184.77, 179.89, 0.94, 0.954], [182.36, 179.93, 0.96, 0.955], [179.54, 177.85, 0.94, 0.96], [176.3, 176.4, 0.92, 0.959], [174.08, 175.36, 0.9, 0.966], [171.91, 174.25, 0.9, 0.958], [168.15, 172.23, 0.88, 0.953], [165.17, 170.82, 0.86, 0.963], [162.45, 171.28, 0.88, 0.959], [160.06, 170.01, 0.86, 0.965], [157.6, 169.78, 0.86, 0.959], [155.67, 167.31, 0.82, 0.96], [152.19, 167.86, 0.84, 0.951], [152.19, 167.86, 0.84, 0.951], [152.24, 167.87, 0.84, 0.952], [152.26, 167.86, 0.84, 0.953], [152.26, 167.85, 0.84, 0.953], [152.27, 167.85, 0.84, 0.953], [152.3, 167.84, 0.84, 0.954], [152.33, 167.83, 0.84, 0.954], [152.69, 166.08, 0.8, 0.956], [152.75, 166.06, 0.8, 0.956], [152.77, 166.04, 0.8, 0.957], [153.16, 166.03, 0.8, 0.957], [153.19, 166.03, 0.8, 0.956], [153.21, 166.02, 0.8, 0.955], [153.23, 166.02, 0.8, 0.955], [153.27, 166.02, 0.8, 0.953], [153.37, 166.03, 0.8, 0.952], [153.28, 166.02, 0.8, 0.952], [153.28, 166.02, 0.8, 0.952], [154.28, 166.02, 0.8, 0.954], [154.49, 166.87, 0.82, 0.951], [155.31, 165.99, 0.8, 0.953], [156.08, 165.96, 0.8, 0.956], [156.67, 166.83, 0.82, 0.958], [157.34, 166.82, 0.82, 0.955], [158.31, 166.73, 0.82, 0.956], [158.83, 166.62, 0.82, 0.96], [159.42, 166.54, 0.82, 0.958], [160.23, 166.48, 0.82, 0.952], [160.85, 166.5, 0.82, 0.954], [161.4, 166.49, 0.82, 0.954], [162.04, 166.45, 0.82, 0.947], [162.98, 166.47, 0.82, 0.947], [163.19, 166.46, 0.82, 0.946], [164.02, 166.47, 0.82, 0.945]] }, actions: { sha256: "1e0db7138d087292a3e70c246a1d56af590b3fb50928687a026e7080d7657c38", frames: [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, [192, 168, 1, null], [197, 167, 1, null], [203, 165, 1, null], [209, 165, 1, null], [224, 154, 1, null], [235, 150, 1, null], [242, 149, 1, null], [245, 149, 1, null], [252, 148, 1, null], null, null, null, null, null, [237, 150, 1, null], [245, 149, 1, null], [248, 149, 1, null], [252, 148, 1, null], null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null] } } };
 function mouthSourceFrame(family, state, info) {
+  if (family === "actions") {
+    const p = paperActionPose(state.actionName, state.actionProgress, info);
+    return p.pair * 9 + Math.round(p.blend * 8);
+  }
   if (family === "approach")
     return state.approachPair * 9 + Math.round(state.blend * 8);
   if (family === "behaviors") {
@@ -2136,9 +2140,10 @@ function createPaperActor(animal, info, { manualTricks = false, trickTimings = n
         actionName = "lie-down";
         actionProgress = 1;
       }
-      if (walkTransitions && state === "view-turn" && turnView === "front") {
-        actionName = view === "approach" ? "walk-face-front" : "walk-face-rear";
-        actionProgress = Math.min(1, age / viewTurnSeconds());
+      if (walkTransitions && state === "view-turn") {
+        actionName = view === "approach" || turnView === "approach" ? "walk-face-front" : "walk-face-rear";
+        const t = Math.min(1, age / viewTurnSeconds());
+        actionProgress = turnView === "front" ? t : 1 - t;
       }
       if (walkTransitions && state === "turn") {
         actionName = "walk-turn";
@@ -2330,8 +2335,8 @@ function createPaperRenderer(cache, info, meta, width, height, { rear, approach,
         out[i] = 255;
     }
     render.lastPlacement = { left, top, side, sideX };
-    const mouthFamily = isInteraction || isAction ? null : isBehavior ? "behaviors" : isSeat ? state.seatVariant === "arrival" && arrivalSeatSample ? "arrivalSeat" : "seat" : isApproach ? "approach" : null;
-    const mouthInfo = { behaviors: behaviors?.info, seat: seat?.info, arrivalSeat: arrivalSeat?.info, approach: approach?.info }[mouthFamily];
+    const mouthFamily = isInteraction ? null : isAction ? "actions" : isBehavior ? "behaviors" : isSeat ? state.seatVariant === "arrival" && arrivalSeatSample ? "arrivalSeat" : "seat" : isApproach ? "approach" : null;
+    const mouthInfo = { actions: actions?.info, behaviors: behaviors?.info, seat: seat?.info, arrivalSeat: arrivalSeat?.info, approach: approach?.info }[mouthFamily];
     const mouthFrame = mouthFamily ? mouthSourceFrame(mouthFamily, state, mouthInfo) : null;
     render.lastMouth = projectMouth(mouthFamily ? mouthAnchor(mouthFamily, mouthFrame, mouthInfo?.sha256) : null, { left, top, side, sideX }, state.flip, { family: mouthFamily, frame: mouthFrame });
     if (motion?.mouth) {
@@ -4234,7 +4239,8 @@ function createCatLife({ seed = 731 } = {}) {
         mat: Boolean(phase.mat),
         facing: phase.facing ?? null,
         resting: ["sleep", "loaf-rest"].includes(phase.clip) && !pending,
-        sleeping: phase.clip === "sleep"
+        sleeping: phase.clip === "sleep",
+        restSeconds: phase.clip === "sleep" ? phase.elapsed : 0
       };
     }
   };
@@ -4314,13 +4320,38 @@ function footSourcePoint2(x, y, pins, out = {}) {
   return out;
 }
 
+// integrations/purrviewer/src/facing.mjs
+function catFacingPath(from, fromMirror, to, toMirror) {
+  const path = [];
+  const push = (clip, reverse, mirror, view) => path.push({ clip, reverse, mirror, view, seconds: 0.28 });
+  if (from === to && (from === "front" || fromMirror === toMirror))
+    return path;
+  if (from === "rear") {
+    push("turn-side-rear", true, fromMirror, "side");
+    from = "side";
+  }
+  if (from === "side") {
+    if (to === "rear" && fromMirror === toMirror) {
+      push("turn-side-rear", false, fromMirror, "rear");
+      return path;
+    }
+    push("turn-front-side", true, fromMirror, "front");
+  }
+  if (to === "front")
+    return path;
+  push("turn-front-side", false, toMirror, "side");
+  if (to === "rear")
+    push("turn-side-rear", false, toMirror, "rear");
+  return path;
+}
+
 // integrations/purrviewer/src/purrviewer-core.mjs
 function createCatFromAssets({ seed = 731 } = {}, lease, kernel = null) {
   if (!Number.isInteger(seed) || seed < 0 || seed > 4294967295)
     throw TypeError("Invalid cat seed");
   let asset = lease.data;
   const release = lease.release, motion = createCatMotion(), life = createCatLife({ seed }), contacts = createCatContacts(asset.meta.walk), sourcePoint = { x: 0, y: 0 };
-  let pixels = null, disposed = false, lastClip = "sit", lastFrame = null, prep = null, view = "front", mirror = false, settle = null, lastMoving = false, lastLifeClip = "sit", lastPaintKey = "", lastText = "", rasterizations = 0, heldHits = 0;
+  let pixels = null, disposed = false, lastClip = "sit", lastFrame = null, prep = null, view = "front", mirror = false, standing = false, settle = null, lastMoving = false, lastLifeClip = "sit", lastPaintKey = "", lastText = "", rasterizations = 0, heldHits = 0;
   const alive = () => {
     if (disposed)
       throw Error("Cat is disposed");
@@ -4336,18 +4367,31 @@ function createCatFromAssets({ seed = 731 } = {}, lease, kernel = null) {
       settle = null;
       motion.wheel(command);
     } else if (command.kind === "stop") {
-      prep = null;
       motion.stop();
     }
   };
+  function prepare(targetView, targetMirror, { command = null, seated = false } = {}) {
+    const steps = [];
+    if (!standing)
+      steps.push({ clip: "rise-front", seconds: 0.3, view: "front", mirror: false });
+    steps.push(...catFacingPath(view, mirror, targetView, targetMirror));
+    if (seated)
+      steps.push({ clip: "sit-front", seconds: 0.32, view: "front", mirror: false, seated: true });
+    if (!steps.length) {
+      if (command)
+        direct(command);
+      return;
+    }
+    prep = { steps, index: 0, age: 0, command };
+    mirror = steps[0].mirror;
+    settle = null;
+  }
   function issue(command) {
-    if (command.kind === "go" && view === "front" && !motion.sample().moving) {
+    if (command.kind === "go" && !motion.sample().moving) {
       const s3 = motion.sample(), dx = command.x - s3.x, dz2 = command.z - s3.z, length2 = Math.hypot(dx, dz2);
       if (length2 > 0.01) {
         const targetView = Math.abs(dz2 / length2) > 0.8 ? dz2 > 0 ? "front" : "rear" : "side";
-        prep = { age: 0, seconds: 0.4, command, targetView, clip: targetView === "front" ? "rise-front" : "rise" };
-        mirror = dx < 0;
-        settle = null;
+        prepare(targetView, dx < 0, { command });
         return;
       }
     }
@@ -4366,12 +4410,23 @@ function createCatFromAssets({ seed = 731 } = {}, lease, kernel = null) {
         left -= step;
         if (prep) {
           prep.age += step;
-          if (prep.age >= prep.seconds) {
-            const cmd = prep.command;
-            view = prep.targetView;
-            prep = null;
-            direct(cmd);
+          const part = prep.steps[prep.index];
+          if (prep.age >= part.seconds) {
+            view = part.view;
+            mirror = part.mirror;
+            standing = !part.seated;
+            prep.age = 0;
+            prep.index++;
+            if (prep.index === prep.steps.length) {
+              const cmd = prep.command;
+              prep = null;
+              if (cmd)
+                direct(cmd);
+            } else
+              mirror = prep.steps[prep.index].mirror;
           }
+          if (prep)
+            continue;
         }
         motion.step(step);
         const s3 = motion.sample();
@@ -4380,61 +4435,47 @@ function createCatFromAssets({ seed = 731 } = {}, lease, kernel = null) {
           issue(command);
         const report = life.report, clip = report.clip;
         if (s3.moving && !prep && !s3.exercising) {
-          const sx = Math.sin(s3.heading), sz = Math.cos(s3.heading);
-          mirror = sx < 0;
-          view = s3.airborne ? "side" : Math.abs(sz) > 0.8 ? sz > 0 ? "front" : "rear" : "side";
+          if (s3.airborne) {
+            mirror = Math.sin(s3.heading) < 0;
+            view = "side";
+          }
+          standing = true;
           settle = null;
         }
         if (clip !== lastLifeClip) {
-          if (clip === "stretch-enter") {
-            view = "front";
-            mirror = false;
-            settle = null;
-          }
-          if (clip === "knead-enter") {
-            view = "front";
-            mirror = false;
-            settle = null;
-          }
-          if (["tower-load", "tower-land", "wheel-enter", "wheel-leave"].includes(clip)) {
+          if (["stretch-enter", "knead-enter", "feed-enter"].includes(clip) && standing)
+            prepare("front", false, { seated: true });
+          if (["tower-load", "crouch", "wheel-enter"].includes(clip))
+            prepare("side", clip === "tower-load" ? report.facing < 0 : clip === "wheel-enter" ? false : mirror);
+          if (["tower-land", "wheel-leave"].includes(clip)) {
             view = "side";
+            standing = true;
             settle = null;
             if (clip.startsWith("wheel"))
               mirror = false;
           }
-          if (clip === "tower-load")
-            mirror = report.facing < 0;
           if (clip === "stretch-reach") {
             view = "side";
             mirror = false;
             settle = null;
           }
-          if (clip === "feed-enter") {
+          if (clip === "feed-sniff") {
             view = "side";
             mirror = false;
+            standing = true;
             settle = null;
           }
           if (clip === "sit" && ["bat", "stretch", "stretch-leave", "feed-leave", "loaf-leave"].includes(lastLifeClip)) {
             view = "front";
             mirror = false;
+            standing = false;
             settle = null;
           }
           lastLifeClip = clip;
         }
         const quiet = ["idle", "sit", "blink", "eye-greeting", "groom", "loaf", "sleep", "tail-swish", "tail-tip"].includes(clip);
-        if (!s3.moving && !prep && quiet) {
-          if (!settle && (lastMoving || view !== "front"))
-            settle = { age: 0, seconds: 0.45, clip: view === "front" ? "sit-front" : "sit-down" };
-          if (settle) {
-            settle.age += step;
-            if (settle.age >= settle.seconds) {
-              view = "front";
-              mirror = false;
-              settle = null;
-            }
-          }
-        } else
-          settle = null;
+        if (!s3.moving && !prep && quiet && standing)
+          prepare("front", false, { seated: true });
         lastMoving = s3.moving;
         if (s3.moving && !s3.airborne && !s3.exercising && s3.supportY === 0 && !prep && view === "side")
           contacts.update(s3, mirror);
@@ -4466,9 +4507,16 @@ function createCatFromAssets({ seed = 731 } = {}, lease, kernel = null) {
         clip = "wheel-run";
         progress = (s3.wheelPhase % 1 + 1) % 1;
       }
+      if (!s3.moving && ["walk", "creep"].includes(clip)) {
+        clip = view === "rear" ? "stand-rear" : view === "front" ? "rise-front" : "stand";
+        progress = 1;
+      }
       if (prep) {
-        clip = prep.clip;
-        progress = Math.min(1, prep.age / prep.seconds);
+        const part = prep.steps[prep.index];
+        clip = part.clip;
+        progress = Math.min(1, prep.age / part.seconds);
+        if (part.reverse)
+          progress = 1 - progress;
       }
       if (settle) {
         clip = settle.clip;
@@ -4478,7 +4526,14 @@ function createCatFromAssets({ seed = 731 } = {}, lease, kernel = null) {
         progress = progress >= 1 ? 0 : progress * 9 % 1;
       if (clip === "knead")
         progress = progress >= 1 ? 0 : progress * 4 % 1;
-      const keys = asset.meta.clips[clip] ?? asset.meta.clips.sit;
+      let keys = asset.meta.clips[clip] ?? asset.meta.clips.sit;
+      if (clip === "stand")
+        keys = [asset.meta.clips["turn-front-side"].at(-1)];
+      if (clip === "sleep") {
+        const t = r.restSeconds ?? 0, phase = t % 5.6;
+        keys = [Math.floor(t) % 23 === 17 ? asset.meta.clips.sleep[3] : phase > 1.4 && phase < 3.5 ? asset.meta.clips.sleep[1] : asset.meta.clips.sleep[0]];
+        progress = 0;
+      }
       const pins = clip === "walk" ? contacts.pins(s3) : [];
       const key = keys[Math.min(keys.length - 1, Math.floor(Math.max(0, Math.min(1, progress)) * keys.length))];
       const food = r.food ? Math.ceil(r.food.remaining * 16) / 16 : null;
@@ -4565,9 +4620,8 @@ function createCatFromAssets({ seed = 731 } = {}, lease, kernel = null) {
       if (!["treat", "toy", "call", "stretch", "tail", "greet", "company", "tower", "wheel"].includes(kind))
         throw TypeError("Invalid cat interaction");
       const accepted = life.interact(kind, options2);
-      if (accepted && prep) {
-        prep = null;
-      }
+      if (accepted && prep)
+        prep.command = null;
       return accepted;
     },
     get report() {

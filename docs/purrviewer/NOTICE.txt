@@ -1,11 +1,11 @@
 Purrviewer ginger cat, by BiteFoundry
 
-Runtime source: Purrviewer commit 5452da3569623b26f1ea87f1097735a1606c5c67.
-The pinned SOURCE.json lists file hashes. Code: MIT; see runtime/5452da3/LICENSE.
-Reused code retains runtime/5452da3/vendor/retrieviewer/LICENSE-CODE.
+Runtime source: Purrviewer commit 79a47c2d618b91945997035e6c7502c43f471f62.
+The pinned SOURCE.json lists file hashes. Code: MIT; see runtime/79a47c2/LICENSE.
+Reused code retains runtime/79a47c2/vendor/retrieviewer/LICENSE-CODE.
 Cat artwork: CC BY-SA 4.0, selected by the owner on 2026-10-25.
 Creator: BiteFoundry project maintainer (GitHub shinick-han / npm shinick), 2026.
 License: https://creativecommons.org/licenses/by-sa/4.0/
 Source: https://github.com/BiteFoundry/retrieviewer
-See runtime/5452da3/ASSETS-LICENSE.md for scope, creation and attribution.
+See runtime/79a47c2/ASSETS-LICENSE.md for scope, creation and attribution.
 Original source sheets and research photographs are not distributed here.

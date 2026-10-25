@@ -3,21 +3,30 @@ import {createCatMotion,projectCat} from './world.mjs';
 import {createCatLife} from './life.mjs';
 import {createCatContacts,footSourcePoint} from './contact.mjs';
 import {paintHabitat} from './habitat.mjs';
+import {catFacingPath} from './facing.mjs';
 export function createCatFromAssets({seed=731}={},lease,kernel=null){
  if(!Number.isInteger(seed)||seed<0||seed>0xffffffff)throw TypeError('Invalid cat seed');
  let asset=lease.data;const release=lease.release,motion=createCatMotion(),life=createCatLife({seed}),contacts=createCatContacts(asset.meta.walk),sourcePoint={x:0,y:0};
- let pixels=null,disposed=false,lastClip='sit',lastFrame=null,prep=null,view='front',mirror=false,settle=null,lastMoving=false,lastLifeClip='sit',lastPaintKey='',lastText='',rasterizations=0,heldHits=0;
+ let pixels=null,disposed=false,lastClip='sit',lastFrame=null,prep=null,view='front',mirror=false,standing=false,settle=null,lastMoving=false,lastLifeClip='sit',lastPaintKey='',lastText='',rasterizations=0,heldHits=0;
  const alive=()=>{if(disposed)throw Error('Cat is disposed');};
  const direct=command=>{
   if(command.kind==='go')motion.go(command.x,command.z,{gait:command.gait});
   else if(command.kind==='pounce')motion.pounce(command.x,command.z,{height:command.height,landingY:command.landingY??0});
   else if(command.kind==='wheel'){view='side';mirror=false;settle=null;motion.wheel(command);}
-  else if(command.kind==='stop'){prep=null;motion.stop();}
+  else if(command.kind==='stop'){motion.stop();}
  };
+ function prepare(targetView,targetMirror,{command=null,seated=false}={}){
+  const steps=[];
+  if(!standing)steps.push({clip:'rise-front',seconds:.3,view:'front',mirror:false});
+  steps.push(...catFacingPath(view,mirror,targetView,targetMirror));
+  if(seated)steps.push({clip:'sit-front',seconds:.32,view:'front',mirror:false,seated:true});
+  if(!steps.length){if(command)direct(command);return;}
+  prep={steps,index:0,age:0,command};mirror=steps[0].mirror;settle=null;
+ }
  function issue(command){
-  if(command.kind==='go'&&view==='front'&&!motion.sample().moving){
+  if(command.kind==='go'&&!motion.sample().moving){
    const s=motion.sample(),dx=command.x-s.x,dz=command.z-s.z,length=Math.hypot(dx,dz);
-   if(length>.01){const targetView=Math.abs(dz/length)>.8?(dz>0?'front':'rear'):'side';prep={age:0,seconds:.4,command,targetView,clip:targetView==='front'?'rise-front':'rise'};mirror=dx<0;settle=null;return;}
+   if(length>.01){const targetView=Math.abs(dz/length)>.8?(dz>0?'front':'rear'):'side';prepare(targetView,dx<0,{command});return;}
   }
   if(command.kind!=='stop')settle=null;
   direct(command);
@@ -26,28 +35,34 @@ export function createCatFromAssets({seed=731}={},lease,kernel=null){
   step(dt){
    alive();if(!Number.isFinite(dt)||dt<0||dt>.25)throw RangeError('Invalid cat dt');
    let left=dt;while(left>1e-10){const step=Math.min(1/60,left);left-=step;
-    if(prep){prep.age+=step;if(prep.age>=prep.seconds){const cmd=prep.command;view=prep.targetView;prep=null;direct(cmd);}}
+    if(prep){
+     prep.age+=step;const part=prep.steps[prep.index];
+     if(prep.age>=part.seconds){view=part.view;mirror=part.mirror;standing=!part.seated;
+      prep.age=0;prep.index++;
+      if(prep.index===prep.steps.length){const cmd=prep.command;prep=null;if(cmd)direct(cmd);}
+      else mirror=prep.steps[prep.index].mirror;
+     }
+     // Life's authored contact/consumption holds start after this bridge,
+     // rather than being consumed while hidden behind it.
+     if(prep)continue;
+    }
     motion.step(step);const s=motion.sample();
     const command=life.step(step,s);if(command)issue(command);
     const report=life.report,clip=report.clip;
-    if(s.moving&&!prep&&!s.exercising){const sx=Math.sin(s.heading),sz=Math.cos(s.heading);mirror=sx<0;view=s.airborne?'side':Math.abs(sz)>.8?(sz>0?'front':'rear'):'side';settle=null;}
+    if(s.moving&&!prep&&!s.exercising){if(s.airborne){mirror=Math.sin(s.heading)<0;view='side';}standing=true;settle=null;}
     if(clip!==lastLifeClip){
-     if(clip==='stretch-enter'){view='front';mirror=false;settle=null;}
-     if(clip==='knead-enter'){view='front';mirror=false;settle=null;}
-     if(['tower-load','tower-land','wheel-enter','wheel-leave'].includes(clip)){view='side';settle=null;if(clip.startsWith('wheel'))mirror=false;}
-     if(clip==='tower-load')mirror=report.facing<0;
+     if(['stretch-enter','knead-enter','feed-enter'].includes(clip)&&standing)prepare('front',false,{seated:true});
+     if(['tower-load','crouch','wheel-enter'].includes(clip))prepare('side',clip==='tower-load'?report.facing<0:clip==='wheel-enter'?false:mirror);
+     if(['tower-land','wheel-leave'].includes(clip)){view='side';standing=true;settle=null;if(clip.startsWith('wheel'))mirror=false;}
      if(clip==='stretch-reach'){view='side';mirror=false;settle=null;}
-     if(clip==='feed-enter'){view='side';mirror=false;settle=null;}
+     if(clip==='feed-sniff'){view='side';mirror=false;standing=true;settle=null;}
      // These authored sequences already finish on the canonical front sit.
      // Replaying stand-to-sit here made the cat rise again after paw play.
-     if(clip==='sit'&&['bat','stretch','stretch-leave','feed-leave','loaf-leave'].includes(lastLifeClip)){view='front';mirror=false;settle=null;}
+     if(clip==='sit'&&['bat','stretch','stretch-leave','feed-leave','loaf-leave'].includes(lastLifeClip)){view='front';mirror=false;standing=false;settle=null;}
      lastLifeClip=clip;
     }
     const quiet=['idle','sit','blink','eye-greeting','groom','loaf','sleep','tail-swish','tail-tip'].includes(clip);
-    if(!s.moving&&!prep&&quiet){
-     if(!settle&&(lastMoving||view!=='front'))settle={age:0,seconds:.45,clip:view==='front'?'sit-front':'sit-down'};
-     if(settle){settle.age+=step;if(settle.age>=settle.seconds){view='front';mirror=false;settle=null;}}
-    }else settle=null;
+    if(!s.moving&&!prep&&quiet&&standing)prepare('front',false,{seated:true});
     lastMoving=s.moving;
     if(s.moving&&!s.airborne&&!s.exercising&&s.supportY===0&&!prep&&view==='side')contacts.update(s,mirror);else contacts.reset();
    }
@@ -62,13 +77,21 @@ export function createCatFromAssets({seed=731}={},lease,kernel=null){
    }
    if(s.airborne){clip=r.clip==='tower-up'?'tower-flight':r.clip==='tower-down'?'tower-fall':'pounce';progress=s.flightProgress;}
    if(s.exercising||r.clip==='wheel-run'){clip='wheel-run';progress=((s.wheelPhase%1)+1)%1;}
-   if(prep){clip=prep.clip;progress=Math.min(1,prep.age/prep.seconds);}
+   if(!s.moving&&['walk','creep'].includes(clip)){clip=view==='rear'?'stand-rear':view==='front'?'rise-front':'stand';progress=1;}
+   if(prep){const part=prep.steps[prep.index];clip=part.clip;progress=Math.min(1,prep.age/part.seconds);if(part.reverse)progress=1-progress;}
    if(settle){clip=settle.clip;progress=Math.min(1,settle.age/settle.seconds);}
    // Nine authored licking cycles in 3.6s. Rendering only samples simulation
    // progress; a hidden or sparse host cannot change eating cadence.
    if(clip==='feed-lick')progress=progress>=1?0:(progress*9)%1;
    if(clip==='knead')progress=progress>=1?0:(progress*4)%1;
-   const keys=asset.meta.clips[clip]??asset.meta.clips.sit;
+   let keys=asset.meta.clips[clip]??asset.meta.clips.sit;
+   if(clip==='stand')keys=[asset.meta.clips['turn-front-side'].at(-1)];
+   if(clip==='sleep'){
+    // A slow fur breath and rare ear twitch, with exact curled endpoints.
+    // No body scaling/bobbing, no extra resident raster, no render-owned clock.
+    const t=r.restSeconds??0,phase=t%5.6;
+    keys=[Math.floor(t)%23===17?asset.meta.clips.sleep[3]:phase>1.4&&phase<3.5?asset.meta.clips.sleep[1]:asset.meta.clips.sleep[0]];progress=0;
+   }
    const pins=clip==='walk'?contacts.pins(s):[];
    // Every authored key needs a real hold, including the recovery/exit key.
    const key=keys[Math.min(keys.length-1,Math.floor(Math.max(0,Math.min(1,progress))*keys.length))];
@@ -122,7 +145,7 @@ export function createCatFromAssets({seed=731}={},lease,kernel=null){
    rasterizations++;lastPaintKey=paintKey;lastText=(kernel?.braille?kernel.braille(pixels,width,height,1.22,1.08):rgbaToBraille(pixels,width,height,{method:'stable',brightness:1.22,contrast:1.08})).text;
    return result(lastText);
   },
-  interact(kind,options){alive();if(!['treat','toy','call','stretch','tail','greet','company','tower','wheel'].includes(kind))throw TypeError('Invalid cat interaction');const accepted=life.interact(kind,options);if(accepted&&prep){prep=null;}return accepted;},
+  interact(kind,options){alive();if(!['treat','toy','call','stretch','tail','greet','company','tower','wheel'].includes(kind))throw TypeError('Invalid cat interaction');const accepted=life.interact(kind,options);if(accepted&&prep)prep.command=null;return accepted;},
   get report(){alive();return life.report;},
   get stats(){alive();return {residentPixelBytes:asset.store.residentPixelBytes??asset.store.residentBytes,cachedFrames:asset.store.stats().cachedFrames,rgbaBytes:pixels?.byteLength??0,lastClip,lastFrame,leases:lease.users?.()??1,rasterizations,heldHits};},
   dispose(){if(disposed)return;disposed=true;pixels=null;prep=null;contacts.reset();asset=null;lastText=lastPaintKey='';release();}

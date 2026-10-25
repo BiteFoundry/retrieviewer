@@ -1,0 +1,25 @@
+{
+  "project": "Purrviewer",
+  "commit": "79a47c2d618b91945997035e6c7502c43f471f62",
+  "files": {
+    "src/purrviewer.mjs": "4613a02f0961e5abc24cdcc163040125cc0589e7016533bd4323af6c52f05981",
+    "src/purrviewer-core.mjs": "4e1b2409fb8874212dbb2d18d2f5b0391897e76ca1fbaa44088ce3ccd44a2c59",
+    "src/facing.mjs": "714b03c207f7845e907b32e6c5d88825e26bc60efcf071cc50c60bc0c5da57db",
+    "src/world.mjs": "a9ce791b1fc2c9b45eb58dd8a77223e3ae05afc3cb7e627c6a543f922c177753",
+    "src/walk-cycle.mjs": "bedf0faf4b470133cfbde0fa5119b27e9e8447fa2fd270416079cdd324b6dfa4",
+    "src/life.mjs": "6d19e543a4e195167eb69c6c65ba84b06dc74243cd52b9f5e2b395fe0bc4d191",
+    "src/contact.mjs": "83daf495910d5741885532523e24d7c0a1de9511cf2bc1cd21683fdfc2629adb",
+    "src/habitat.mjs": "1208ee7330f6b4f37ecbc32ccbd55a6e519add836e3f04888f15ae2aa967b57a",
+    "vendor/retrieviewer/braille.mjs": "c932988b353e50dad8f9e4d5b01692bc61d369e72ebe6c069de19240ac9eac01",
+    "vendor/retrieviewer/puppy-frame-store.mjs": "bd9a29402d4f55696601b598989fcac28f41eed81f5c1bf25b00c0e07a5f97cf",
+    "vendor/retrieviewer/puppy-frame-predictive.mjs": "b16eae14f851c66cb196d3607d76c7d6aa16e8db632b27c799850b84edad44a8",
+    "vendor/retrieviewer/puppy-frame-file.mjs": "0b46720eff5bc313b993bd986718ce2ca596c098aba63f7e6dcf9f28af9a3e3d",
+    "vendor/retrieviewer/puppy-frame-indexed.mjs": "7f1ffb1b1122a04307f68f385c3f6b7c1576f028b01ee8dd04cbc8aefce78e20",
+    "vendor/retrieviewer/LICENSE-CODE": "9efad605c3d72a713cd7f0e59afb664274ee934e75976e67e8069bde65ea7fe0",
+    "LICENSE": "8138b4f29dd09304be8cb9dcf3dc81a1941de26900514f77bef5e00c1acedc92",
+    "ASSETS-LICENSE.md": "307810fdb3782e26cd0c68e21648f94f9bfe32f1110538fbec73a29acc407c03",
+    "ART.md": "6139255dcbb18f945c2c6f6a9a2892be7c5854ec67865e4e3bbf416e382ceb4d",
+    "art/ginger.json": "062809f456d69d85a5da978a5090546f8db2901e6fef5e1b4f1170c9598ba6f0",
+    "art/ginger.bin.gz": "bf2521f981a6ab8b89469ba880557860275120bb71745fb9e05403163c57604f"
+  }
+}

@@ -1,3 +1,20 @@
+# Retrieviewer 0.0.21 release process
+
+Current target: `@bitefoundry/retrieviewer@0.0.21`, public `latest`.
+The owner accepted the local six-finding repair candidate and asked to proceed.
+Ship the reviewed dog standing-turn/mouth repairs and77-key cat atlas, preserving
+64 original cat drawings exactly. Cat source pin: `79a47c2d618b91945997035e6c7502c43f471f62`.
+Keep physics, bounded caches, the coherent native painter and existing licenses.
+
+Run full tests and release/package checks, install and compare the exact archive,
+exercise its Windows adapter, then push and wait for Windows/Linux CI. Publish
+that same archive, verify registry integrity and a fresh consumer, and verify
+the matching bilingual Pages deployment and pinned cat hashes. Current memory
+evidence is4K35s basic-mode sampling, not a long-run ceiling; see
+[repair evidence](research/pet-motion-repair-20261025.md). Raw sheets stay private.
+
+## Previous0.0.20 scope (historical)
+
 # Retrieviewer 0.0.20 release process
 
 Current target: `@bitefoundry/retrieviewer@0.0.20`, public `latest`.

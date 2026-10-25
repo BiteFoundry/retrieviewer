@@ -2,7 +2,7 @@
   "version": 1,
   "width": 320,
   "height": 320,
-  "frames": 65,
+  "frames": 77,
   "clips": {
     "idle": [
       0
@@ -31,12 +31,19 @@
     "tower-flight": [
       34,
       64,
-      36
+      74,
+      35,
+      75,
+      36,
+      76
     ],
     "tower-fall": [
       34,
+      74,
       35,
-      36
+      75,
+      36,
+      76
     ],
     "tower-land": [
       37,
@@ -160,8 +167,11 @@
     ],
     "pounce": [
       34,
+      74,
       35,
-      36
+      75,
+      36,
+      76
     ],
     "land": [
       37,
@@ -232,6 +242,10 @@
       2
     ],
     "sleep": [
+      2,
+      72,
+      2,
+      73,
       2
     ],
     "curl": [
@@ -320,6 +334,23 @@
       14,
       15,
       0
+    ],
+    "turn-front-side": [
+      5,
+      65,
+      66,
+      67,
+      1
+    ],
+    "turn-side-rear": [
+      1,
+      68,
+      69,
+      70,
+      71
+    ],
+    "stand-rear": [
+      71
     ]
   },
   "walk": {
@@ -589,7 +620,7 @@
     "evidence": "human-inspected visible toe proxies; .60m source canvas"
   },
   "color": "#f1b66b",
-  "gzipBytes": 391476,
+  "gzipBytes": 476953,
   "sourceSha256": "af4322edb7d1f001d002b55535369f8dd067cd4621ddd453318251b0caa1d559",
   "registration": [
     {
@@ -718,18 +749,15 @@
     },
     {
       "name": "lower",
-      "source": "ginger-rest-v1.png",
-      "sourceBox": [
-        537,
-        313,
-        1030,
-        578
-      ],
-      "scale": 0.5780000000000001,
+      "source": "ginger-lower-repair-v1.png",
+      "sourceSha256": "5f8e22e17f08bb49d668ea1adf12938978bf7399eb03d851a0da140f27b34b07",
+      "scale": 0.25,
       "translation": [
-        52,
-        145
-      ]
+        11,
+        8
+      ],
+      "registrationFamily": "motion-repair-v1",
+      "replaces": 8
     },
     {
       "name": "loaf",
@@ -1702,6 +1730,188 @@
         850
       ],
       "registrationFamily": "tower-v1"
+    },
+    {
+      "name": "yaw-22",
+      "source": "ginger-yaw-v1.png",
+      "sourceSha256": "e87554521d27eba2f97a5ec9ae411fdf224d69d5a1181d1880b70947777dbda2",
+      "scale": 0.61,
+      "translation": [
+        29,
+        56
+      ],
+      "registrationFamily": "motion-repair-v1",
+      "cell": 1
+    },
+    {
+      "name": "yaw-45",
+      "source": "ginger-yaw-v1.png",
+      "sourceSha256": "e87554521d27eba2f97a5ec9ae411fdf224d69d5a1181d1880b70947777dbda2",
+      "scale": 0.61,
+      "translation": [
+        29,
+        56
+      ],
+      "registrationFamily": "motion-repair-v1",
+      "cell": 2
+    },
+    {
+      "name": "yaw-67",
+      "source": "ginger-yaw-v1.png",
+      "sourceSha256": "e87554521d27eba2f97a5ec9ae411fdf224d69d5a1181d1880b70947777dbda2",
+      "scale": 0.61,
+      "translation": [
+        29,
+        79
+      ],
+      "registrationFamily": "motion-repair-v1",
+      "cell": 3
+    },
+    {
+      "name": "yaw-112",
+      "source": "ginger-yaw-v1.png",
+      "sourceSha256": "e87554521d27eba2f97a5ec9ae411fdf224d69d5a1181d1880b70947777dbda2",
+      "scale": 0.61,
+      "translation": [
+        29,
+        77
+      ],
+      "registrationFamily": "motion-repair-v1",
+      "cell": 5
+    },
+    {
+      "name": "yaw-135",
+      "source": "ginger-yaw-v1.png",
+      "sourceSha256": "e87554521d27eba2f97a5ec9ae411fdf224d69d5a1181d1880b70947777dbda2",
+      "scale": 0.61,
+      "translation": [
+        29,
+        90
+      ],
+      "registrationFamily": "motion-repair-v1",
+      "cell": 6
+    },
+    {
+      "name": "yaw-157",
+      "source": "ginger-yaw-v1.png",
+      "sourceSha256": "e87554521d27eba2f97a5ec9ae411fdf224d69d5a1181d1880b70947777dbda2",
+      "scale": 0.61,
+      "translation": [
+        29,
+        92
+      ],
+      "registrationFamily": "motion-repair-v1",
+      "cell": 7
+    },
+    {
+      "name": "rear-stand",
+      "source": "ginger-yaw-v1.png",
+      "sourceSha256": "e87554521d27eba2f97a5ec9ae411fdf224d69d5a1181d1880b70947777dbda2",
+      "scale": 0.61,
+      "translation": [
+        29,
+        92
+      ],
+      "registrationFamily": "motion-repair-v1",
+      "cell": 8
+    },
+    {
+      "name": "sleep-breath",
+      "source": "ginger-sleep-details-v1.png",
+      "sourceSha256": "7e2c797ad3e510583af53da60c708a4b7e452491b2531ffe9167521536f70e21",
+      "scale": 0.33,
+      "translation": [
+        20,
+        10
+      ],
+      "registrationFamily": "motion-repair-v1",
+      "cell": 0,
+      "localPatch": [
+        100,
+        198,
+        157,
+        241
+      ]
+    },
+    {
+      "name": "sleep-ear",
+      "source": "ginger-sleep-details-v1.png",
+      "sourceSha256": "7e2c797ad3e510583af53da60c708a4b7e452491b2531ffe9167521536f70e21",
+      "scale": 0.33,
+      "translation": [
+        20,
+        10
+      ],
+      "registrationFamily": "motion-repair-v1",
+      "cell": 1,
+      "localPatch": [
+        172,
+        193,
+        199,
+        223
+      ]
+    },
+    {
+      "name": "jump-extend",
+      "source": "ginger-jump-breakdowns-v1.png",
+      "sourceSha256": "fa46905d52110a94eafaa75d9920d1c92d0991ddd42741a4cb1d12c593dbf54b",
+      "scale": 0.36,
+      "translation": [
+        16,
+        54
+      ],
+      "registrationFamily": "motion-repair-v1",
+      "cell": 0,
+      "sourceBox": [
+        0,
+        0,
+        780,
+        724
+      ]
+    },
+    {
+      "name": "jump-gather",
+      "source": "ginger-jump-breakdowns-v1.png",
+      "sourceSha256": "fa46905d52110a94eafaa75d9920d1c92d0991ddd42741a4cb1d12c593dbf54b",
+      "scale": 0.36,
+      "translation": [
+        16,
+        54
+      ],
+      "registrationFamily": "motion-repair-v1",
+      "cell": 1,
+      "sourceBox": [
+        780,
+        0,
+        1460,
+        724
+      ]
+    },
+    {
+      "name": "jump-descend",
+      "source": "ginger-jump-breakdowns-v1.png",
+      "sourceSha256": "fa46905d52110a94eafaa75d9920d1c92d0991ddd42741a4cb1d12c593dbf54b",
+      "scale": 0.36,
+      "translation": [
+        16,
+        54
+      ],
+      "registrationFamily": "motion-repair-v1",
+      "cell": 2,
+      "sourceBox": [
+        1460,
+        0,
+        2172,
+        724
+      ]
     }
-  ]
+  ],
+  "repair": {
+    "baseline": "5452da3",
+    "unchangedOriginalKeys": 64,
+    "replaced": [
+      8
+    ],
+    "appended": 12
+  }
 }

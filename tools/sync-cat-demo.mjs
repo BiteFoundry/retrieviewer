@@ -6,11 +6,11 @@ import {createHash} from 'node:crypto';
 import {fileURLToPath} from 'node:url';
 const source=resolve(process.argv[2]??'../purrviewer');
 const commit=execFileSync('git',['-C',source,'rev-parse','HEAD'],{encoding:'utf8'}).trim();
-if(!commit.startsWith('5452da3'))throw Error('Expected reviewed Purrviewer5452da3');
-const files=['src/purrviewer.mjs','src/purrviewer-core.mjs','src/world.mjs','src/walk-cycle.mjs','src/life.mjs','src/contact.mjs','src/habitat.mjs',
+if(!commit.startsWith('79a47c2'))throw Error('Expected reviewed Purrviewer79a47c2');
+const files=['src/purrviewer.mjs','src/purrviewer-core.mjs','src/facing.mjs','src/world.mjs','src/walk-cycle.mjs','src/life.mjs','src/contact.mjs','src/habitat.mjs',
  'vendor/retrieviewer/braille.mjs','vendor/retrieviewer/puppy-frame-store.mjs','vendor/retrieviewer/puppy-frame-predictive.mjs',
- 'vendor/retrieviewer/puppy-frame-file.mjs','vendor/retrieviewer/puppy-frame-indexed.mjs','vendor/retrieviewer/LICENSE-CODE','LICENSE','ASSETS-LICENSE.md','art/ginger.json','art/ginger.bin.gz'];
-const target=new URL('../docs/purrviewer/runtime/5452da3/',import.meta.url),hashes={};
+ 'vendor/retrieviewer/puppy-frame-file.mjs','vendor/retrieviewer/puppy-frame-indexed.mjs','vendor/retrieviewer/LICENSE-CODE','LICENSE','ASSETS-LICENSE.md','ART.md','art/ginger.json','art/ginger.bin.gz'];
+const target=new URL('../docs/purrviewer/runtime/79a47c2/',import.meta.url),hashes={};
 for(const name of files){
  const bytes=execFileSync('git',['-C',source,'show',commit+':'+name],{maxBuffer:2_000_000});
  hashes[name]=createHash('sha256').update(bytes).digest('hex');

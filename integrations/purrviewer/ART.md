@@ -1,6 +1,6 @@
 # Cat art and motion review
 
-Current default: the owner-approved ginger identity and65-key ginger motion
+Current default: the owner-approved ginger identity and77-key ginger motion
 atlas described below. The tuxedo material is retained as historical source
 and is not fetched by the default renderer.
 
@@ -287,3 +287,26 @@ keys, timings, anatomy or source pixels were changed. The owner explicitly
 chose CC BY-SA 4.0 for the bundled ginger artwork, including its metadata and
 alternative encodings; code remains MIT. Research photographs and raw source
 sheets are not included in the public package.
+
+## Motion repair candidate · 2026-10-25
+
+The77-key candidate retains64 earlier drawings byte-exact and replaces only
+the stray-cat lowering key8. Seven grounded orientation keys, three airborne
+breakdowns and two local sleep variants are appended. The original curl2 is
+unchanged, and sleep patches preserve every thresholded silhouette pixel.
+Source sheets were generated with the built-in imagegen using the accepted
+cat drawings as inputs; no new photos or video frames were used. Whole-body
+registration uses a shared family scale and rigid offsets. The generated sleep
+fur/ear patches are offline local edits, not runtime warps.
+
+| Local source (ignored) | SHA-256 |
+|---|---|
+| ginger-lower-repair-v1.png | 5f8e22e17f08bb49d668ea1adf12938978bf7399eb03d851a0da140f27b34b07 |
+| ginger-yaw-v1.png | e87554521d27eba2f97a5ec9ae411fdf224d69d5a1181d1880b70947777dbda2 |
+| ginger-sleep-details-v1.png | 7e2c797ad3e510583af53da60c708a4b7e452491b2531ffe9167521536f70e21 |
+| ginger-jump-breakdowns-v1.png | fa46905d52110a94eafaa75d9920d1c92d0991ddd42741a4cb1d12c593dbf54b |
+
+Preparation: tools/prepare-motion-repairs.py and tools/rebuild-motion-repairs.mjs.
+Metadata includes source hashes and registration. Final aesthetic approval is
+separate from pixel-preservation and physical checks. Artwork remains under
+CC BY-SA4.0; raw source sheets are not included in the public package.

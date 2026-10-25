@@ -189,6 +189,14 @@ The puppy artwork was developed with AI-generated imagery and programmatic pose,
 grounding and frame processing. It is authored animation, not motion capture or
 a claim of sentience.
 
+## 0.0.21
+
+Cat turns now connect through standing poses before walking or pouncing. Jump
+breakdowns and small sleep-fur/ear changes add motion without enlarging the
+two-frame cache. A stray duplicate cat in one drawing is removed. Dog departure
+and return turns share standing endpoints, with the carried ball attached to
+the visible muzzle. Code remains MIT; both pets’ artwork is CC BY-SA4.0.
+
 ## 0.0.20
 
 Fixes Windows flicker introduced by the split-window painter. The whole scene

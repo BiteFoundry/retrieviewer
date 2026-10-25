@@ -89,8 +89,10 @@ test('website keeps bilingual current-release guidance and two primary install s
  const html=read('./docs/index.html'),app=read('./docs/app.mjs');
  const {version}=JSON.parse(read('./package.json'));
  assert.ok(html.includes(`npm · v${version}`));
- assert.ok(html.includes(`${version} · Fixed flickering on Windows`));
- assert.match(app,/Windows 화면 깜빡임을 고쳤어요/);
+ assert.ok(html.includes(`${version} · `));
+ const update=app.match(/latestUpdate:\s*['"]([^'"]+)/)?.[1];
+ assert.ok(update?.startsWith(`${version} · `));
+ assert.match(update,/[가-힣]/,'current-release guidance has a Korean translation');
  for(const key of ['desktopLanguage','latestUpdate']){
   assert.ok(html.includes(`data-i18n="${key}"`));
   assert.match(app,new RegExp(`\\n  ${key}:`));
