@@ -1,6 +1,6 @@
 {
   "name": "@bitefoundry/retrieviewer",
-  "version": "0.0.18",
+  "version": "0.0.19",
   "description": "A fluffy Braille desktop pet for Windows and Linux X11, with experimental macOS support and an embeddable TUI engine.",
   "license": "SEE LICENSE IN LICENSE",
   "homepage": "https://bitefoundry.github.io/retrieviewer/",
@@ -197,7 +197,10 @@
     "integrations/purrviewer/vendor/retrieviewer/puppy-frame-store.mjs",
     "integrations/purrviewer/vendor/retrieviewer/puppy-frame-file.mjs",
     "integrations/purrviewer/vendor/retrieviewer/puppy-frame-indexed.mjs",
-    "integrations/native-windows/application.manifest"
+    "integrations/native-windows/application.manifest",
+    "integrations/native-windows/paint-regions.hpp",
+    "integrations/native-windows/native-paint.hpp",
+    "SPARSE-PAINT.md"
   ],
   "scripts": {
     "bake:motion": "node tools/bake-pet-motion.mjs",

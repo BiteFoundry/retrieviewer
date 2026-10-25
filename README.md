@@ -189,6 +189,14 @@ The puppy artwork was developed with AI-generated imagery and programmatic pose,
 grounding and frame processing. It is authored animation, not motion capture or
 a claim of sentience.
 
+## 0.0.19
+
+Windows basic mode now splits distant content into small paint regions and
+reclaims oversized/hidden surfaces. Same pets, artwork and behavior. In real4K
+150s tests: dog median22.6MiB / OS peak36.5MiB; cat with tower/wheel29.5 /39.1MiB.
+Optional watching and other OS/browser hosts keep their separate memory scope.
+See [measurements and verification](SPARSE-PAINT.md).
+
 ## 0.0.18
 
 Windows x64 basic mode now runs one native process; Node exits after launch.

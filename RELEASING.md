@@ -1,4 +1,20 @@
-# Retrieviewer 0.0.18 release process
+# Retrieviewer 0.0.19 release process
+
+Current target: `@bitefoundry/retrieviewer@0.0.19`, public `latest`.
+The owner explicitly authorized npm and website deployment on2026-10-25.
+Ship the verified sparse Windows painter: bounded disjoint final-mask regions,
+reclaimable buffers, preserved artwork/behavior and existing compatibility modes.
+Keep code MIT and both artworks CC BY-SA4.0; no new generation inputs or assets.
+
+Existing evidence covers300 exact native paint frames,56 partition cases,
+real4K150s operating memory and owned-window shrink/hide/restore/switch/teardown.
+Run the suite/release gate, build and install a fresh exact tarball, exercise its
+actual native resources/picker, then publish that same artifact after CI.
+Verify registry integrity, fresh registry installation and production website.
+Keep website figures scoped to Windows basic mode; update EN/KO copy and cache
+keys together. Preserve old releases, the user's running pet and privacy setup.
+
+## Previous0.0.18 scope (historical)
 
 Current target: `@bitefoundry/retrieviewer@0.0.18`, public `latest`.
 The owner authorized immediate npm and website deployment of the lightweight

@@ -1,3 +1,14 @@
+# 0.0.19 sparse painter result
+
+Windows x64 basic mode retains one native process and splits sparse content
+into bounded cropped surfaces. In the same real4K150s schedule, dog median RSS
+was22.6MiB (OS peak36.5MiB); cat with tower/wheel29.5MiB (peak39.1MiB).
+Final masks and behavior are unchanged. No forced GC/trim; optional watching,
+other OS hosts and browser tabs are outside this memory claim. See
+[sparse paint evidence](SPARSE-PAINT.md) and [runtime scope](NATIVE-RUNTIME.md).
+
+## Previous0.0.18 native result (historical)
+
 # 0.0.18 native desktop result
 
 Windows x64 basic mode now uses a single QuickJS/Win32 process. In real4K

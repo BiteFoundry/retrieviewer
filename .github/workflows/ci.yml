@@ -39,3 +39,7 @@ jobs:
 
       - if: runner.os == 'Windows'
         run: node tools/check-native-picker.mjs
+      - if: runner.os == 'Windows'
+        run: node tools/check-native-resources.mjs
+      - if: runner.os == 'Windows'
+        run: node tools/check-native-paint.mjs

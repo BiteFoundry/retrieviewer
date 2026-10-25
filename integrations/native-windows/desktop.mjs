@@ -25,7 +25,10 @@ export async function startNativeDesktop(options={}){
  if(process.platform!=='win32'||process.arch!=='x64')throw Error('Native desktop currently requires Windows x64');
  await verifyNativeArtifact();const paths=await prepareRoot(options);await noLink(paths.session);
  const pipe=controlAddress({uuid:randomUUID()}),token=randomBytes(32).toString('hex');
- const child=spawn(fileURLToPath(binary),[fileURLToPath(bundle),fileURLToPath(new URL('../../',root)),'--production'],{detached:true,windowsHide:true,stdio:['pipe','pipe','pipe'],env:{...process.env,OPENROUTER_API_KEY:undefined}});
+ const args=[fileURLToPath(bundle),fileURLToPath(new URL('../../',root)),'--production'];
+ if(options.nativeDiagnostic&&options.nativeVerifyPaint)args.push('--verify-regions');
+ if(options.nativeDiagnostic&&options.nativeProofPath)args.push('--proof='+options.nativeProofPath);
+ const child=spawn(fileURLToPath(binary),args,{detached:true,windowsHide:true,stdio:['pipe','pipe','pipe'],env:{...process.env,OPENROUTER_API_KEY:undefined}});
  let owns=false,complete=false,stderr='';const session={owner:'bitefoundry-retrieviewer-overlay-v1',pid:child.pid,pipe,token};
  child.stderr.on('data',b=>stderr=(stderr+b.toString('utf8')).slice(-2048));child.stdin.on('error',()=>{});
  try{

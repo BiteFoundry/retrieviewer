@@ -4,13 +4,18 @@ import {mkdtemp,readFile,writeFile,cp,mkdir} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {randomUUID,randomBytes} from 'node:crypto';
-import {spawn} from 'node:child_process';
+import {spawn,execFileSync} from 'node:child_process';
 import {fileURLToPath} from 'node:url';
 import {verifyNativeArtifact} from './integrations/native-windows/desktop.mjs';
 import {startDesktop,desktopStatus,stopDesktop,readSession,requestSession,prepareRoot} from './integrations/windows-overlay/desktop.mjs';
 import {controlAddress} from './integrations/desktop/platform.mjs';
 import {getPetAssetFiles} from './retrieviewer.mjs';
 const windows=process.platform==='win32'&&process.arch==='x64';
+test('native partition covers masks once, limits surfaces and reclaims oversized buffers',{skip:!windows},()=>{
+ const executable=fileURLToPath(new URL('./integrations/native-windows/bin/win32-x64/retrieviewer-native.exe',import.meta.url));
+ const result=JSON.parse(execFileSync(executable,['--self-test-regions'],{encoding:'utf8',windowsHide:true,timeout:10000}));
+ assert.equal(result.passed,true);assert.ok(result.partitionCases>=50);assert.equal(result.coverageAndDisjointness,true);assert.equal(result.surfaceShrink,true);
+});
 test('shipped native files match the checked-in manifest; cat is separately licensed',async()=>{
  const manifest=await verifyNativeArtifact();assert.ok(manifest.files['bin/win32-x64/retrieviewer-native.exe'].bytes<2_000_000);
  const license=await readFile(new URL('./integrations/purrviewer/ASSETS-LICENSE.md',import.meta.url),'utf8');assert.match(license,/CC BY-SA 4.0/);

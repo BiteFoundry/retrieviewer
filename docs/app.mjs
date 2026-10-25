@@ -62,7 +62,7 @@ const ko = {
   runStep: "실행 → 앱 창 선택 → Attach 누르기",
   desktopLanguage: "데스크톱 창 선택창과 조작 메뉴는 영어로 표시됩니다.",
   latestUpdate:
-    '0.0.18 · 같은 강아지, 더 가벼운 Windows 엔진. 치즈 고양이도 데스크톱에 왔어요. <a href="https://github.com/BiteFoundry/retrieviewer/blob/main/RELEASING.md">변경 기록</a>',
+    '0.0.19 · Windows 메모리 사용량을 더 줄였어요. <a href="https://github.com/BiteFoundry/retrieviewer/blob/main/RELEASING.md">변경 기록</a>',
   copy: "복사",
   copied: "명령을 복사했어요.",
   copyFailed: "복사하지 못했어요. 위 명령을 직접 선택해 복사해 주세요.",
@@ -90,7 +90,7 @@ const ko = {
   wayland:
     "네이티브 Wayland·화면 없는 서버는 미지원이에요. 원격 X11/VNC는 그 원격 화면에서 동작하며 로컬 IDE와는 별개예요.",
   resource:
-    "Windows 기본 실행은 프로세스 하나만 써요. StackBite·LLM 감시는 메모리를 더 쓰는 호환 엔진, Linux는 Node·Python으로 실행됩니다. 4K 측정: 강아지 중앙값29MiB·최고40MiB, 고양이44MiB·65MiB. 창 크기와 동작에 따라 달라져요.",
+    "Windows 기본 실행은 프로세스 하나만 써요. StackBite·LLM 감시는 메모리를 더 쓰는 호환 엔진, Linux는 Node·Python으로 실행됩니다. 4K 측정(중앙값/최고): 강아지22.6/36.5MiB, 고양이29.5/39.1MiB. 창 크기와 동작에 따라 달라져요.",
   supportLink: "필요 조건과 실제 검증 범위 보기 ↗",
   goodbyeTitle: "헤어질 때도, 간단하게.",
   goodbyeBody:
@@ -277,7 +277,7 @@ async function load() {
   playing = false;
   cancelLoop();
   try {
-    const { createPet } = await import("./runtime/0.0.18/retrieviewer.mjs");
+    const { createPet } = await import("./runtime/0.0.19/retrieviewer.mjs");
     const next = await createPet({ seed: 731, returnStyle: $("#return-style").value });
     if (closed) {
       next.dispose();
@@ -318,7 +318,7 @@ $("#sleep-pose").addEventListener("change",async()=>{
   }
   study=key;playing=false;cancelLoop();syncControls();status('previewLoading');
   try{
-    const response=await fetch('./sleep-'+key+'.txt?v=0.0.18');
+    const response=await fetch('./sleep-'+key+'.txt?v=0.0.19');
     if(!response.ok)throw Error('Sleep preview HTTP '+response.status);
     const text=await response.text();if(request!==studyRequest||closed)return;
     art.textContent=text.replace(/^(?:\u2800*\n)+/,'').replace(/(?:\n\u2800*)+$/,'');

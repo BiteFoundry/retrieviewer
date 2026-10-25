@@ -1,4 +1,4 @@
-# Lightweight desktop runtime · 0.0.18
+# Lightweight desktop runtime · 0.0.19
 
 Windows x64 basic desktop mode runs the existing JavaScript pet behavior in
 QuickJS-NG, inside the same native process that paints the transparent window.
@@ -41,15 +41,15 @@ play/treat/attention or tower/wheel actions. No forced GC or working-set trimmin
 
 | Pet | Median RSS | Sampled maximum | OS lifetime peak |
 |---|---:|---:|---:|
-| Retriever |29.4MiB|39.3MiB|39.9MiB|
-| Ginger cat |44.2MiB|61.8MiB|65.3MiB|
+| Retriever |22.6MiB|35.3MiB|36.5MiB|
+| Ginger cat with tower/wheel |29.5MiB|34.6MiB|39.1MiB|
 
-The cat's scene also includes the tower and wheel. It is typically below50MiB
-in this measurement, but its peaks exceed50MiB; this is not a strict50MiB cap.
-The preceding Node/CLR dog had a sampled maximum170.7MiB on the same host.
-Raw evidence: dist/native-product-memory/{dog,cat,report}.json (local QA output).
-Reproduce with the measurement command below. Package/website figures are
-rounded; memory remains dependent on scene, window dimensions and OS behavior.
+Version0.0.19 uses up to8 disjoint cell-aligned paint regions inside the same
+process, reclaiming oversized/hidden surfaces. The preceding0.0.18 final run
+had medians29.4/44.2MiB and OS peaks40.3/65.4MiB for dog/cat respectively.
+See [sparse surface measurements](SPARSE-PAINT.md) for the matching workloads,
+pixel comparisons and CPU tradeoff. This is not a universal50MiB memory cap.
+Raw local evidence: dist/sparse-paint-memory/{dog,cat,report}.json.
 
 ## Scope
 
@@ -87,3 +87,9 @@ off-screen diagnostic windows, preserving an already-running user companion.
 The executable embeds the Windows UTF-8 process code-page manifest (Windows10
 1903+ /11) so QuickJS stdio also reads Korean/non-ASCII installation paths.
 A regression test launches both species from Korean bundle, art and state paths.
+
+## Sparse paint surfaces
+
+[Sparse paint regions](SPARSE-PAINT.md) preserve final masks while reducing
+empty bitmap space. Their HWNDs remain click-through and non-activating; no
+extra pet process, runtime dependency or animation asset is introduced.
