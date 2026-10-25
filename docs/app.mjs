@@ -90,7 +90,7 @@ const ko = {
   wayland:
     "네이티브 Wayland·화면 없는 서버는 미지원이에요. 원격 X11/VNC는 그 원격 화면에서 동작하며 로컬 IDE와는 별개예요.",
   resource:
-    "Windows 기본 실행은 프로세스 하나만 써요. StackBite·LLM 감시는 메모리를 더 쓰는 호환 엔진, Linux는 Node·Python으로 실행됩니다. 4K 측정(중앙값/최고): 강아지22.6/36.5MiB, 고양이29.5/39.1MiB. 창 크기와 동작에 따라 달라져요.",
+    "Windows 기본 실행은 프로세스 하나만 써요. StackBite·LLM 감시는 메모리를 더 쓰는 호환 엔진, Linux는 Node·Python으로 실행됩니다. 4K 측정(중앙값/최고): 강아지 22.6/36.5MiB, 고양이 29.5/39.1MiB. 창 크기와 동작에 따라 달라져요.",
   supportLink: "필요 조건과 실제 검증 범위 보기 ↗",
   goodbyeTitle: "헤어질 때도, 간단하게.",
   goodbyeBody:
