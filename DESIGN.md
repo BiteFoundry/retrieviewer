@@ -9,6 +9,7 @@ colors:
   line: "#303a32"
   leaf: "#c9e7b9"
   leaf-hover: "#e2f4d8"
+  cat: "#f1b66b"
 typography:
   display:
     fontFamily: "Manrope, 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif"
@@ -64,6 +65,14 @@ components:
   button-play-hover:
     backgroundColor: "{colors.leaf}"
     textColor: "{colors.ground}"
+  button-cat-start:
+    backgroundColor: "{colors.cat}"
+    textColor: "{colors.ground}"
+    rounded: "{rounded.control}"
+    padding: "10px 16px"
+  button-cat-start-hover:
+    backgroundColor: "{colors.ink}"
+    textColor: "{colors.ground}"
   button-subtle:
     backgroundColor: "transparent"
     textColor: "{colors.ink}"
@@ -96,7 +105,7 @@ components:
 
 The existing system gives the fluffy monochrome Braille retriever room to be seen. Near-black negative space, off-white text and pale leaf-green actions frame the approved Q5 artwork. Plain controls and generous section spacing keep the puppy and practical instructions readable.
 
-This document records the implementation in `docs/index.html`, `docs/style.css` and `docs/app.mjs`, grounded in PRODUCT.md and the current site brief. The North Star reuses the page's existing promise; it is not a new identity proposal.
+This document records the implementation in `docs/index.html`, `docs/style.css`, `docs/app.mjs` and `docs/purrviewer/demo.mjs`, grounded in PRODUCT.md and the current site brief. The North Star reuses the page's existing promise; it is not a new identity proposal. The ginger-cat canvas extends this world with a scoped Amber accent while retaining the retriever identity and installation flow.
 
 **Key Characteristics:**
 
@@ -107,12 +116,16 @@ This document records the implementation in `docs/index.html`, `docs/style.css` 
 
 ## Colors
 
-The palette is a dark green-tinted neutral field with one pale green action family. Frontmatter values match the CSS custom properties.
+The palette is a dark green-tinted neutral field with a pale green action family and a scoped ginger-cat accent. Frontmatter values match the CSS custom properties.
 
 ### Primary
 
 - **Leaf:** installation action, links, numbered steps, note headings and keyboard focus.
 - **Leaf hover:** brighter installation-action background on hover.
+
+### Secondary
+
+- **Amber (Cat):** the cat Start background and ginger scene ink. Start becomes Ink on hover; the existing Leaf focus and other action roles remain. Keep this accent scoped to Purrviewer.
 
 ### Neutral
 
@@ -137,6 +150,8 @@ The centered content width caps at 1240px, with a total viewport inset of 96px. 
 Desktop uses a two-column hero (0.9fr / 1.1fr), with aligned two-column information sections below. Section rules and substantial vertical padding organize the page. The inset note and support rows also use columns. At the mobile breakpoint, the hero, information sections and support rows stack; hero copy centers, the footer becomes a vertical flow and the GitHub header link hides. Language controls remain visible.
 
 The art stage is clipped and centered, with heights of 400px by default, 460px from 1550px, 340px at the tablet breakpoint and 320px on mobile. Play controls wrap. Commands can wrap anywhere and retain a separate copy action. Preserve these behaviors for Korean text and narrow screens.
+
+The cat section inherits the content width and wrapping controls. Its stage uses a 16:9 frame, with a minimum height (210px) on mobile. Fullscreen gives the stage the remaining space, keeps controls and status visible, and hides the introduction, availability note and terms link until exit.
 
 ## Elevation & Depth
 
@@ -165,6 +180,31 @@ The remote-display guidance is a Surface note with a Leaf heading and Muted expl
 ### Retriever preview
 
 The signature component is a real engine preview rendered as monochrome Braille text in JuliaMono. A still preview appears before the visitor requests play; runtime assets load on Play. Keep ball, treat, pause / resume, retry and polite status feedback connected to the engine's actual state. The artwork is hidden from text reading while the stage has a localized accessible description. Preserve the distinction between the browser preview and the installed window-following companion.
+
+### Purrviewer preview
+
+The signature cat component uses the approved ginger dot art, cat tower and
+exercise wheel on Ground. A static poster from the actual canvas scene precedes
+one live canvas; Start lazily imports the pinned runtime (`9da9e42`) and reveals
+the scene. Keep the Amber Start treatment, existing outlined action shapes and
+Leaf keyboard focus. The cat stays a browser preview with its own availability
+note and artwork-terms link.
+
+Five interaction buttons offer slow blink, treat, company, tower and wheel.
+Start, Pause / Resume and Full screen bring the initial total to eight buttons;
+Start hides after successful loading. Interaction buttons are disabled until running, and
+Pause remains available after loading. Labels, scene description, controls-group
+name and polite status feedback follow the existing document language, including
+loading, retry, unsupported-browser and fullscreen-unavailable states.
+
+Keep one backing canvas capped at one million pixels. Its scheduler targets
+8 fps at rest and 30 fps during action, suspends offscreen or when the document
+is hidden, preserves the instance across bfcache return, and disposes it on final
+exit. These bounds describe rendering behavior, not guaranteed memory or frame
+performance. Scheduling rechecks the stage's actual viewport intersection after
+input or resize; a passive scroll-boundary fallback reconciles delayed observer
+notifications and is removed on final disposal. Preserve the real scene and its
+proportions when fitting the stage.
 
 ### Website copy refresh (0.0.10)
 

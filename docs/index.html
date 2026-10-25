@@ -29,7 +29,7 @@
     <meta name="twitter:card" content="summary_large_image" />
     <link rel="canonical" href="https://bitefoundry.github.io/retrieviewer/" />
     <link rel="icon" href="./assets/icon.svg" type="image/svg+xml" />
-    <link rel="stylesheet" href="./style.css?v=0.0.16" />
+    <link rel="stylesheet" href="./style.css?v=0.0.16-cat-9da9e42" />
     <link
       rel="preload"
       href="./assets/fonts/Manrope.ttf"
@@ -45,6 +45,7 @@
       crossorigin
     />
     <script type="module" src="./app.mjs?v=0.0.16"></script>
+    <script type="module" src="./purrviewer/demo.mjs?v=9da9e42"></script>
   </head>
   <body>
     <a class="skip" href="#main" data-i18n="skip">Skip to content</a>
@@ -97,6 +98,7 @@
           <p class="quiet" data-i18n="noAccount">
             Runs locally, without an account or model API.
           </p>
+          <a class="text-link cat-jump" href="#purrviewer" data-cat-copy="meetCatLink">There is a cat here, too.</a>
         </div>
         <figure class="puppy-demo" id="demo">
           <div
@@ -217,6 +219,30 @@
             leaving your editor and terminal untouched.
           </p>
         </div>
+      </section>
+      <section class="cat-section wrap" id="purrviewer" aria-labelledby="cat-title">
+        <div class="section-title">
+          <h2 id="cat-title" data-cat-copy="catTitle">I made a cat, too.</h2>
+          <span class="muted">Purrviewer</span>
+        </div>
+        <p class="cat-intro" data-cat-copy="catIntro">A slow blink, a little kneading. Then off to the cat tower or exercise wheel.</p>
+        <div class="cat-stage" role="img" data-cat-label="scene">
+          <img class="cat-poster" src="./purrviewer/poster.png" width="1264" height="784" alt="" loading="lazy" />
+          <canvas class="cat-canvas" aria-hidden="true" hidden></canvas>
+        </div>
+        <div class="play-controls cat-controls" role="group" data-cat-label="controls">
+          <button type="button" class="button play" data-cat-start data-cat-copy="start">Meet the cat</button>
+          <button type="button" class="button" data-cat-action="greet" data-cat-copy="greet" disabled>Slow blink</button>
+          <button type="button" class="button" data-cat-action="treat" data-cat-copy="treat" disabled>Offer a treat</button>
+          <button type="button" class="button" data-cat-action="company" data-cat-copy="company" disabled>Keep me company</button>
+          <button type="button" class="button" data-cat-action="tower" data-cat-copy="tower" disabled>Cat tower</button>
+          <button type="button" class="button" data-cat-action="wheel" data-cat-copy="wheel" disabled>Exercise wheel</button>
+          <button type="button" class="button" data-cat-pause data-cat-copy="pause" disabled>Pause</button>
+          <button type="button" class="button" data-cat-full data-cat-copy="fullscreen">Full screen</button>
+        </div>
+        <p class="cat-status muted" role="status" aria-live="polite" data-cat-status>Meet the cat to begin. Nothing to install.</p>
+        <p class="quiet cat-note" data-cat-copy="catNote">Browser preview · Cat artwork loads when you start (about0.4MB). Desktop installation is not available yet.</p>
+        <a class="cat-terms quiet" href="./purrviewer/NOTICE.txt" data-cat-copy="catTerms">Cat demo credits & artwork terms</a>
       </section>
       <section
         class="install-section wrap"
@@ -443,7 +469,7 @@
             >Share feedback</a
           >
         </p>
-        <p data-i18n="licenses">Code MIT · Artwork CC BY-SA 4.0</p>
+        <p>Retrieviewer: <span data-i18n="licenses">Code MIT · Artwork CC BY-SA 4.0</span></p>
         <a
           href="https://github.com/BiteFoundry/retrieviewer/blob/main/ATTRIBUTION.md"
           data-i18n="credits"

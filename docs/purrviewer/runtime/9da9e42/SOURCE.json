@@ -1,0 +1,19 @@
+{
+  "project": "Purrviewer",
+  "commit": "9da9e428315126c6eb2a76e4a450e652c743937a",
+  "files": {
+    "src/purrviewer.mjs": "c74e993f756275578447fddc92f783f00dea106ed1548ba050ebe480d933f9dd",
+    "src/world.mjs": "a9ce791b1fc2c9b45eb58dd8a77223e3ae05afc3cb7e627c6a543f922c177753",
+    "src/walk-cycle.mjs": "bedf0faf4b470133cfbde0fa5119b27e9e8447fa2fd270416079cdd324b6dfa4",
+    "src/life.mjs": "5e6fcce8731883d548c2827314691b9762d683ab58810e96f458d6b357580b01",
+    "src/contact.mjs": "83daf495910d5741885532523e24d7c0a1de9511cf2bc1cd21683fdfc2629adb",
+    "src/habitat.mjs": "1208ee7330f6b4f37ecbc32ccbd55a6e519add836e3f04888f15ae2aa967b57a",
+    "vendor/retrieviewer/braille.mjs": "c932988b353e50dad8f9e4d5b01692bc61d369e72ebe6c069de19240ac9eac01",
+    "vendor/retrieviewer/puppy-frame-store.mjs": "e47a3e6040a30ae5263f09e5c7dc9af8d8070d655419265042216def13da3668",
+    "vendor/retrieviewer/puppy-frame-predictive.mjs": "2d004ccd7a0e13dddd30fb781b723219b906068ec42e884522851eae29c9c6d9",
+    "vendor/retrieviewer/LICENSE-CODE": "9efad605c3d72a713cd7f0e59afb664274ee934e75976e67e8069bde65ea7fe0",
+    "LICENSE": "8138b4f29dd09304be8cb9dcf3dc81a1941de26900514f77bef5e00c1acedc92",
+    "art/ginger.json": "fe13830036ccf0568c2f392b32769f1a49557fc717d0b1bd83f838b5b00b85c6",
+    "art/ginger.bin.gz": "b999ce67c7d02760b4beb179be1eec8506d44fb710116c3f6246f697db06584f"
+  }
+}

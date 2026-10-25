@@ -1,0 +1,10 @@
+Purrviewer browser demo, by BiteFoundry
+
+Runtime source: Purrviewer commit9da9e42. The pinned SOURCE.json lists hashes.
+Code: MIT; see runtime/9da9e42/LICENSE. Reused Retrieviewer code retains
+runtime/9da9e42/vendor/retrieviewer/LICENSE-CODE.
+
+The ginger-cat artwork is displayed here with the owner's authorization.
+No redistribution license for this cat artwork has been granted. The retriever
+artwork's CC BY-SA4.0 terms do not apply to these cat assets. The cat source
+sheets, research media and private project documents are not distributed here.
