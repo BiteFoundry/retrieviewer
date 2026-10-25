@@ -75,6 +75,7 @@ static JSValue blit(JSContext* c,JSValueConst,int argc,JSValueConst* a){try{
 int wmain(int argc,wchar_t** wideArgs){
  std::vector<std::string> argText;for(int i=0;i<argc;i++){int n=WideCharToMultiByte(CP_UTF8,0,wideArgs[i],-1,nullptr,0,nullptr,nullptr);std::string value(n,0);WideCharToMultiByte(CP_UTF8,0,wideArgs[i],-1,value.data(),n,nullptr,nullptr);value.pop_back();argText.push_back(value);}std::vector<char*> args;for(auto& text:argText)args.push_back(text.data());char** argv=args.data();
  if(argc==2&&std::string(argv[1])=="--self-test-regions")try{return NativePet::selfTestPaintRegions();}catch(const std::exception& e){fprintf(stderr,"%s\n",e.what());return 1;}
+ if(argc==2&&std::string(argv[1])=="--self-test-presentation")try{return NativePet::selfTestPaintPresentation();}catch(const std::exception& e){fprintf(stderr,"%s\n",e.what());return 1;}
  bool production=false;for(int i=1;i<argc;i++)if(std::string(argv[i])=="--production")production=true;std::string configuration;
  if(production){char ch;while(std::cin.get(ch)&&ch!='\n'){if(configuration.size()>=8192)return 2;configuration+=ch;}if(configuration.empty())return 2;}
  if(argc<2)return 2;JSRuntime* rt=JS_NewRuntime();js_std_init_handlers(rt);JSContext* ctx=JS_NewContext(rt);JS_SetModuleLoaderFunc2(rt,nullptr,js_module_loader,js_module_check_attributes,nullptr);js_init_module_std(ctx,"qjs:std");js_init_module_os(ctx,"qjs:os");js_std_add_helpers(ctx,argc-1,argv+1);

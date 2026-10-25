@@ -7,8 +7,8 @@
       "sha256": "e9da942dbe57ac778c44ea8f300e2e868face5e73b00ffcd4399aeb7e94ee09c"
     },
     "bin/win32-x64/retrieviewer-native.exe": {
-      "bytes": 1564672,
-      "sha256": "288150c7112c50214996174250ce71bfa4ffc91779c8ea899a47d85f4fef71dd"
+      "bytes": 1562624,
+      "sha256": "0844d0e5303938e11d3e57acb457d7f6df2f138ee84246ecdf006395055f0fba"
     }
   }
 }

@@ -8,6 +8,6 @@
   "artLicense": "CC-BY-SA-4.0",
   "approvalDate": "2026-10-25",
   "rightsReview": "ASSET-PROVENANCE.md",
-  "approvedRelease": "0.0.19",
-  "releaseScope": "Owner explicitly authorized npm and website deployment of the verified sparse Windows painter on 2026-10-25. Publish the exact fresh installed/native-tested artifact after CI. Preserve artwork, behavior, MIT code and CC BY-SA4.0 assets, optional watcher/brain compatibility, old releases and the running pet. Update bilingual website memory measurements with Windows-basic-only scope. No paid inference or real approvals."
+  "approvedRelease": "0.0.20",
+  "releaseScope": "Hotfix the reported Windows flicker regression in the previously authorized npm/site release: one coherent final-mask HWND, retained bounded buffer reclamation and unchanged pet art/behavior. Verify native presentation, exact pixels, package installation, CI and public registry. Update bilingual site with current Windows-basic-only memory evidence. Preserve old releases, existing running pet, MIT code and CC BY-SA4.0 assets. No paid inference or real approvals."
 }

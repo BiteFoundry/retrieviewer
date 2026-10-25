@@ -1,3 +1,56 @@
+# Coherent native painting · 0.0.20
+
+The 0.0.19 sparse-window optimization is superseded. Per-frame pixel comparison
+passed, but a moving scene could change its partition and destroy/reposition
+multiple HWNDs at different compositor moments. The owner reported visible
+flicker. Preparing all DIBs first did not make those window updates atomic.
+
+Version 0.0.20 paints the complete final mask into one cropped layered window.
+`UpdateLayeredWindow` uploads all pixels, position and size together. The same
+HWND survives movement and crop changes. Visibility is changed only when first
+shown; there is no extra per-frame `SetWindowPos` after upload. No animal assets,
+anatomy, motion, Braille masks or optional integrations changed.
+
+The 256-mask stamp atlas and one-process QuickJS host remain. Capacity still
+shrinks when it exceeds twice the rounded target area; hidden/minimized scenes
+release their surface and window. The tradeoff is one bounding bitmap spanning
+distant furniture: memory can exceed the regressed split-painter measurements.
+Those old numbers below must not be presented as current measurements.
+
+## Verification
+
+- Real Win32 presentation regression: 128 changing/disjoint scenes retain one
+  visible HWND, with exact full-scene BGRA pixels; hidden resources release.
+- Native mask/capacity tests: 56 grids across seven cell sizes.
+- Real moving dog/cream, cat/gold and cat/dark: 301 exact paint comparisons.
+- Owned 4K -> small -> 4K, minimize/restore and same-process species switching.
+  DIB capacity shrank from 12.22 to 1.50 MiB and reached zero when minimized.
+
+Reproduce with `node --test native-desktop.test.mjs`,
+`node tools/check-native-paint.mjs` and `node tools/check-native-resources.mjs`.
+This checks actual window lifetime and upload coherence as well as image bytes;
+finite pixel/lifetime checks are not a claim that every display was observed.
+
+## Current memory measurement
+
+Same Windows x64 host, owned off-screen 3840x2160 target, real native painter,
+seed731 and 150s action schedule, 300 roughly half-second samples per pet
+(157.5/156.9s wall time). Watch/brain off; no forced GC or working-set trim.
+Harness and external DWM/GPU allocations are excluded.
+
+| Pet | Median RSS | Sampled maximum | OS lifetime peak |
+|---|---:|---:|---:|
+| Retriever |22.9MiB|37.9MiB|38.7MiB|
+| Cat with tower/wheel |44.4MiB|64.6MiB|65.5MiB|
+
+Cat furniture spans a large bounding bitmap again. This restores coherent
+presentation at a higher RAM cost than 0.0.19; it is not a universal 50MiB cap.
+Both owned processes stopped and removed their sessions. Raw local evidence:
+`dist/coherent-paint-memory/{dog,cat,report}.json`. Full suite:244 passed,
+two macOS-only tests skipped on Windows. No artwork or motion change.
+
+## Superseded 0.0.19 experiment (historical)
+
 # Sparse Windows paint surfaces · 0.0.19
 
 Version0.0.19 builds on0.0.18. JavaScript behavior, Q5 art, world/contact math, colors and

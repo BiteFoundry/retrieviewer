@@ -46,7 +46,7 @@ static void verifyPaint(const std::vector<uint8_t>& masks,int columns,const PetP
   static const int dx[]={0,0,0,1,1,1,0,1},dy[]={0,1,2,0,1,2,3,3};float step=cell/2.f,diameter=std::max(1.1f,step*.48f);
   for(int y=all.top;y<all.bottom;y++)for(int x=all.left;x<all.right;x++){int mask=masks[(size_t)y*columns+x];for(int bit=0;bit<8;bit++)if(mask&(1<<bit)){float px=(x-all.left)*cell+(dx[bit]+.5f)*step,py=(y-all.top)*cell*2+(dy[bit]+.5f)*step;g.FillEllipse(&brush,px-diameter/2,py-diameter/2,diameter,diameter);}}g.Flush(Gdiplus::FlushIntentionSync);
  }
- if(reference!=assemble(all,cell))throw std::runtime_error("Partitioned dots changed pixels");verifiedPaints++;
+ if(reference!=assemble(all,cell))throw std::runtime_error("Native dots changed pixels");verifiedPaints++;
  if(!atlasVerified){printf("{\"stage\":\"dot-atlas-verified\",\"pixelExact\":true,\"regions\":%zu}\n",paintCount());fflush(stdout);}atlasVerified=true;
 }
 static void paint(const std::string& text,int columns,int rows,int cell,POINT canvas){
@@ -66,10 +66,11 @@ static void paint(const std::string& text,int columns,int rows,int cell,POINT ca
  for(size_t i=regions.size();i<panels.size();i++)panels[i].release();
  if(verifyAtlas&&(!atlasVerified||verifyEveryPaint))verifyPaint(masks,columns,all,cell);
  if(saveProof&&!proofSaved){const int w=all.width()*cell,h=all.height()*cell*2;auto image=assemble(all,cell);Gdiplus::Bitmap source(w,h,w*4,PixelFormat32bppPARGB,image.data()),proof(w,h,PixelFormat32bppARGB);Gdiplus::Graphics pg(&proof);pg.Clear(Gdiplus::Color(255,0,0,0));pg.DrawImage(&source,Gdiplus::Rect(0,0,w,h),0,0,w,h,Gdiplus::UnitPixel);pg.Flush(Gdiplus::FlushIntentionSync);CLSID png={0x557cf406,0x1a04,0x11d3,{0x9a,0x73,0x00,0x00,0xf8,0x1e,0xf3,0x2e}};if(proof.Save(wide(proofPath).c_str(),&png,nullptr)!=Gdiplus::Ok)throw std::runtime_error("PNG proof failed");proofSaved=true;}
- // Prepare every region before uploading any. The disjoint cell boundaries
- // neither duplicate alpha nor clip a glyph; all share the same source frame.
+ // The complete scene (pet, ball and furniture) has exactly one HWND.
+ // UpdateLayeredWindow changes its pixels, size and position in one call.
+ // Do not add another per-frame SetWindowPos/show: it exposes separate state.
  HDC screen=GetDC(nullptr);BLENDFUNCTION blend={AC_SRC_OVER,0,255,AC_SRC_ALPHA};POINT origin={0,0};
- for(size_t i=0;i<regions.size();i++){auto& p=panels[i];POINT destination={canvas.x+p.crop.left*cell,canvas.y+p.crop.top*cell*2};SIZE size={p.crop.width()*cell,p.crop.height()*cell*2};BOOL ok=UpdateLayeredWindow(p.window,screen,&destination,&size,p.surface.dc,&origin,0,&blend,ULW_ALPHA);if(!ok){ReleaseDC(nullptr,screen);throw std::runtime_error("Native layered update");}SetWindowPos(p.window,HWND_TOPMOST,destination.x,destination.y,size.cx,size.cy,SWP_NOACTIVATE|SWP_SHOWWINDOW);}
+ for(size_t i=0;i<regions.size();i++){auto& p=panels[i];POINT destination={canvas.x+p.crop.left*cell,canvas.y+p.crop.top*cell*2};SIZE size={p.crop.width()*cell,p.crop.height()*cell*2};BOOL ok=UpdateLayeredWindow(p.window,screen,&destination,&size,p.surface.dc,&origin,0,&blend,ULW_ALPHA);if(!ok){ReleaseDC(nullptr,screen);throw std::runtime_error("Native layered update");}if(!IsWindowVisible(p.window))ShowWindow(p.window,SW_SHOWNOACTIVATE);}
  ReleaseDC(nullptr,screen);painted++;
 }
 static int selfTestPaintRegions(){
@@ -77,10 +78,39 @@ static int selfTestPaintRegions(){
  for(int cell:{6,8,10,12,16,24,32})for(int type=0;type<8;type++){
   const int cols=type==7?1000:240,rows=type==7?125:90;std::vector<uint8_t> masks((size_t)cols*rows);
   for(int y=0;y<rows;y++)for(int x=0;x<cols;x++){bool on=type==1||type==2&&x%61==0||type==3&&y%31==0||type==4&&(x<20||x>cols-30)&&y>10||type==5&&(next()%100<4)||type==6&&((x-cols/2)*(x-cols/2)+(y-rows/2)*(y-rows/2)<900)||type==7&&x%97<3&&y%17<2;if(on)masks[(size_t)y*cols+x]=(uint8_t)(1+next()%255);}
-  const auto regions=PetPaint::partition(masks,cols,rows,cell);if(regions.size()>PetPaint::MaxRegions)throw std::runtime_error("Region count overflow");std::vector<uint8_t> seen(masks.size(),0);PetPaint::Rect all;uint64_t bytes=0;
+  const auto regions=PetPaint::partition(masks,cols,rows,cell);if(regions.size()>PetPaint::MaxRegions)throw std::runtime_error("Non-atomic scene partition");std::vector<uint8_t> seen(masks.size(),0);PetPaint::Rect all;uint64_t bytes=0;
   for(const auto& r:regions){if(r.empty()||r.left<0||r.top<0||r.right>cols||r.bottom>rows)throw std::runtime_error("Region outside grid");all.include(r);bytes+=PetPaint::bytes(r,cell);for(int y=r.top;y<r.bottom;y++)for(int x=r.left;x<r.right;x++)if(++seen[(size_t)y*cols+x]!=1)throw std::runtime_error("Overlapping paint regions");}
   for(size_t i=0;i<masks.size();i++)if(masks[i]&&seen[i]!=1)throw std::runtime_error("Missing mask cell");if(bytes>PetPaint::bytes(all,cell))throw std::runtime_error("Partition grew allocation");checks++;
  }
  Surface s;s.ensure(2048,1024);const auto big=s.bytes();s.ensure(1800,900);if(s.bytes()!=big)throw std::runtime_error("Surface churn on small size change");s.ensure(96,64);if(s.bytes()>(uint64_t)128*64*4*2)throw std::runtime_error("Surface did not shrink");s.release();if(s.bytes()!=0)throw std::runtime_error("Surface did not release");
  printf("{\"passed\":true,\"partitionCases\":%zu,\"coverageAndDisjointness\":true,\"surfaceShrink\":true}\n",checks);return 0;
+}
+
+// Real Win32 regression: moving/disjoint masks must retain one display window.
+// Byte equality alone did not catch the multi-HWND presentation regression.
+static int selfTestPaintPresentation(){
+ Gdiplus::GdiplusStartupInput input;ULONG_PTR token=0;
+ if(Gdiplus::GdiplusStartup(&token,&input,nullptr)!=Gdiplus::Ok)throw std::runtime_error("Presentation GDI+ startup");
+ WNDCLASS wc{};wc.lpfnWndProc=DefWindowProc;wc.hInstance=GetModuleHandle(nullptr);wc.lpszClassName=L"RetrieviewerNativeDots";RegisterClass(&wc);
+ const int columns=240,rows=90,cell=8;HWND first=nullptr;size_t checked=0;
+ verifyAtlas=verifyEveryPaint=atlasVerified=true;
+ try{
+  for(int frame=0;frame<128;frame++){
+   std::string text;
+   for(int y=0;y<rows;y++){if(y)text+='\n';for(int x=0;x<columns;x++){
+    bool pet=x>=20+frame%81&&x<55+frame%81&&y>=20&&y<65;
+    bool object=frame%3!=0&&x>=200-frame%13&&x<210-frame%13&&y>=5&&y<30;
+    unsigned ch=0x2800+(pet||object?1+(x+y+frame)%255:0);
+    text+=(char)(0xe0|(ch>>12));text+=(char)(0x80|((ch>>6)&63));text+=(char)(0x80|(ch&63));
+   }}
+   paint(text,columns,rows,cell,POINT{-12000,-12000});
+   if(paintCount()!=1||!IsWindowVisible(panels[0].window))throw std::runtime_error("Scene lost coherent visible window");
+   if(!first)first=panels[0].window;
+   if(panels[0].window!=first)throw std::runtime_error("Moving scene recreated its display window");
+   checked++;
+  }
+  hidePanels();if(paintCount()!=0||paintBytes()!=0)throw std::runtime_error("Hidden scene retained paint resources");
+ }catch(...){releasePanels();atlas.pixels.clear();Gdiplus::GdiplusShutdown(token);throw;}
+ atlas.pixels.clear();Gdiplus::GdiplusShutdown(token);
+ printf("{\"passed\":true,\"frames\":%zu,\"singleWindow\":true,\"stableWindow\":true,\"pixelExact\":true,\"hiddenResourcesReleased\":true}\n",checked);return 0;
 }

@@ -1,4 +1,4 @@
-# Lightweight desktop runtime · 0.0.19
+# Lightweight desktop runtime · 0.0.20
 
 Windows x64 basic desktop mode runs the existing JavaScript pet behavior in
 QuickJS-NG, inside the same native process that paints the transparent window.
@@ -41,15 +41,14 @@ play/treat/attention or tower/wheel actions. No forced GC or working-set trimmin
 
 | Pet | Median RSS | Sampled maximum | OS lifetime peak |
 |---|---:|---:|---:|
-| Retriever |22.6MiB|35.3MiB|36.5MiB|
-| Ginger cat with tower/wheel |29.5MiB|34.6MiB|39.1MiB|
+| Retriever |22.9MiB|37.9MiB|38.7MiB|
+| Ginger cat with tower/wheel |44.4MiB|64.6MiB|65.5MiB|
 
-Version0.0.19 uses up to8 disjoint cell-aligned paint regions inside the same
-process, reclaiming oversized/hidden surfaces. The preceding0.0.18 final run
-had medians29.4/44.2MiB and OS peaks40.3/65.4MiB for dog/cat respectively.
-See [sparse surface measurements](SPARSE-PAINT.md) for the matching workloads,
-pixel comparisons and CPU tradeoff. This is not a universal50MiB memory cap.
-Raw local evidence: dist/sparse-paint-memory/{dog,cat,report}.json.
+Version 0.0.20 uses one cropped layered window for the complete scene. This
+fixes flicker from the 0.0.19 multi-window painter; its lower memory figures are
+superseded. Buffer shrinking and hidden-state cleanup remain. See the
+[presentation fix](SPARSE-PAINT.md). These finite measurements do not establish
+a universal 50 MiB memory cap. Raw evidence: dist/coherent-paint-memory/.
 
 ## Scope
 
@@ -88,8 +87,9 @@ The executable embeds the Windows UTF-8 process code-page manifest (Windows10
 1903+ /11) so QuickJS stdio also reads Korean/non-ASCII installation paths.
 A regression test launches both species from Korean bundle, art and state paths.
 
-## Sparse paint surfaces
+## Coherent scene presentation
 
-[Sparse paint regions](SPARSE-PAINT.md) preserve final masks while reducing
-empty bitmap space. Their HWNDs remain click-through and non-activating; no
-extra pet process, runtime dependency or animation asset is introduced.
+[One complete-scene upload](SPARSE-PAINT.md) keeps the final pet, props and
+furniture in the same HWND. That window stays click-through and non-activating.
+The 128-frame presentation regression checks window identity, full-frame pixel
+parity and hidden-resource release separately from pet-core pixel parity.

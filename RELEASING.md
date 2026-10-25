@@ -1,4 +1,21 @@
-# Retrieviewer 0.0.19 release process
+# Retrieviewer 0.0.20 release process
+
+Current target: `@bitefoundry/retrieviewer@0.0.20`, public `latest`.
+Hotfix for the reported flicker in the previously authorized npm/site release.
+Replace the dynamically repartitioned HWNDs with one complete-scene layered
+window and one pixel/position/size upload. Keep stamp caching, indexed art,
+buffer shrinking and hidden-state release. Artwork and pet behavior are unchanged.
+
+Verify moving/disjoint masks keep one stable window, exact native paint pixels,
+resize/hide/restore/switch/teardown, full suite and fresh installed artifact.
+Publish that same tested tarball after CI, verify registry integrity and a fresh
+consumer, then confirm the matching bilingual website. Memory figures must
+come from this version, not the regressed sparse painter. Existing code/art
+licenses, optional integrations, user pet and privacy setup are preserved.
+
+## Previous 0.0.19 scope (historical; presentation regression)
+
+### Retrieviewer 0.0.19 release process
 
 Current target: `@bitefoundry/retrieviewer@0.0.19`, public `latest`.
 The owner explicitly authorized npm and website deployment on2026-10-25.

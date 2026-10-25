@@ -11,11 +11,17 @@ import {startDesktop,desktopStatus,stopDesktop,readSession,requestSession,prepar
 import {controlAddress} from './integrations/desktop/platform.mjs';
 import {getPetAssetFiles} from './retrieviewer.mjs';
 const windows=process.platform==='win32'&&process.arch==='x64';
-test('native partition covers masks once, limits surfaces and reclaims oversized buffers',{skip:!windows},()=>{
+test('native scene uses one crop and reclaims oversized buffers',{skip:!windows},()=>{
  const executable=fileURLToPath(new URL('./integrations/native-windows/bin/win32-x64/retrieviewer-native.exe',import.meta.url));
  const result=JSON.parse(execFileSync(executable,['--self-test-regions'],{encoding:'utf8',windowsHide:true,timeout:10000}));
  assert.equal(result.passed,true);assert.ok(result.partitionCases>=50);assert.equal(result.coverageAndDisjointness,true);assert.equal(result.surfaceShrink,true);
 });
+test('native moving scenes keep one stable visible HWND and exact full-frame pixels',{skip:!windows},()=>{
+ const executable=fileURLToPath(new URL('./integrations/native-windows/bin/win32-x64/retrieviewer-native.exe',import.meta.url));
+ const result=JSON.parse(execFileSync(executable,['--self-test-presentation'],{encoding:'utf8',windowsHide:true,timeout:20000}));
+ assert.equal(result.passed,true);assert.equal(result.frames,128);assert.equal(result.singleWindow,true);assert.equal(result.stableWindow,true);assert.equal(result.pixelExact,true);assert.equal(result.hiddenResourcesReleased,true);
+});
+
 test('shipped native files match the checked-in manifest; cat is separately licensed',async()=>{
  const manifest=await verifyNativeArtifact();assert.ok(manifest.files['bin/win32-x64/retrieviewer-native.exe'].bytes<2_000_000);
  const license=await readFile(new URL('./integrations/purrviewer/ASSETS-LICENSE.md',import.meta.url),'utf8');assert.match(license,/CC BY-SA 4.0/);

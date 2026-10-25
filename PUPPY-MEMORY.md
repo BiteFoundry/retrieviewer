@@ -1,3 +1,17 @@
+# 0.0.20 coherent scene painter
+
+The complete scene now updates through one native layered window to fix the
+0.0.19 flicker regression. Buffer shrinking, hidden-state release, stamp atlas
+and indexed art loading remain; no art or pet behavior changed. Distant cat
+furniture can enlarge the one bounding surface. The 0.0.19 figures below are
+historical and must not describe the current version. See
+[presentation evidence](SPARSE-PAINT.md) and [current measurements](NATIVE-RUNTIME.md).
+
+Real 4K 150s measurements: dog median22.9MiB / OS peak38.7MiB; cat with
+tower/wheel44.4 /65.5MiB. Watch/brain off, no forced GC/trim; not a hard cap.
+
+## Superseded 0.0.19 result (presentation regression)
+
 # 0.0.19 sparse painter result
 
 Windows x64 basic mode retains one native process and splits sparse content

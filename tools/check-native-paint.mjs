@@ -1,4 +1,4 @@
-// Compare real disjoint native panels against the old monolithic GDI+ drawing.
+// Compare coherent full-scene native painting against the old monolithic GDI+ drawing.
 import {mkdir,mkdtemp,writeFile} from 'node:fs/promises';
 import {join} from 'node:path';
 import {fileURLToPath,pathToFileURL} from 'node:url';
@@ -11,7 +11,7 @@ for(const [pet,ink] of [['dog','cream'],['cat','gold'],['cat','dark']]){
  try{
   started=await startDesktop(options);let status;
   for(let i=0;i<30;i++){await new Promise(r=>setTimeout(r,200));status=await desktopStatus(options);assert.equal(status.pid,started.pid);assert.equal(status.engine,'quickjs-native');}
-  assert.ok(status.paintVerificationCount>=2);assert.ok(status.paintRegionCount>0&&status.paintRegionCount<=8);
+  assert.ok(status.paintVerificationCount>=2);assert.ok(status.paintRegionCount===1);
   reports.push({pet,ink,verifiedFrames:status.paintVerificationCount,paintRegions:status.paintRegionCount,surfaceMiB:status.paintSurfaceBytes/1048576,proof:options.nativeProofPath});
  }finally{if(started)await stopDesktop(options);assert.deepEqual(await desktopStatus(options),{running:false});}
 }

@@ -189,7 +189,14 @@ The puppy artwork was developed with AI-generated imagery and programmatic pose,
 grounding and frame processing. It is authored animation, not motion capture or
 a claim of sentience.
 
-## 0.0.19
+## 0.0.20
+
+Fixes Windows flicker introduced by the split-window painter. The whole scene
+updates through one stable transparent window again; buffer shrinking and
+hidden-state cleanup remain. Artwork and behavior are unchanged.
+See [presentation fix and measurements](SPARSE-PAINT.md).
+
+## 0.0.19 (historical; superseded by flicker fix)
 
 Windows basic mode now splits distant content into small paint regions and
 reclaims oversized/hidden surfaces. Same pets, artwork and behavior. In real4K

@@ -12,7 +12,7 @@ const options={stateDir:join(out,'owned-state'),pet:'cat',nativeDiagnostic:true}
 const poll=async test=>{for(let i=0;i<60;i++){const s=await desktopStatus(options);if(test(s))return s;await new Promise(r=>setTimeout(r,50));}throw Error('Native resource state did not settle');};
 try{
  await receive();started=await startDesktop(options);const pid=started.pid,big=await poll(s=>s.paintSurfaceBytes>0);
- assert.ok(big.paintRegionCount>1&&big.paintRegionCount<=8);assert.equal((await command({op:'native-panels',pid})).panels,big.paintRegionCount);
+ assert.ok(big.paintRegionCount===1);assert.equal((await command({op:'native-panels',pid})).panels,big.paintRegionCount);
  await command({op:'native-resize',pid,width:1280,height:800});const small=await poll(s=>s.paintSurfaceBytes>0&&s.paintSurfaceBytes<big.paintSurfaceBytes*.6);
  await command({op:'native-minimize',pid});await poll(s=>!s.visible&&s.paintSurfaceBytes===0&&s.paintRegionCount===0);assert.equal((await command({op:'native-panels',pid})).panels,0);
  await command({op:'native-restore',pid});await poll(s=>s.visible&&s.paintSurfaceBytes>0);
