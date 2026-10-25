@@ -83,3 +83,7 @@ and titles, not screen content or keyboard input. Watch/brain remain opt-in.
 QA: `node --test native-desktop.test.mjs`, `npm run check:native-pixels`, and
 `node tools/measure-native-pet.mjs 150`. These use isolated state and owned
 off-screen diagnostic windows, preserving an already-running user companion.
+
+The executable embeds the Windows UTF-8 process code-page manifest (Windows10
+1903+ /11) so QuickJS stdio also reads Korean/non-ASCII installation paths.
+A regression test launches both species from Korean bundle, art and state paths.

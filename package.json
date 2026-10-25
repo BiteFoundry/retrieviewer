@@ -196,7 +196,8 @@
     "integrations/purrviewer/vendor/retrieviewer/puppy-frame-predictive.mjs",
     "integrations/purrviewer/vendor/retrieviewer/puppy-frame-store.mjs",
     "integrations/purrviewer/vendor/retrieviewer/puppy-frame-file.mjs",
-    "integrations/purrviewer/vendor/retrieviewer/puppy-frame-indexed.mjs"
+    "integrations/purrviewer/vendor/retrieviewer/puppy-frame-indexed.mjs",
+    "integrations/native-windows/application.manifest"
   ],
   "scripts": {
     "bake:motion": "node tools/bake-pet-motion.mjs",
