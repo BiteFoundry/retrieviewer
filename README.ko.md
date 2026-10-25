@@ -108,6 +108,9 @@ npm uninstall -g @bitefoundry/retrieviewer
 
 ## StackBite 알림
 
+0.0.17은 기존 그림과 움직임을 유지하고, 기본 로컬 Node 실행에서 필요한 그림만
+파일에서 읽어요. [메모리 측정 기록](PUPPY-MEMORY.md)을 참고하세요.
+
 0.0.16은 앞발로 살살 부르기와 두 발로 서서 벽 박박 긁기를 번갈아 보여줘요.
 홈페이지에서도 두 동작을 눌러볼 수 있어요. Windows의 npm 설치형 StackBite도
 감시할 수 있게 했어요. 작업 완료 체크표시는 아직 알림 대상이 아니에요.

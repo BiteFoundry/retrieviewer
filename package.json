@@ -1,6 +1,6 @@
 {
   "name": "@bitefoundry/retrieviewer",
-  "version": "0.0.16",
+  "version": "0.0.17",
   "description": "A fluffy Braille desktop pet for Windows and Linux X11, with experimental macOS support and an embeddable TUI engine.",
   "license": "SEE LICENSE IN LICENSE",
   "homepage": "https://bitefoundry.github.io/retrieviewer/",
@@ -142,26 +142,29 @@
     "puppy-continuous.mjs",
     "puppy-zoomies.mjs",
     "puppy-zoomies30.mjs",
-    "puppy-stride-tweens-q5.bin.gz",
+    "puppy-stride-tweens-q5.rvz",
     "puppy-stride-meta.json",
     "puppy-stable-meta.json",
-    "puppy-paper-rear-gallop-q5.bin.gz",
+    "puppy-paper-rear-gallop-q5.rvz",
     "puppy-paper-rear-gallop.json",
-    "puppy-paper-approach-q5.bin.gz",
+    "puppy-paper-approach-q5.rvz",
     "puppy-paper-approach.json",
-    "puppy-paper-seat-q5.bin.gz",
+    "puppy-paper-seat-q5.rvz",
     "puppy-paper-seat.json",
-    "puppy-paper-arrival-seat-q5.bin.gz",
+    "puppy-paper-arrival-seat-q5.rvz",
     "puppy-paper-arrival-seat.json",
-    "puppy-paper-behaviors-q5.bin.gz",
+    "puppy-paper-behaviors-q5.rvz",
     "puppy-paper-behaviors.json",
-    "puppy-paper-actions-v9-q5.bin.gz",
+    "puppy-paper-actions-v9-q5.rvz",
     "puppy-paper-actions-v9.json",
-    "puppy-companion-interactions-v3-q5.bin.gz",
+    "puppy-companion-interactions-v3-q5.rvz",
     "puppy-companion-interactions-v3.json",
-    "puppy-companion-comfort-q5.bin.gz",
+    "puppy-companion-comfort-q5.rvz",
     "puppy-companion-comfort.json",
-    "vendor/procedural-animals/LICENSE"
+    "vendor/procedural-animals/LICENSE",
+    "puppy-frame-indexed.mjs",
+    "puppy-frame-file.mjs",
+    "pet-indexed-manifest.json"
   ],
   "scripts": {
     "bake:motion": "node tools/bake-pet-motion.mjs",
@@ -173,7 +176,9 @@
     "test": "node --test",
     "test:package": "node check-pet-package.mjs",
     "release:check": "npm run check:motion && node tools/check-release.mjs",
-    "prepublishOnly": "npm run release:check"
+    "prepublishOnly": "npm run release:check",
+    "bake:art-index": "node tools/index-pet-art.mjs",
+    "check:art-index": "node tools/index-pet-art.mjs --check"
   },
   "dependencies": {
     "jsonc-parser": "3.3.1"

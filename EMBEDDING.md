@@ -52,10 +52,16 @@ Redirected stdout prints one plain frame and exits.
 ## Assets / original option
 
 Default files resolve against the module URL, never cwd (lazy Node fs or browser
-HTTP fetch). getPetAssetFiles(profile?) returns exactly18 filenames:8 compressed
-bundles plus metadata and animal. Copy these without transforming bytes for
-bundlers. Loader returns ArrayBuffer/typed bytes; .gz must remain compressed,
-not transparently decompressed by HTTP Content-Encoding.
+HTTP fetch). getPetAssetFiles(profile?) returns 19 filenames: nine art archives
+plus ten metadata files. Copy these unchanged for bundlers. The default Q5 files
+use `.rvz`, an index followed by individually gzip-compressed crops. A custom
+loader returns the original ArrayBuffer/typed bytes, without unpacking the archive.
+
+Local Node hosts using the default loader read only the indices at creation and
+read/decode requested crops synchronously into a two-frame cache per family.
+There is no background loader or extra process. The final pet's `dispose()` closes
+the shared files. Custom loaders and browsers use the portable memory-backed
+store; they do not receive the local file-backed memory reduction.
 
 ```js
 import {createPet,getPetAssetFiles} from '@bitefoundry/retrieviewer';
@@ -74,11 +80,11 @@ They are **not bundled** in the small distribution. For external original art,
 copy getPetAssetFiles('original') from the workspace and supply loadAsset. Missing
 originals fail clearly, never silently fall back.
 
-Q5 is lossy quantization (max source-pixel error4/255), not lossless compression.
-Art gzip18.7MB versus54.2MB original; resident packed pixels66.5MB.
-One Windows Node sample:172MB RSS after rendering, startup737ms, mean frame2.61ms
-at160×50. Samples, not guarantees. Node/Three remain runtime costs.
-See [PUPPY-Q5-COMPARISON.md](./PUPPY-Q5-COMPARISON.md).
+Q5 is lossy quantization (max original-source pixel error 4/255). The indexed
+repack is lossless relative to the approved Q5 art: all 2,401 logical frames and
+their timing remain unchanged. The nine indexed archives total 19,326,068 bytes;
+their indices total 54,040 bytes. No Three.js dependency runs in the pet core.
+See [PUPPY-MEMORY.md](./PUPPY-MEMORY.md) for measured costs and host limitations.
 
 ## JSONL bridge (Python/Rust/other process hosts)
 

@@ -141,6 +141,9 @@ Version 0.0.15 alerts without waiting for the model, shows the Seat name and
 pending kind locally on Windows, and lets the puppy approach before looking
 toward the sidebar. It reuses existing artwork; names never enter model input.
 
+Version 0.0.17 keeps the same artwork and motion while loading only requested
+frames from disk in the default local Node host. See [memory measurements](PUPPY-MEMORY.md).
+
 Version 0.0.16 adds two approved attention gestures: a gentle seated paw and a
 standing two-paw glass scrabble. They alternate for new alerts; both are playable
 in the website demo. Windows watching also supports npm's PowerShell launcher.

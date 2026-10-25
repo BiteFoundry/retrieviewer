@@ -5,6 +5,7 @@ import {createSnappyTrickTimings} from './puppy-paper-trick-timing.mjs';
 import {createCompanionLife,FETCH_RETURN_STYLES} from './puppy-companion-life.mjs';
 import {paintCompanionObjects} from './puppy-companion-objects.mjs';
 import {readPackedFrames} from './puppy-frame-store.mjs';
+import {expandIndexedArchive} from './puppy-frame-indexed.mjs';
 import {BAKED_MOTION} from './puppy-motion-tables.generated.mjs';
 
 // Embeddable autonomous puppy. Importing or creating has no DOM, timer, stdin/stdout
@@ -19,12 +20,12 @@ export const ART_PROFILES=Object.freeze(['original','q5']);
 export const PET_ASSETS=Object.freeze({
  // Kept as a legacy identifier only; createPet/getPetAssetFiles no longer load it.
  animal:'locomotion-puppy.animal',
- stride:'puppy-stride-tweens-q5.bin.gz',strideInfo:'puppy-stride-meta.json',stableInfo:'puppy-stable-meta.json',
+ stride:'puppy-stride-tweens-q5.rvz',strideInfo:'puppy-stride-meta.json',stableInfo:'puppy-stable-meta.json',
  rear:'puppy-paper-rear-gallop',approach:'puppy-paper-approach',seat:'puppy-paper-seat',arrivalSeat:'puppy-paper-arrival-seat',
  behaviors:'puppy-paper-behaviors',actions:'puppy-paper-actions-v9',interactions:'puppy-companion-interactions-v3',comfort:'puppy-companion-comfort',
 });
 const BUNDLES=['rear','approach','seat','arrivalSeat','behaviors','actions','interactions','comfort'];
-const frameFile=(base,profile)=>base+(profile==='q5'?'-q5.bin.gz':'-compact.bin.gz');
+const frameFile=(base,profile)=>base+(profile==='q5'?'-q5.rvz':'-compact.bin.gz');
 /** Exact files a host/bundler must copy, including metadata. Never loads assets. */
 export function getPetAssetFiles(artProfile=DEFAULT_ART_PROFILE){
  if(!ART_PROFILES.includes(artProfile))throw RangeError('artProfile must be original or q5');
@@ -50,9 +51,9 @@ const bytesOf=(name,value)=>{
  if(ArrayBuffer.isView(value))return new Uint8Array(value.buffer,value.byteOffset,value.byteLength);
  throw TypeError(`loadAsset(${name}) must return an ArrayBuffer or typed bytes`);
 };
-async function gunzip(bytes){
+async function gunzip(bytes,size){
  // Native Node gzip avoids Blob/Response/stream copies of every large cache.
- if(typeof process!=='undefined'&&process.versions?.node){const {gunzipSync}=await import('node:zlib');return gunzipSync(bytes);}
+ if(typeof process!=='undefined'&&process.versions?.node){const {gunzipSync}=await import('node:zlib');return gunzipSync(bytes,size===undefined?undefined:{maxOutputLength:Math.max(1,size)});}
  if(typeof DecompressionStream!=='undefined')return new Uint8Array(await new Response(new Blob([bytes]).stream().pipeThrough(new DecompressionStream('gzip'))).arrayBuffer());
  throw Error('This browser needs DecompressionStream for pet assets');
 }
@@ -75,8 +76,8 @@ function heldFrameKey(state,report,{columns,rows,cellAspect=.5,camera,poseFps=24
   report.ball,report.treat]);
 }
 async function loadPetAssets(loadAsset,artProfile){
- // Node keeps filtered crops compressed; only the existing two-frame LRU is
- // expanded. Browser bundles retain the portable bit-packed implementation.
+ // Default local Node hosts keep art on disk and reconstruct two frames per
+ // family. Custom/browser loaders retain the compatible memory-backed store.
  let codec;
  if(typeof process!=='undefined'&&process.versions?.node){
   const {deflateRawSync,inflateRawSync}=await import('node:zlib');
@@ -86,9 +87,18 @@ async function loadPetAssets(loadAsset,artProfile){
  }
  const load=async name=>bytesOf(name,await loadAsset(name));
  const json=async name=>JSON.parse(new TextDecoder().decode(await load(name)));
- const frames=async (name,options)=>readPackedFrames(await gunzip(await load(name)),{...options,codec});
- // One family at a time: never inflate all eight legacy-sized buffers together.
+ let openFrameFile;
+ if(artProfile==='q5'&&loadAsset===defaultLoadAsset&&new URL('.',import.meta.url).protocol==='file:'&&typeof process!=='undefined'&&process.versions?.node)({openFrameFile}=await import('./puppy-frame-file.mjs'));
+ const frames=async (name,options)=>{
+  if(name.endsWith('.rvz')){
+   if(openFrameFile)return openFrameFile(new URL(name,import.meta.url),options);
+   return readPackedFrames(await expandIndexedArchive(await load(name),gunzip),{...options,codec});
+  }
+  return readPackedFrames(await gunzip(await load(name)),{...options,codec});
+ };
+ // Read small indices locally; expand portable archives one family at a time.
  const data={assets:{}};
+ try{
  data.info=await json(PET_ASSETS.strideInfo);data.meta=await json(PET_ASSETS.stableInfo);
  data.cache=await frames(frameFile('puppy-stride-tweens',artProfile));
  for(const key of BUNDLES){
@@ -100,15 +110,17 @@ async function loadPetAssets(loadAsset,artProfile){
   data.assets[key]={info,bytes:await frames(frameFile(base,artProfile),options)};
  }
  return data;
+ }catch(error){disposeAssets(data);throw error;}
 }
+function disposeAssets(data){data?.cache?.dispose?.();for(const family of Object.values(data?.assets??{}))family.bytes?.dispose?.();}
 async function acquireAssets(loadAsset,artProfile){
  let entry;
  if(loadAsset===defaultLoadAsset){entry=sharedAssets.get(artProfile);if(!entry){entry={users:0,promise:loadPetAssets(loadAsset,artProfile)};sharedAssets.set(artProfile,entry);}}
  else entry={users:0,promise:loadPetAssets(loadAsset,artProfile)};
  entry.users++;
  let released=false;
- const release=()=>{if(released)return;released=true;const previous=entry;entry=null;if(--previous.users===0&&sharedAssets.get(artProfile)===previous)sharedAssets.delete(artProfile);};
- try{return{data:await entry.promise,release};}catch(error){release();throw error;}
+ const release=()=>{if(released)return;released=true;const previous=entry;entry=null;if(--previous.users===0){if(sharedAssets.get(artProfile)===previous)sharedAssets.delete(artProfile);disposeAssets(previous.data);}};
+ try{const data=await entry.promise;entry.data=data;return{data,release};}catch(error){release();throw error;}
 }
 
 export async function createPet({loadAsset=defaultLoadAsset,seed,energy,pawTransport=true,artProfile=DEFAULT_ART_PROFILE,returnStyle='auto'}={}){

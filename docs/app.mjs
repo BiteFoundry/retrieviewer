@@ -62,7 +62,7 @@ const ko = {
   runStep: "실행 → 앱 창 선택 → Attach 누르기",
   desktopLanguage: "데스크톱 창 선택창과 조작 메뉴는 영어로 표시됩니다.",
   latestUpdate:
-    '0.0.16 · 확인할 일이 있으면 앞발로 살살 부르거나 두 발로 서서 박박 긁어요. 위에서 두 동작을 눌러보세요. 감시·유료 연결은 선택이에요. <a href="https://github.com/BiteFoundry/retrieviewer/blob/main/RELEASING.md">변경 기록</a>',
+    '0.0.17 · 강아지는 그대로, 로컬 실행에서는 필요한 그림만 읽어요. 시작 시간과 메모리를 줄였습니다. <a href="https://github.com/BiteFoundry/retrieviewer/blob/main/RELEASING.md">변경 기록</a>',
   copy: "복사",
   copied: "명령을 복사했어요.",
   copyFailed: "복사하지 못했어요. 위 명령을 직접 선택해 복사해 주세요.",
@@ -277,7 +277,7 @@ async function load() {
   playing = false;
   cancelLoop();
   try {
-    const { createPet } = await import("./runtime/0.0.16/retrieviewer.mjs");
+    const { createPet } = await import("./runtime/0.0.17/retrieviewer.mjs");
     const next = await createPet({ seed: 731, returnStyle: $("#return-style").value });
     if (closed) {
       next.dispose();
@@ -318,7 +318,7 @@ $("#sleep-pose").addEventListener("change",async()=>{
   }
   study=key;playing=false;cancelLoop();syncControls();status('previewLoading');
   try{
-    const response=await fetch('./sleep-'+key+'.txt?v=0.0.16');
+    const response=await fetch('./sleep-'+key+'.txt?v=0.0.17');
     if(!response.ok)throw Error('Sleep preview HTTP '+response.status);
     const text=await response.text();if(request!==studyRequest||closed)return;
     art.textContent=text.replace(/^(?:\u2800*\n)+/,'').replace(/(?:\n\u2800*)+$/,'');

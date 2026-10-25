@@ -1,0 +1,106 @@
+{
+  "version": 1,
+  "format": "RVZ5",
+  "pixels": "Exact approved RVQ5 rows; no quantization, frame removal or resampling",
+  "entries": [
+    {
+      "file": "puppy-stride-tweens-q5.rvz",
+      "bytes": 7643027,
+      "indexBytes": 19608,
+      "frames": 799,
+      "uniqueFrames": 683,
+      "sha256": "e049a3e5dbf2332620d881b8b484b1828dcc7aa3c9e636bf14358b3146458fd9",
+      "source": "puppy-stride-tweens-q5.bin.gz",
+      "sourceSha256": "abcc6f1825f09655f23e977c56e6790d27edd054c4c24be852c097fb575d6a4f",
+      "restoredRvq5Sha256": "eecf92fd402843bef43aa4b154db6eba999959dd16cd8e34c54e42c88eaade10"
+    },
+    {
+      "file": "puppy-paper-rear-gallop-q5.rvz",
+      "bytes": 1481295,
+      "indexBytes": 4100,
+      "frames": 162,
+      "uniqueFrames": 143,
+      "sha256": "fefa5949317e5afde1f5872f8ac43da95206a844cec1d90b27b2f31f32655ddd",
+      "source": "puppy-paper-rear-gallop-q5.bin.gz",
+      "sourceSha256": "ca731e1979a37ec2e005a80365e3b58358f640b8b26e7036b0e931940a7b1264",
+      "restoredRvq5Sha256": "fe96e31d30348cc7d1fc674f40778d2312c9d1b40c57e634dcc397a35cc5ccf4"
+    },
+    {
+      "file": "puppy-paper-approach-q5.rvz",
+      "bytes": 1462216,
+      "indexBytes": 4004,
+      "frames": 162,
+      "uniqueFrames": 139,
+      "sha256": "5f14d0c8f4b2a5a6f59be653cd6a9f3c0450260e0ae4e79074a0da5dc9f66821",
+      "source": "puppy-paper-approach-q5.bin.gz",
+      "sourceSha256": "17179d3ace7748f66ed3c5a61b5246d24ecd3570b350535bd2edc8cbf58304e6",
+      "restoredRvq5Sha256": "6f57a5f506eabea41c00f02738c8124a4ae8e05471bdcd76e0a6e9ed739ca1a3"
+    },
+    {
+      "file": "puppy-paper-seat-q5.rvz",
+      "bytes": 481353,
+      "indexBytes": 1400,
+      "frames": 51,
+      "uniqueFrames": 49,
+      "sha256": "569e943321eaad920f6915c4bd7c60f70571737c57a9407f3268ae7283565c4f",
+      "source": "puppy-paper-seat-q5.bin.gz",
+      "sourceSha256": "5480c994de0d034d70eff6ea86095f3722cf87bde72f364dd369b94b1ad66f84",
+      "restoredRvq5Sha256": "b21aa11039b314ed3dec96818e571d54b6102bd0bc1f76e0a99ceb6d2b5ae097"
+    },
+    {
+      "file": "puppy-paper-arrival-seat-q5.rvz",
+      "bytes": 492675,
+      "indexBytes": 1400,
+      "frames": 51,
+      "uniqueFrames": 49,
+      "sha256": "d69c7d59c99b6f12cebab4e92ec2aa137ba68efb56bb5d37cb52ea1b91d217a2",
+      "source": "puppy-paper-arrival-seat-q5.bin.gz",
+      "sourceSha256": "7effa0a2150e8ef9ed37d5b6cb10089672e0ce32599c06db21ad4769144bf246",
+      "restoredRvq5Sha256": "3b2ef9e322e625340c42a549f17165492cc14f724f4593bf298f67195677bb6e"
+    },
+    {
+      "file": "puppy-paper-behaviors-q5.rvz",
+      "bytes": 1288500,
+      "indexBytes": 3692,
+      "frames": 162,
+      "uniqueFrames": 126,
+      "sha256": "fac739a813a00bfd63294b3926b2463b60a2ab1a1b063b4ae02a053d2f925e8d",
+      "source": "puppy-paper-behaviors-q5.bin.gz",
+      "sourceSha256": "e4b79387aca974ceec74a02dc3f02780eb53d38af6ec9ebd69994de744b39716",
+      "restoredRvq5Sha256": "cb045558ca490436c5d6703f6468daba26f20ed76bc886e829787889253ccbb9"
+    },
+    {
+      "file": "puppy-paper-actions-v9-q5.rvz",
+      "bytes": 4691230,
+      "indexBytes": 13772,
+      "frames": 594,
+      "uniqueFrames": 474,
+      "sha256": "80621dbbdbd5272e9f4a40ac237f1d1f784a01456cdef48f2c10fdd45095f600",
+      "source": "puppy-paper-actions-v9-q5.bin.gz",
+      "sourceSha256": "abb4677468206c62937c0247dc4c5823e0a7c4a3a197da40194a08dd594aeef9",
+      "restoredRvq5Sha256": "615fb04961a38e592a661a20ad50fad45e1e4205e34198fa87a155ace966ea77"
+    },
+    {
+      "file": "puppy-companion-interactions-v3-q5.rvz",
+      "bytes": 1160887,
+      "indexBytes": 4436,
+      "frames": 360,
+      "uniqueFrames": 124,
+      "sha256": "237089d60d0350f08c4570c3379d44a6947d610b59c50856ed5f050d1debf420",
+      "source": "puppy-companion-interactions-v3-q5.bin.gz",
+      "sourceSha256": "8c7d24254f3f1e9fb85bff5ed1c7904fb4f111b0e47b57eee22dc094c18f3bf3",
+      "restoredRvq5Sha256": "5ebfc58c9cfeaf349d30bc65be2e4663f7a3b8be9f35ca5d6da323172624de7a"
+    },
+    {
+      "file": "puppy-companion-comfort-q5.rvz",
+      "bytes": 624885,
+      "indexBytes": 1628,
+      "frames": 60,
+      "uniqueFrames": 57,
+      "sha256": "9df13e0e4c5cd854e42aee595ee675eea716293e392d6e587145ffbaa74c5870",
+      "source": "puppy-companion-comfort-q5.bin.gz",
+      "sourceSha256": "57942c55e9c467d973a08f1e23804b0f756eaed46dddfe3aba7e7c3621996236",
+      "restoredRvq5Sha256": "5f598c2ba15212a73e88c02f0d189b20a74e46f2346f7dfbc3bca8c2d26fc66b"
+    }
+  ]
+}

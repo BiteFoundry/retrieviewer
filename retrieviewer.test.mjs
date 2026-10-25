@@ -14,7 +14,7 @@ const plain=(text,columns,rows)=>{
 test('import performs no asset I/O and installs no listeners, timers or globals',()=>{
  const probe=`
   import fs from 'node:fs';import {syncBuiltinESMExports} from 'node:module';
-  let reads=0;for(const o of [fs,fs.promises])for(const k of ['readFile','readFileSync','open','openSync'])if(o[k]){const f=o[k];o[k]=function(...a){if(/\.(gz|animal)$|puppy-(stride-meta|stable-meta|paper-[a-z0-9-]+|companion-[a-z0-9-]+)\.json$/.test(String(a[0])))reads++;return f.apply(this,a);};}
+  let reads=0;for(const o of [fs,fs.promises])for(const k of ['readFile','readFileSync','open','openSync'])if(o[k]){const f=o[k];o[k]=function(...a){if(/\.(gz|rvz|animal)$|puppy-(stride-meta|stable-meta|paper-[a-z0-9-]+|companion-[a-z0-9-]+)\.json$/.test(String(a[0])))reads++;return f.apply(this,a);};}
   syncBuiltinESMExports();
   // Windows Node20 can retain an ESM-loader CloseReq until the next loop turn.
   // Drain that loader bookkeeping on BOTH sides; keep checking every resource.
@@ -38,6 +38,7 @@ test('concurrent default pets share art, survive another disposal and release th
  import fs from 'node:fs';import {syncBuiltinESMExports} from 'node:module';
  let reads=0;const original=fs.promises.readFile;
  fs.promises.readFile=function(...args){if(/(?:puppy-.*\\.(?:json|gz)|locomotion-puppy\\.animal)$/.test(String(args[0])))reads++;return original.apply(this,args);};
+ const open=fs.openSync;fs.openSync=function(...args){if(String(args[0]).endsWith('.rvz'))reads++;return open.apply(this,args);};
  syncBuiltinESMExports();const {createPet}=await import(${JSON.stringify(moduleUrl)});
  const [a,b]=await Promise.all([createPet({seed:1}),createPet({seed:2})]);
  const loaded=reads;a.dispose();const visible=b.frame({columns:20,rows:6}).text.length>0;

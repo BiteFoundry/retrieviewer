@@ -89,8 +89,8 @@ test('website keeps bilingual current-release guidance and two primary install s
  const html=read('./docs/index.html'),app=read('./docs/app.mjs');
  const {version}=JSON.parse(read('./package.json'));
  assert.ok(html.includes(`npm · v${version}`));
- assert.ok(html.includes(`${version} · A gentle paw or a two-paw scrabble`));
- assert.match(app,/감시·유료 연결은 선택이에요/);
+ assert.ok(html.includes(`${version} · Same dog, lighter local runtime`));
+ assert.match(app,/로컬 실행에서는 필요한 그림만 읽어요/);
  for(const key of ['desktopLanguage','latestUpdate']){
   assert.ok(html.includes(`data-i18n="${key}"`));
   assert.match(app,new RegExp(`\\n  ${key}:`));

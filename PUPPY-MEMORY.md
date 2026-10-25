@@ -1,5 +1,64 @@
 # Runtime weight and performance
 
+## Indexed local art (local candidate, 2026-10-25)
+
+The default local Node loader opens nine RVZ5 files and reads only 54,040 bytes
+of indices (plus 20-byte header probes). Each file contains the exact approved
+RVQ5 filtered rows, individually gzip-compressed offline at level 9. Frame access
+reads and inflates one requested crop into the existing two-frame-per-family
+cache. No artwork family is decompressed/recompressed during startup; no loader
+thread, process, dependency, polling timer or persistent user cache is added.
+Shared pets hold one set of file descriptors. Last disposal closes all nine;
+partial startup failure closes previously opened files. Repeated disposal is safe.
+
+All 2,401 logical source frames are pixel-identical, including duplicates and
+random seeks. The indexed repack round-trips to byte-identical RVQ5 archives.
+The 450-frame fetch replay retains the same trajectory and visible SHA256
+`76d5ec6c58622f4330a277852e0d6cb16f4bf2f9fd118688d9ec97b35f80f6a8`.
+Timing, contacts, physics, palettes, art resolution and behavior are unchanged.
+
+Fresh-process Windows Node 24 samples, seed 731, 480x135 cells, the existing
+`tools/benchmark-pet.mjs` workload. ArrayBuffers/RSS samples below use diagnostic
+GC after native zlib-close callbacks; these are not desktop memory guarantees.
+
+| Metric | Previous | Indexed |
+|---|---:|---:|
+| Initial load | 1,481ms | 17ms |
+| Loaded ArrayBuffers | 21,122,810B | 206,439B |
+| Rendered ArrayBuffers | 27,658,258B | 6,741,887B |
+| Loaded process RSS | 92,504,064B | 66,420,736B |
+| Rendered process RSS | 166,457,344B | 148,267,008B |
+| Peak benchmark process RSS | 207,421,440B | 158,302,208B |
+| Mean frame time | 4.04ms | 4.09ms |
+| P95 frame time | 6.44ms | 6.80ms |
+
+This is a RAM/startup tradeoff, not a smaller download: art bytes increase from
+19,095,012 to 19,326,068 (about 1.2%) to allow independent crop reads. The npm
+candidate is about 19.5MB versus 19.3MB; it contains only indexed Q5 art, not
+duplicate legacy archives. Legacy source archives remain for authoring and exact
+regression comparisons. `pet-indexed-manifest.json` describes the shipped format;
+the older `pet-q5-manifest.json` describes its legacy source inputs.
+
+Random-access storage adds synchronous small reads during rendering. The local
+sample used OS-cached files; cold disks, network filesystems, antivirus and other
+platforms can have different latency. Frame access validates gzip length/CRC and
+filtered pixels on demand; headers, maps, crop bounds and offsets are validated
+at opening. This differs from the old eager whole-archive pixel validation.
+
+Browser/custom-loader compatibility is retained by restoring each indexed family
+into the existing portable store during async creation. Those hosts do not get
+the local file-backed RAM reduction. Actual Aside browser loading, Braille output
+and a ball interaction were checked; no Node file module was requested there.
+An isolated npm-installed Windows native check painted real frames, accepted the
+native ball button and exited worker/painter cleanly. Its short Node sample was
+73MiB RSS, with native-helper memory separate; it is not a peak or long-run budget.
+No live Linux/macOS check was performed for this storage change.
+
+Evidence: local `dist/indexed-art-{before,after}.json`,
+`dist/indexed-art-tests.txt`, `dist/package-check-*/package-check.json` and
+`dist/windows-overlay-qa/`. Rebuild/check deterministic archives with
+`npm run bake:art-index` / `npm run check:art-index` in the source checkout.
+
 ## Held-pose invalidation (local candidate, 2026-10-24)
 
 The desktop pump now asks `pet.needsFrame(viewport)` before rasterization. Only

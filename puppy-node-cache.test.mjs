@@ -4,12 +4,11 @@ import {deflateRawSync,inflateRawSync,gunzipSync} from 'node:zlib';
 import {readFileSync} from 'node:fs';
 import {readPackedFrames,packFrames} from './puppy-frame-store.mjs';
 import {encodePredictiveFrames} from './puppy-frame-predictive.mjs';
-import {getPetAssetFiles} from './retrieviewer.mjs';
 const codec={compress:bytes=>deflateRawSync(bytes,{level:3}),expand:(bytes,size)=>inflateRawSync(bytes,{maxOutputLength:size})};
 
 test('Node compressed crops reconstruct every packaged frame exactly with only two cached rasters',()=>{
  let before=0,after=0,frames=0;
- for(const name of getPetAssetFiles().filter(n=>n.endsWith('.bin.gz'))){
+ for(const name of JSON.parse(readFileSync(new URL('./pet-indexed-manifest.json',import.meta.url))).entries.map(e=>e.source)){
   const input=gunzipSync(readFileSync(new URL(name,import.meta.url))),portable=readPackedFrames(input),compressed=readPackedFrames(input,{codec});
   before+=portable.residentPixelBytes;after+=compressed.residentPixelBytes;
   for(let i=0;i<portable.frameCount;i++){assert.deepEqual(compressed.getFrame(i),portable.getFrame(i),name+' '+i);frames++;}

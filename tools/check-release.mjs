@@ -23,7 +23,7 @@ function leakReason(path){
   if(dir)return `${dir}/ is not distributable`;
   if(base==='.env'||base.startsWith('.env.'))return 'environment file';
   if(base==='.npmrc')return 'npm credentials/config file';
-  if(base.endsWith('.bin.gz')&&!base.endsWith('-q5.bin.gz'))return 'non-Q5 art archive (Q5 is the packaged default)';
+  if((base.endsWith('.bin.gz')||base.endsWith('.rvz'))&&!base.endsWith('-q5.bin.gz')&&!base.endsWith('-q5.rvz'))return 'non-Q5 art archive (Q5 is the packaged default)';
   return null;
 }
 
@@ -65,7 +65,7 @@ export function validateRelease(input={}){
   const paths=new Set(files.map(f=>f.replace(/^(\.\/)+/,'')));
   for(const required of REQUIRED_FILES)if(!paths.has(required))errors.push(`packed files missing ${required}`);
   if(!paths.has(TUI_ENTRY.slice(2)))errors.push(`packed files missing ${TUI_ENTRY.slice(2)} (exports["./tui"] target)`);
-  if(![...paths].some(p=>p.endsWith('-q5.bin.gz')))errors.push('packed files contain no Q5 art archive (Q5 default must ship)');
+  if(![...paths].some(p=>p.endsWith('-q5.bin.gz')||p.endsWith('-q5.rvz')))errors.push('packed files contain no Q5 art archive (Q5 default must ship)');
   for(const path of [...paths].sort()){const reason=leakReason(path);if(reason)errors.push(`packed file ${path} rejected: ${reason}`);}
   return errors;
 }

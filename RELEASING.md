@@ -1,4 +1,20 @@
-# Retrieviewer 0.0.16 release process
+# Retrieviewer 0.0.17 release process
+
+Current target: `@bitefoundry/retrieviewer@0.0.17`, public `latest`.
+On 2026-10-25 the owner authorized publication of the indexed local-art update
+and measurement of actual operating memory. Local Node hosts read only the art
+indices at startup, then reconstruct requested crops from file-backed archives.
+All 2,401 approved Q5 frames, timing and behavior remain unchanged. The browser
+and custom-loader paths retain the compatible memory-backed representation.
+No new dependency, background loader, process or persistent user cache is added.
+
+Publish one fresh installed/native-tested tarball after Windows/Linux CI and
+verify its registry integrity and a fresh registry consumer. Keep existing pets
+running; measure only owned diagnostic windows and report Node and native-helper
+working sets separately. No real approval, paid inference or user-window change
+is needed for the measurement. Preserve all existing registry releases.
+
+## Previous 0.0.16 scope (historical)
 
 Current target: `@bitefoundry/retrieviewer@0.0.16`, public `latest`.
 On2026-10-24 the owner accepted the gentle-paw and standing-wall gestures and

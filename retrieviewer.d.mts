@@ -1,7 +1,7 @@
 /** A headless pet: the host owns input, time and terminal rendering. */
 export type FetchReturnStyle = 'auto' | 'brake' | 'trot' | 'run-trot';
 export interface PetOptions {
-  /** Asset names are relative; return original file bytes (keep .gz files compressed). */
+  /** Relative names; return unchanged .rvz/.gz file bytes. Custom loaders use memory-backed art. */
   loadAsset?: (name: string) => Promise<ArrayBuffer | ArrayBufferView>;
   seed?: number;
   energy?: number;
