@@ -47,7 +47,7 @@ test('killing the launcher during startup also reaps its detached worker and pai
  const exited=once(launcher,'exit');let workerPid,painterPid;
  const gone=async pid=>{
   try{process.kill(pid,0);}catch(e){if(e.code==='ESRCH')return true;throw e;}
-  if(process.platform==='linux')try{const stat=await readFile('/proc/'+pid+'/stat','utf8');return ['Z','X'].includes(stat.slice(stat.lastIndexOf(')')+2).charAt(0));}catch(e){if(e.code==='ENOENT')return true;throw e;}
+  if(process.platform==='linux')try{const stat=await readFile('/proc/'+pid+'/stat','utf8');return ['Z','X'].includes(stat.slice(stat.lastIndexOf(')')+2).charAt(0));}catch(e){if(e.code==='ENOENT'||e.code==='ESRCH')return true;throw e;}
   return false;
  };
  t.after(async()=>{if(launcher.exitCode===null&&launcher.signalCode===null)launcher.kill();await bounded(exited);for(const pid of [workerPid,painterPid])if(pid&&!await gone(pid))try{process.kill(pid);}catch{}});
