@@ -28,7 +28,8 @@ export function createFramePump({pet,send,now=()=>performance.now()}){
   ack(){alive();inFlight=false;},
   tick(){
    alive();if(inFlight||!viewport||paused)return false;
-   const t=now(),dt=last===null?0:Math.max(0,(t-last)/1000);last=t;
+   // Drop excess stalled time, matching the basic native host's bounded step.
+   const t=now(),dt=last===null?0:Math.min(.1,Math.max(0,(t-last)/1000));last=t;
    pet.step(dt);if(t<nextPaint)return false;
    // Do this BEFORE rasterization/Braille conversion. Older embedders without
    // the optional hint retain the original byte-comparison fallback below.

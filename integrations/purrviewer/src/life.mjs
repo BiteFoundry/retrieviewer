@@ -226,6 +226,14 @@ export function createCatLife({seed = 731} = {}) {
       return null; // Expose the next source clip's entry endpoint at progress 0.
     }
     if (phase.command) {
+      // A completed/no-op approach needs no invented moving sample. Delayed
+      // commands still wait when the actual root has not reached the target.
+      if (phase.command.kind === 'go' && settled(sample) &&
+          Math.hypot(sample.x - phase.command.x, sample.z - phase.command.z) <= GROUND) {
+        phase.progress = 1;
+        phase.done = true;
+        return null;
+      }
       if (!phase.issued) {
         if (!settled(sample)) return null;
         phase.issued = true;

@@ -1,6 +1,6 @@
 # Purrviewer web demo
 
-The homepage's #purrviewer section embeds the reviewed ginger-cat core27337ab.
+The homepage's #purrviewer section embeds the reviewed ginger-cat core3e2531d.
 Desktop cat: retrieviewer desktop --pet cat (same npm package).
 The owner authorized CC BY-SA4.0 for cat artwork; code is MIT. See NOTICE.txt. No raw sheets/research media are included.
 

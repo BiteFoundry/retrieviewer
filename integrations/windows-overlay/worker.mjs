@@ -78,7 +78,7 @@ try{
   const {createCat}=await import('../purrviewer/src/purrviewer.mjs');starting();const cat=await createCat();
   pet={step:dt=>cat.step(dt),frame:o=>cat.frame(o),dispose:()=>cat.dispose(),
    interact:kind=>cat.interact(({ball:'toy',tug:'company'})[kind]??kind),
-   notify:()=>cat.interact('greet'),clearNotice:()=>{}};
+    notify:notice=>cat.notify(notice),clearNotice:()=>{}};
  }else {const {createPet}=await import('../../retrieviewer.mjs');starting();pet=await createPet({returnStyle});}
  if(stopping)pet.dispose();else{
   pump=createFramePump({pet,send:write});if(pendingViewport)pump.viewport(pendingViewport);

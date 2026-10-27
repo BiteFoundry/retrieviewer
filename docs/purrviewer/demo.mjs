@@ -48,7 +48,7 @@ if(root){
   if(typeof DecompressionStream==='undefined'){setStatus('unsupported');return;}
   loading=true;failed=false;setStatus('loading');sync();
   try{
-   const {createCat}=await import('./runtime/27337ab/src/purrviewer.mjs');
+   const {createCat}=await import('./runtime/3e2531d/src/purrviewer.mjs');
    const loaded=await createCat({seed:731});if(closed){loaded.dispose();return;}
    cat=loaded;playing=true;poster.hidden=true;canvas.hidden=false;root.dataset.ready='true';fit();setStatus('running');schedule();
   }catch{if(!closed){failed=true;setStatus('failed');}}

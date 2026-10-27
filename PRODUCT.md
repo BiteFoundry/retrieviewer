@@ -21,12 +21,13 @@ Website: English/Korean buttons, existing black/white dot-art identity, real
 runtime demonstration and clear two-step install. LinkedIn: Korean-first with
 brief English summary. No publishing to social accounts without explicit request.
 
-## Purrviewer browser demo
+## Purrviewer ginger cat
 
 The existing website also introduces the approved ginger Purrviewer cat before
-installation, with a short link from the hero. This is a browser-only demo of the
-pinned Purrviewer runtime at commit `9da9e42`; cat desktop installation is not yet
-available. Preserve the retriever's separate demo and two-step install flow.
+installation, with a short link from the hero. The package also supports
+`retrieviewer desktop --pet cat`, with species selection in the Windows basic
+engine. The browser demo uses a pinned Purrviewer runtime and a `SOURCE.json`
+file manifest. Preserve the retriever's separate demo and two-step install flow.
 The static poster comes from the actual canvas scene. Starting the demo lazily
 loads one live canvas and its cat artwork; it does not autoplay. There are five
 cat interactions: slow blink, offer a treat, keep me company, cat tower and
@@ -40,7 +41,6 @@ pauses for bfcache navigation and resumes on return, and disposes the runtime on
 final page exit. These are implementation bounds, not RAM or performance
 guarantees. The cat's scoped amber accent does not replace the site's Leaf roles.
 
-Cat code is MIT with retained upstream notices. The owner authorized display and
-demo of the cat artwork; no redistribution license has been granted. The
-retriever artwork's CC BY-SA4.0 terms do not apply to the cat. Keep the separate
-cat credits and artwork terms linked from its section.
+Cat code is MIT with retained upstream notices. Cat artwork is CC BY-SA4.0,
+selected by the owner on2026-10-25. Keep the separate cat credits and artwork
+terms linked from its section.

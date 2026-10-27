@@ -185,10 +185,9 @@ The signature component is a real engine preview rendered as monochrome Braille 
 
 The signature cat component uses the approved ginger dot art, cat tower and
 exercise wheel on Ground. A static poster from the actual canvas scene precedes
-one live canvas; Start lazily imports the pinned runtime (`9da9e42`) and reveals
+one live canvas; Start lazily imports the pinned runtime recorded in its `SOURCE.json` and reveals
 the scene. Keep the Amber Start treatment, existing outlined action shapes and
-Leaf keyboard focus. The cat stays a browser preview with its own availability
-note and artwork-terms link.
+Leaf keyboard focus. The preview links to desktop cat installation and its separate artwork terms.
 
 Five interaction buttons offer slow blink, treat, company, tower and wheel.
 Start, Pause / Resume and Full screen bring the initial total to eight buttons;

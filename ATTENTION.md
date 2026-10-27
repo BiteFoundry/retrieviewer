@@ -68,6 +68,9 @@ two-hind-foot glass scrabble. Automatic cues alternate; hosts can pass
 for support, recovery and measured costs. The preview's wall button forces that
 variant using simulated input; it does not request a real approval.
 
+The ginger cat uses a finite eye greeting for passive alerts. Its current direct
+interaction or feeding finishes before the monitor can deliver the greeting.
+
 - A new exact Room/Seat/generation/turn/request cues one connected attention episode:
   brake/recover and face the user, approach using the existing world path if more
   than 0.8 m from the near check-in point, then sit, gently paw the air twice,

@@ -160,6 +160,9 @@ export function createCatFromAssets({seed=731}={},lease,kernel=null){
    return result(lastText);
   },
   interact(kind,options){alive();if(!['treat','toy','call','stretch','tail','greet','company','tower','wheel'].includes(kind))throw TypeError('Invalid cat interaction');const accepted=life.interact(kind,options);if(accepted&&prep)prep.command=null;return accepted;},
+  // Passive host cues wait for direct input/feeding to finish. A fresh source
+  // may retry a rejected cue through its existing attention monitor.
+  notify(){alive();if(life.report.busy)return false;const accepted=life.interact('greet');if(accepted&&prep)prep.command=null;return accepted;},
   get report(){alive();return life.report;},
   get stats(){alive();return {residentPixelBytes:asset.store.residentPixelBytes??asset.store.residentBytes,cachedFrames:asset.store.stats().cachedFrames,rgbaBytes:pixels?.byteLength??0,lastClip,lastFrame,leases:lease.users?.()??1,rasterizations,heldHits};},
   dispose(){if(disposed)return;disposed=true;pixels=null;prep=null;contacts.reset();wheelContacts.reset();asset=null;lastText=lastPaintKey='';release();}

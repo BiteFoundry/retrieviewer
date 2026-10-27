@@ -4320,6 +4320,11 @@ function createCatLife({ seed = 731 } = {}) {
       return null;
     }
     if (phase.command) {
+      if (phase.command.kind === "go" && settled(sample) && Math.hypot(sample.x - phase.command.x, sample.z - phase.command.z) <= GROUND) {
+        phase.progress = 1;
+        phase.done = true;
+        return null;
+      }
       if (!phase.issued) {
         if (!settled(sample))
           return null;
@@ -4840,6 +4845,15 @@ function createCatFromAssets({ seed = 731 } = {}, lease, kernel = null) {
       if (!["treat", "toy", "call", "stretch", "tail", "greet", "company", "tower", "wheel"].includes(kind))
         throw TypeError("Invalid cat interaction");
       const accepted = life.interact(kind, options2);
+      if (accepted && prep)
+        prep.command = null;
+      return accepted;
+    },
+    notify() {
+      alive();
+      if (life.report.busy)
+        return false;
+      const accepted = life.interact("greet");
       if (accepted && prep)
         prep.command = null;
       return accepted;
