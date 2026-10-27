@@ -58,15 +58,31 @@ static JSValue blit(JSContext* c,JSValueConst,int argc,JSValueConst* a){try{
  if(width<1||height<1||(int64_t)width*height>1000000||sourceN<1||sourceN>640||output.n!=(size_t)width*height*4||image.n<(size_t)sourceN*sourceN*4||side<=0||sideX<=0)throw std::runtime_error("Blit dimensions");
  JSValue layersValue=JS_GetPropertyStr(c,opts,"layers"),length=JS_GetPropertyStr(c,layersValue,"length");uint32_t count;JS_ToUint32(c,&count,length);JS_FreeValue(c,length);if(count>16)throw std::runtime_error("Layer limit");std::vector<Layer> layers;
  for(uint32_t i=0;i<count;i++){JSValue v=JS_GetPropertyUint32(c,layersValue,i);Layer l;l.lo=number(c,v,"lo");l.hi=number(c,v,"hi");l.dx=number(c,v,"dx");l.dy=number(c,v,"dy");l.toe=number(c,v,"toeTop");l.span=l.toe-226;l.a=0;if(l.dy<0){double k=.9*l.span/-l.dy;if(k<1)l.a=1;else if(k<1.5)l.a=std::min(1.0,3-2*k);}JS_FreeValue(c,v);layers.push_back(l);}JS_FreeValue(c,layersValue);
+ std::sort(layers.begin(),layers.end(),[](const Layer& a,const Layer& b){return a.lo<b.lo;});
  const bool minify=side<320||sideX<320;int pitch=sourceN+1;std::vector<uint32_t> sums;
  if(minify){sums.assign(pitch*pitch,0);for(int y=0;y<sourceN;y++){uint32_t row=0;for(int x=0;x<sourceN;x++){row+=image.p[((size_t)y*sourceN+x)*4];sums[(y+1)*pitch+x+1]=sums[y*pitch+x+1]+row;}}}
  auto integral=[&](double x,double y){x=clamp(x,0,sourceN);y=clamp(y,0,sourceN);int ix=std::min(sourceN-1,(int)floor(x)),iy=std::min(sourceN-1,(int)floor(y));double fx=x-ix,fy=y-iy;size_t k=iy*pitch+ix;return (sums[k]*(1-fx)+sums[k+1]*fx)*(1-fy)+(sums[k+pitch]*(1-fx)+sums[k+pitch+1]*fx)*fy;};
  auto area=[&](double x,double y){double dx=320/sideX,dy=320/side,l=x-dx/2,r=x+dx/2,t=y-dy/2,b=y+dy/2;return std::max(0.0,(integral(r,b)-integral(l,b)-integral(r,t)+integral(l,t))/(dx*dy));};
- auto opaque=[&](double x,double y){double xx=x+originX,yy=y+originY;if(xx<0||xx>=sourceN||yy<0||yy>=sourceN)return false;int sx=(int)floor(xx);if(flip)sx=sourceN-1-sx;return image.p[((size_t)floor(yy)*sourceN+sx)*4]>16;};
+
  const int y0=std::max(0,(int)(minify?floor(drawTop):ceil(drawTop-.5))),y1=std::min(height,(int)(minify?ceil(bottom):ceil(bottom-.5))),x0=std::max(0,(int)(minify?floor(drawLeft):ceil(drawLeft-.5))),x1=std::min(width,(int)(minify?ceil(drawRight):ceil(drawRight-.5)));
+ std::vector<double> seamY(layers.size()),seamShift(layers.size());double seamRow=NAN;
  for(int y=y0;y<y1;y++)for(int x=x0;x<x1;x++){
   double px=(x+.5-left)/sideX*320,py=(y+.5-top)/side*320,wx=px,wy=py;bool claimed=true;
-  if(py>=226&&!layers.empty()){claimed=false;bool fallback=false;double fallbackX=0,fallbackY=0;for(auto& l:layers){double sx,sy;if(l.dx==0&&l.dy==0){sx=px;sy=py;}else{sy=inverseY(l,py);sx=sy>=l.toe?px-l.dx:px-l.dx*smooth((sy-226)/l.span);}if(!(sx>=l.lo&&sx<l.hi))continue;if(opaque(sx,sy)){wx=sx;wy=sy;claimed=true;break;}if(!fallback){fallback=true;fallbackX=sx;fallbackY=sy;}}if(!claimed&&fallback){wx=fallbackX;wy=fallbackY;claimed=true;}}
+  if(py>=226&&!layers.empty()){
+   // Match the JS inverse: a continuous shared boundary, with a bounded source band (at least eight pixels)
+   // blending both limbs' inverse row coordinates and x shifts.
+   claimed=false;auto& sy=seamY;auto& shift=seamShift;
+   if(py!=seamRow){for(size_t i=0;i<layers.size();i++){sy[i]=inverseY(layers[i],py);shift[i]=layers[i].dx*smooth((sy[i]-226)/layers[i].span);}seamRow=py;}
+   for(size_t i=0;i<layers.size();i++){auto& l=layers[i];bool hasPrev=i>0,hasNext=i+1<layers.size();
+    double lw=hasPrev?std::min({std::max(8.0,fabs(shift[i-1]-shift[i])/2+1),(l.hi-l.lo)/2,(layers[i-1].hi-layers[i-1].lo)/2}):0;
+    double rw=hasNext?std::min({std::max(8.0,fabs(shift[i]-shift[i+1])/2+1),(l.hi-l.lo)/2,(layers[i+1].hi-layers[i+1].lo)/2}):0;
+    double left=hasPrev?l.lo+(shift[i-1]+shift[i])/2:-INFINITY,right=hasNext?l.hi+(shift[i]+shift[i+1])/2:INFINITY;
+    if(px<left||px>=right)continue;double sx=px-shift[i],yy=sy[i];
+    if(hasPrev&&px<l.lo+lw+shift[i]){double edge=l.lo+lw+shift[i],t=(px-left)/(edge-left);sx=l.lo+lw*t;yy=(sy[i-1]+sy[i])/2+(sy[i]-sy[i-1])/2*t;}
+    else if(hasNext&&px>l.hi-rw+shift[i]){double edge=l.hi-rw+shift[i],t=(px-edge)/(right-edge);sx=l.hi-rw+rw*t;yy=sy[i]+(sy[i+1]-sy[i])/2*t;}
+    wx=sx;wy=yy;claimed=true;break;
+   }
+  }
   if(!claimed)continue;double rawX=wx+originX,rawY=wy+originY;int sx=(int)clamp(floor(rawX),0,sourceN-1),sy=(int)clamp(floor(rawY),0,sourceN-1);if(flip)sx=sourceN-1-sx;size_t j=((size_t)y*width+x)*4,k=((size_t)sy*sourceN+sx)*4;
   uint8_t value=byteClamp(minify?area(flip?sourceN-rawX:rawX,rawY):(rawY<0||rawY>=sourceN||rawX<0||rawX>=sourceN?0:image.p[k]));output.p[j]=output.p[j+1]=output.p[j+2]=value;
  }
