@@ -9,7 +9,7 @@ No agent configuration is needed for this separate transparent companion.
 Choose the dot ink at launch: `retrieviewer desktop --ink gold`, or
 `retrieviewer desktop --ink dark` on light backgrounds. Default: `cream`.
 Exit an existing companion before changing ink. Presets reuse the same Braille
-mask and native painter, without new color sprites or screen capture.
+mask and native painter.
 Windows and AlmaLinux8/GLIBC2.28 X11 have live test evidence. macOS support is
 experimental and not runtime verified; native Wayland is unsupported. Linux needs
 system Python3.6+, X11/Xrender/Xext and a compositor; Windows needs the .NET
@@ -18,9 +18,8 @@ basic mode uses the bundled native engine. See [Windows controls and removal](WI
 
 ## Optional native OpenCode integration
 
-0.0.3 also includes an installer CLI and a native OpenCode TUI adapter. It does **not** claim
-that every MCP client can display animated UI. Native OpenCode rendering uses its
-official TUI plugin slot, not another terminal, a wrapper, or a modified binary.
+The installer CLI supports a native OpenCode TUI adapter through its official
+TUI plugin slot.
 Other agent IDs are discoverable but refused until an adapter is implemented.
 
 ## Install
@@ -70,7 +69,7 @@ the new package. No automatic global install is done by the package itself.
 
 ## Commands
 
-For the separate native overlay (Windows since0.0.2; Linux X11 and experimental macOS since0.0.3),
+For the separate native overlay,
 see [desktop platforms](DESKTOP-PLATFORMS.md). It does not register a Codex plugin
 or change the way an agent is launched:
 

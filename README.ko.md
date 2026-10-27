@@ -36,9 +36,9 @@ Node.js/npm이 없다면 [먼저 설치](PREREQUISITES.md)해 주세요.
 도트 색은 실행할 때 고를 수 있어요. 기본은 크림색이고, 골드색은
 `retrieviewer desktop --ink gold`, 밝은 배경에는
 `retrieviewer desktop --ink dark`를 쓰세요. 실행 중이라면 먼저 종료하고 다시
-실행하세요. 배경을 캡처하지 않고, 같은 도트에 색만 바꿉니다.
+실행하세요. 같은 도트에 색만 바꿉니다.
 
-0.0.10부터 `--return-style auto|brake|trot|run-trot`로 귀환도
+`--return-style auto|brake|trot|run-trot`로 귀환도
 고를 수 있어요. 기본 `auto`는 기존 제동·총총·달리다 총총을 섞고 같은 동작이
 연달아 나오지 않게 합니다. 기존 제동만 쓰려면
 `retrieviewer desktop --return-style brake`. 실행 중인 강아지는 직접 종료한 뒤
@@ -87,10 +87,8 @@ PATH에 넣어야 해요. [bash·csh/tcsh·Windows별 안내](PREREQUISITES.md#c
 
 Linux는 저사양 기본값인 16px 셀·15fps, Windows는 8px 셀·30fps여서 Linux의
 점이 더 거칠게 보일 수 있어요. 그림 원본은 같은 Q5 자산입니다.
-무부하·초경량 도구는 아니에요. npm 압축본은 약19MB예요. 이전0.0.3의 작은
-Alma8 테스트에서는 Node RSS가 약180MiB였고 Python 헬퍼는 별도였어요.
-이 값은 메모리 상한이나0.0.4의 새 Linux GUI 검증 결과는 아니에요.
-[지원 범위와 검증 내용](DESKTOP-PLATFORMS.md).
+0.0.21 npm 압축본은 21.42 MB (20.43 MiB)예요.
+[메모리 측정 기록](PUPPY-MEMORY.md) · [지원 범위와 검증 내용](DESKTOP-PLATFORMS.md).
 
 ## 쉽게 종료하고 제거하기
 
@@ -108,17 +106,16 @@ npm uninstall -g @bitefoundry/retrieviewer
 
 ## StackBite 알림
 
-0.0.17은 기존 그림과 움직임을 유지하고, 기본 로컬 Node 실행에서 필요한 그림만
-파일에서 읽어요. [메모리 측정 기록](PUPPY-MEMORY.md)을 참고하세요.
+[승인·입력 대기 알림](ATTENTION.md)을 선택해서 켤 수 있어요. 화면 캡처나
+다른 앱 조작이나 자동 승인 없이 현재 Room의 메타데이터를 읽어요. 선택형 [유료 DeepSeek/OpenRouter 연결](BRAIN.md)은
+익명 이벤트 메타데이터를 판단하며, 기본 규칙은 확인된 대기 알림을 유지해요.
 
-0.0.16은 앞발로 살살 부르기와 두 발로 서서 벽 박박 긁기를 번갈아 보여줘요.
-홈페이지에서도 두 동작을 눌러볼 수 있어요. Windows의 npm 설치형 StackBite도
-감시할 수 있게 했어요. 작업 완료 체크표시는 아직 알림 대상이 아니에요.
+LLM을 기다리지 않고 알리며, Windows에 Seat 이름과 대기 종류를 표시해요.
+이름은 모델 입력에 들어가지 않아요. 강아지는 가까이 와서 알림 방향을 보고,
+앞발로 살살 부르기와 두 발로 서서 벽 박박 긁기를 번갈아 보여줘요.
+홈페이지에서도 두 동작을 눌러볼 수 있어요. Windows에서는 npm PowerShell
+실행기로 실행하는 StackBite도 감시할 수 있어요. 작업 완료 체크표시는 아직 알림 대상이 아니에요.
 
-0.0.14부터 [승인·입력 대기 알림](ATTENTION.md)을 선택해서 켤 수 있어요.
-0.0.15는 LLM을 기다리지 않고 알리고, Windows에 Seat 이름과 대기 종류를 표시해요.
-강아지도 기존 그림으로 가까이 와서 알림 방향을 봐요. 이름은 외부로 보내지 않아요.
-화면 캡처나 자동 승인 없이 현재 Room의 메타데이터만 읽어요.
 업데이트 후, 화면이 보이는 PC의 실행 중인 StackBite Seat에서 실행하세요.
 
 ```sh
@@ -146,7 +143,6 @@ JS 플러그인과 JSONL 브리지를 제공해요. 화면·입력·시간 제�
 [서드파티 고지](THIRD-PARTY-NOTICES.md) · [브랜드 안내](TRADEMARKS.md).
 
 AI로 생성한 그림에 자세 정렬·접지·프레임 처리를 적용한 애니메이션입니다.
-실제 모션 캡처나 자의식이 있는 강아지라고 주장하지 않아요.
 
 ## 0.0.21
 

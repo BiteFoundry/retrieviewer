@@ -43,9 +43,9 @@ inactive or minimized. No automatic startup entry is installed.
 
 Choose the dot color at launch: `retrieviewer desktop --ink gold`, or
 `retrieviewer desktop --ink dark` for light backgrounds. Default: `cream`.
-Quit a running companion first. Colors reuse the same artwork; no screen capture.
+Quit a running companion first. Colors reuse the same artwork.
 
-Version 0.0.10 offers `--return-style auto|brake|trot|run-trot`.
+Choose a return with `--return-style auto|brake|trot|run-trot`.
 `auto` mixes the original braking return, a trot and run-then-trot, without
 adjacent repeats. For example, `retrieviewer desktop --return-style brake` keeps
 the original return. Quit and relaunch to change the desktop choice; an existing
@@ -84,10 +84,8 @@ Do not use `sudo npm install -g` as a blanket workaround.
 
 Linux currently favors lower load: 16px cells / 15fps versus the Windows default
 8px cells / 30fps, so its dots look coarser. The Q5 artwork is identical.
-This is not a zero-resource widget: the npm tarball is about 19 MB. An earlier
-0.0.3 AlmaLinux test used roughly 180 MiB of Node RSS, plus the Python helper;
-that is not a memory budget or a new Linux GUI check for 0.0.4.
-See [platform details and verification boundaries](./DESKTOP-PLATFORMS.md).
+The 0.0.21 npm tarball is 21.42 MB (20.43 MiB). See [memory measurements](PUPPY-MEMORY.md)
+and [platform details and verification boundaries](./DESKTOP-PLATFORMS.md).
 
 ## Easy to leave, too
 
@@ -132,22 +130,17 @@ An MCP connection alone cannot insert a persistent picture into those clients.
 
 ## Optional StackBite alerts
 
-Version 0.0.14 adds [metadata-only StackBite alerts](./ATTENTION.md).
-It is opt-in and does not capture screens or operate other apps.
-An [optional paid DeepSeek/OpenRouter backend](./BRAIN.md) can judge anonymous event metadata;
-offline rules remain the default and preserve confirmed pending alerts.
+[StackBite alerts](./ATTENTION.md) are opt-in and read current Room metadata without
+capturing screens, operating other apps or approving requests automatically. An [optional paid DeepSeek/OpenRouter backend](./BRAIN.md)
+can judge anonymous event metadata; offline rules remain the default and preserve
+confirmed pending alerts.
 
-Version 0.0.15 alerts without waiting for the model, shows the Seat name and
-pending kind locally on Windows, and lets the puppy approach before looking
-toward the sidebar. It reuses existing artwork; names never enter model input.
-
-Version 0.0.17 keeps the same artwork and motion while loading only requested
-frames from disk in the default local Node host. See [memory measurements](PUPPY-MEMORY.md).
-
-Version 0.0.16 adds two approved attention gestures: a gentle seated paw and a
-standing two-paw glass scrabble. They alternate for new alerts; both are playable
-in the website demo. Windows watching also supports npm's PowerShell launcher.
-Completed-work checkmarks are not alert events yet.
+Alerts arrive without waiting for the model. On Windows, the Seat name and pending
+kind appear locally; names never enter model input. The puppy approaches, looks
+toward the sidebar and alternates a gentle seated paw with a standing two-paw
+glass scrabble. Both gestures are playable in the website demo. Windows watching
+also supports npm's PowerShell launcher. Completed-work checkmarks are not alert
+events yet.
 
 After updating, run inside a live StackBite Seat on the display computer:
 
@@ -186,8 +179,7 @@ the complete package is **not MIT-only**.
 [Brand notice](./TRADEMARKS.md).
 
 The puppy artwork was developed with AI-generated imagery and programmatic pose,
-grounding and frame processing. It is authored animation, not motion capture or
-a claim of sentience.
+grounding and frame processing.
 
 ## 0.0.21
 
