@@ -4,7 +4,7 @@ import {readFileSync} from 'node:fs';
 import vm from 'node:vm';
 
 const source = readFileSync(new URL('./docs/app.mjs', import.meta.url), 'utf8')
-  .replace('await import("./runtime/0.0.21/retrieviewer.mjs")', 'await loadRuntime()');
+  .replace('await import("./runtime/0.0.22/retrieviewer.mjs")', 'await loadRuntime()');
 
 async function setup() {
   class Target {

@@ -181,6 +181,12 @@ the complete package is **not MIT-only**.
 The puppy artwork was developed with AI-generated imagery and programmatic pose,
 grounding and frame processing.
 
+## 0.0.22
+
+Dog turns now connect through grounded whole-body steps, with aligned paws and
+carried-ball anchors. The desktop controls fold into a Menu button. The dog
+preview pauses outside the viewport and resumes when visible.
+
 ## 0.0.21
 
 Cat turns now connect through standing poses before walking or pouncing. Jump

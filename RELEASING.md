@@ -1,3 +1,19 @@
+# Retrieviewer 0.0.22 release process
+
+Current target: `@bitefoundry/retrieviewer@0.0.22`, public `latest`.
+The owner approved the reviewed turns and requested npm and website deployment.
+Ship the grounded standing-turn artwork and matching paw/muzzle registration,
+collapsible desktop controls, offscreen dog-preview pause, and revised usage copy.
+Keep the accepted response/departure timing and existing cat artwork.
+
+Run tests and release/package checks, install and compare the exact archive,
+and exercise its Windows adapter. Push and wait for Windows/Linux CI before
+publishing that archive. Verify registry integrity, a fresh consumer and the
+matching bilingual Pages runtime. Existing memory measurements retain their
+version labels. Code is MIT; both pets' artwork is CC BY-SA 4.0.
+
+## Previous 0.0.21 scope (historical)
+
 # Retrieviewer 0.0.21 release process
 
 Current target: `@bitefoundry/retrieviewer@0.0.21`, public `latest`.
