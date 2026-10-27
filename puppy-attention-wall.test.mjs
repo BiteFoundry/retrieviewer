@@ -18,14 +18,16 @@ function make(){
  actor.sit();for(let i=0;i<600&&!(actor.state==='idle'&&actor.sample(clock).seatProgress===1);i++)step();
  return {actor,step,sample:()=>actor.sample(clock,{poseFps:30})};
 }
-test('nine wall keys preserve the accepted 51 frames, neutral and bounded shared storage',()=>{
+test('nine wall keys preserve comfort art outside the reviewed tug cleanup, neutral and bounded shared storage',()=>{
  assert.equal(meta.frames,60);assert.equal(meta.wallSource.existingFrameHashes.length,51);
  const codec={compress:b=>deflateRawSync(b,{level:3}),expand:(b,n)=>inflateRawSync(b,{maxOutputLength:n})};
  const node=readPackedFrames(encoded,{codec}),base=readPackedFrames(encoded,{codec,frameIndices:Array.from({length:51},(_,i)=>i)});
  assert.ok(node.residentPixelBytes-base.residentPixelBytes<130_000);
  assert.ok(meta.gzipBytes-meta.wallSource.baseGzipBytes<115_000);
  const store=readPackedFrames(encoded),scratch=new Uint8ClampedArray(320*320*4),sample=createComfortSpriteSampler(store,meta,scratch);
- for(let i=0;i<51;i++)assert.equal(hash(store.getFrame(i)),meta.wallSource.existingFrameHashes[i]);
+ // The cleaned tug keys have complete pixel baselines in
+ // puppy-comfort-art-regression.test.mjs; keep historical source hashes intact.
+ for(let i=0;i<51;i++)if(![2,3,6,7].includes(i))assert.equal(hash(store.getFrame(i)),meta.wallSource.existingFrameHashes[i]);
  const neutral=Uint8Array.from(store.getFrame(0));
  for(const progress of [0,1])assert.deepEqual(sample({clip:'attention-wall',progress}).filter((_,i)=>i%4===0),new Uint8ClampedArray(neutral));
  for(let i=0;i<=100;i++)assert.equal(sample({clip:'attention-wall',progress:i/100}),scratch);

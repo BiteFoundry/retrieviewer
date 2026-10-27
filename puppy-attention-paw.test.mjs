@@ -19,13 +19,15 @@ function make(){
  actor.sit();for(let i=0;i<600&&!(actor.state==='idle'&&sample().seatProgress===1);i++)step();
  return {actor,step,sample};
 }
-test('six whole-body paw keys preserve all 45 old comfort frames and bounded borrowed storage',()=>{
+test('six whole-body paw keys preserve comfort art outside the reviewed tug cleanup and bounded borrowed storage',()=>{
  const store=readPackedFrames(encoded,{frameIndices:Array.from({length:51},(_,i)=>i)}),old=readPackedFrames(encoded,{frameIndices:Array.from({length:45},(_,i)=>i)}),scratch=new Uint8ClampedArray(320*320*4),sampler=createComfortSpriteSampler(store,info,scratch);
  assert.equal(info.attentionWall?.baseFrames??info.frames,51);assert.equal(info.attentionSource.existingFrameHashes.length,45);
  // Compare equally cold stores before warming either two-frame reconstruction
  // cache. Six cropped 5-bit whole-body drawings retain about 137 KiB.
  assert.ok(store.residentPixelBytes-old.residentPixelBytes<160_000,'six cropped keys, not an expanded 30fps film');
- for(let i=0;i<45;i++)assert.equal(createHash('sha256').update(store.getFrame(i)).digest('hex'),info.attentionSource.existingFrameHashes[i]);
+ // Complete pixel baselines for the four cleaned tug keys are checked in
+ // puppy-comfort-art-regression.test.mjs; retain these historical source hashes.
+ for(let i=0;i<45;i++)if(![2,3,6,7].includes(i))assert.equal(createHash('sha256').update(store.getFrame(i)).digest('hex'),info.attentionSource.existingFrameHashes[i]);
  const neutral=Uint8Array.from(store.getFrame(0));
  for(const progress of [0,1])assert.deepEqual(Uint8Array.from(sampler({clip:'attention-paw',progress}).filter((_,i)=>i%4===0)),neutral);
  for(let i=0;i<=120;i++)assert.equal(sampler({clip:'attention-paw',progress:i/120}),scratch);

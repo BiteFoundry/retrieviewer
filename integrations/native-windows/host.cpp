@@ -65,21 +65,29 @@ static JSValue blit(JSContext* c,JSValueConst,int argc,JSValueConst* a){try{
  auto area=[&](double x,double y){double dx=320/sideX,dy=320/side,l=x-dx/2,r=x+dx/2,t=y-dy/2,b=y+dy/2;return std::max(0.0,(integral(r,b)-integral(l,b)-integral(r,t)+integral(l,t))/(dx*dy));};
 
  const int y0=std::max(0,(int)(minify?floor(drawTop):ceil(drawTop-.5))),y1=std::min(height,(int)(minify?ceil(bottom):ceil(bottom-.5))),x0=std::max(0,(int)(minify?floor(drawLeft):ceil(drawLeft-.5))),x1=std::min(width,(int)(minify?ceil(drawRight):ceil(drawRight-.5)));
- std::vector<double> seamY(layers.size()),seamShift(layers.size());double seamRow=NAN;
+ struct SeamRow {double y=0,shift=0,lw=0,rw=0,left=0,right=0,leftEdge=0,rightEdge=0;};
+ std::vector<SeamRow> seam(layers.size());double seamRow=NAN;
  for(int y=y0;y<y1;y++)for(int x=x0;x<x1;x++){
   double px=(x+.5-left)/sideX*320,py=(y+.5-top)/side*320,wx=px,wy=py;bool claimed=true;
   if(py>=226&&!layers.empty()){
    // Match the JS inverse: a continuous shared boundary, with a bounded source band (at least eight pixels)
    // blending both limbs' inverse row coordinates and x shifts.
-   claimed=false;auto& sy=seamY;auto& shift=seamShift;
-   if(py!=seamRow){for(size_t i=0;i<layers.size();i++){sy[i]=inverseY(layers[i],py);shift[i]=layers[i].dx*smooth((sy[i]-226)/layers[i].span);}seamRow=py;}
+   claimed=false;
+   if(py!=seamRow){
+    for(size_t i=0;i<layers.size();i++){auto& r=seam[i];r.y=inverseY(layers[i],py);r.shift=layers[i].dx*smooth((r.y-226)/layers[i].span);}
+    for(size_t i=0;i<layers.size();i++){auto& l=layers[i];auto& r=seam[i];
+     r.lw=i?std::min({std::max(8.0,fabs(seam[i-1].shift-r.shift)/2+1),(l.hi-l.lo)/2,(layers[i-1].hi-layers[i-1].lo)/2}):0;
+     r.rw=i+1<layers.size()?std::min({std::max(8.0,fabs(r.shift-seam[i+1].shift)/2+1),(l.hi-l.lo)/2,(layers[i+1].hi-layers[i+1].lo)/2}):0;
+     r.left=i?l.lo+(seam[i-1].shift+r.shift)/2:-INFINITY;r.right=i+1<layers.size()?l.hi+(r.shift+seam[i+1].shift)/2:INFINITY;
+     r.leftEdge=l.lo+r.lw+r.shift;r.rightEdge=l.hi-r.rw+r.shift;
+    }
+    seamRow=py;
+   }
    for(size_t i=0;i<layers.size();i++){auto& l=layers[i];bool hasPrev=i>0,hasNext=i+1<layers.size();
-    double lw=hasPrev?std::min({std::max(8.0,fabs(shift[i-1]-shift[i])/2+1),(l.hi-l.lo)/2,(layers[i-1].hi-layers[i-1].lo)/2}):0;
-    double rw=hasNext?std::min({std::max(8.0,fabs(shift[i]-shift[i+1])/2+1),(l.hi-l.lo)/2,(layers[i+1].hi-layers[i+1].lo)/2}):0;
-    double left=hasPrev?l.lo+(shift[i-1]+shift[i])/2:-INFINITY,right=hasNext?l.hi+(shift[i]+shift[i+1])/2:INFINITY;
-    if(px<left||px>=right)continue;double sx=px-shift[i],yy=sy[i];
-    if(hasPrev&&px<l.lo+lw+shift[i]){double edge=l.lo+lw+shift[i],t=(px-left)/(edge-left);sx=l.lo+lw*t;yy=(sy[i-1]+sy[i])/2+(sy[i]-sy[i-1])/2*t;}
-    else if(hasNext&&px>l.hi-rw+shift[i]){double edge=l.hi-rw+shift[i],t=(px-edge)/(right-edge);sx=l.hi-rw+rw*t;yy=sy[i]+(sy[i+1]-sy[i])/2*t;}
+    const auto& r=seam[i];
+    if(px<r.left||px>=r.right)continue;double sx=px-r.shift,yy=r.y;
+    if(hasPrev&&px<r.leftEdge){double t=(px-r.left)/(r.leftEdge-r.left);sx=l.lo+r.lw*t;yy=(seam[i-1].y+r.y)/2+(r.y-seam[i-1].y)/2*t;}
+    else if(hasNext&&px>r.rightEdge){double t=(px-r.rightEdge)/(r.right-r.rightEdge);sx=l.hi-r.rw+r.rw*t;yy=r.y+(seam[i+1].y-r.y)/2*t;}
     wx=sx;wy=yy;claimed=true;break;
    }
   }

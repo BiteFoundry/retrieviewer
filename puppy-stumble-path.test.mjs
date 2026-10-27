@@ -46,12 +46,14 @@ test('actual rare fetch has no lateral detour, reverse or second chase before pi
  assert.equal(tumbles,2);
 });
 
-test('installed motion art preserves every old comfort pixel, exact run/pickup endpoints, and declared byte budgets',()=>{
+test('installed motion art preserves the cleaned comfort baseline, exact run/pickup endpoints, and declared byte budgets',()=>{
  const meta=JSON.parse(readFileSync(new URL('./puppy-companion-comfort.json',import.meta.url)));
  assert.equal(meta.version,6);assert.equal(meta.scramble.trajectory,'single-pass-target');
  const gzip=readFileSync(new URL('./puppy-companion-comfort-q5.bin.gz',import.meta.url)),encoded=gunzipSync(gzip),store=readPackedFrames(encoded);
  assert.equal(meta.encodedSha256,createHash('sha256').update(encoded).digest('hex'));assert.equal(meta.gzipBytes,gzip.length);assert.equal(meta.frames,store.frameCount);
- const hash=createHash('sha256');for(let i=0;i<13;i++)hash.update(store.getFrame(i));assert.equal(hash.digest('hex'),'d6acd36bff0fbe31ea7eb26499b342d011467cf03c5b119be05f54383c90a282');
+ // Four tug-only spill removals are checked pixel-by-pixel against the original
+ // baseline in puppy-comfort-art-regression.test.mjs.
+ const hash=createHash('sha256');for(let i=0;i<13;i++)hash.update(store.getFrame(i));assert.equal(hash.digest('hex'),'6a2bce006eeb5f3a27a7cceff9cb58d1176253670fd2bc72959c7336ea949482');
  const rear=readPackedFrames(gunzipSync(readFileSync(new URL('./puppy-paper-rear-gallop-q5.bin.gz',import.meta.url))));
  assert.deepEqual(store.getFrame(meta.scramble.frames[0]),rear.getFrame(7*9));assert.deepEqual(store.getFrame(meta.scramble.frames.at(-1)),rear.getFrame(5*9));
  assert.deepEqual(store.getFrame(meta.pickups.rear.frames[0]),rear.getFrame(5*9));assert.ok(meta.carrySource.gzipBytes-meta.sourceComfort.gzipBytes<260_000);assert.ok((meta.attentionSource?.baseGzipBytes??meta.gzipBytes)-meta.carrySource.gzipBytes<90_000);

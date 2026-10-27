@@ -59,7 +59,9 @@ test('carry art has a seamless cyclic schedule, exact sitting handoff and bounde
  const arrival=readPackedFrames(gunzipSync(readFileSync(new URL('./puppy-paper-arrival-seat-q5.bin.gz',import.meta.url))));
  assert.deepEqual(store.getFrame(motion.settle.frames.at(-1)),arrival.getFrame(0));
  const hash=createHash('sha256');for(let i=0;i<37;i++)hash.update(store.getFrame(i));
- assert.equal(hash.digest('hex'),'891aa32b15fca24cb781dfc240856c30e15696c8148c51abbe25fd1d62e16160');
+ // Updated only for the four reviewed tug spill removals; per-frame preservation
+ // is independently pinned in puppy-comfort-art-regression.test.mjs.
+ assert.equal(hash.digest('hex'),'d9f7526002dd8477537b7f1b766658063eeb77e43711c9f291c00653bff46e17');
  const codec={compress:b=>deflateRawSync(b,{level:3}),expand:(b,n)=>inflateRawSync(b,{maxOutputLength:n})};
  const all=readPackedFrames(encoded,{codec,frameIndices:Array.from({length:45},(_,i)=>i)}),base=readPackedFrames(encoded,{codec,frameIndices:Array.from({length:37},(_,i)=>i)});
  assert.ok(all.residentPixelBytes-base.residentPixelBytes<110_000,'new Node compressed pixels under 108KiB');
