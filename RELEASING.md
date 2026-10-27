@@ -1,3 +1,19 @@
+# Retrieviewer 0.0.25 release process
+
+Current target: `@bitefoundry/retrieviewer@0.0.25`, public `latest`.
+The owner accepted the ball-handoff preview and requested release and website
+updates. Ship the continuous world/mouth/gesture attachment, actual rear-body
+occlusion, floor-ball persistence and matching native bundle. Preserve the
+existing artwork, cache bounds, executable and cat source `3e2531d`.
+
+Verify the exact archive and installed ball regressions, Windows/Linux CI and
+native painting before publishing that archive. Check registry integrity and a
+fresh installation. Update the bilingual product site and shinick.dev, using
+the accepted 15-second candidate with versioned media paths. Keep historical
+memory measurements under their original versions; memory was not remeasured.
+
+## Previous 0.0.24 scope (historical)
+
 # Retrieviewer 0.0.24 release process
 
 Current target: `@bitefoundry/retrieviewer@0.0.24`, public `latest`.

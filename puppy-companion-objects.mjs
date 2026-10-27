@@ -1,12 +1,32 @@
 // Small physical toys in the SAME fixed camera as the puppy, before Braille
 // conversion. No minimum thumbnail size, DOM overlay, sprite zoom or new dog art.
-// mouth: renderer.lastMouth for the frame just painted. A carried ball sits on that
-// measured drawn mouth only; without one (side/rear/unmeasured pose) it is hidden.
-export function paintCompanionObjects(pixels,width,height,projection,report,state,mouth=null){
+const ease=p=>{const t=Math.max(0,Math.min(1,p));return t*t*(3-2*t);};
+const mix=(a,b,t)=>({x:a.x+(b.x-a.x)*t,y:a.y+(b.y-a.y)*t,rx:a.rx+(b.rx-a.rx)*t,ry:a.ry+(b.ry-a.ry)*t});
+// One screen attachment for the same ball, including the old drawing's toy.
+// Explicit rear occlusion is distinct from a missing/deleted logical object.
+export function projectCompanionBall(width,height,projection,report,state,mouth=null,sprite=null){
+ const b=report.ball;if(!b)return null;
+ const radius=.035,p=projection.project(b.x,(b.height??0)+radius,b.z),edge=projection.project(b.x+radius,(b.height??0)+radius,b.z),up=projection.project(b.x,(b.height??0)+2*radius,b.z);
+ const world={x:p.x*width,y:p.y*height,rx:Math.abs(edge.x-p.x)*width,ry:Math.abs(up.y-p.y)*height};
+ const gesture=report.gesture;
+ if(gesture&&['ball-drop','ball-pickup'].includes(gesture.clip)){
+  if(!sprite)return null;
+  const q=gesture.progress,drop=gesture.clip==='ball-drop',rest=sprite.rest??sprite;
+  let screen=mix(drop?rest:world,sprite,ease(q/(drop?.15:.22)));
+  const end=drop?.57:.82;
+  screen=mix(screen,drop?world:rest,ease((q-end)/(1-end)));
+  return {...screen,owner:'gesture',occluded:false,behind:false};
+ }
+ if(b.carried){
+  const screen=mouth?(b.pickupProgress===undefined?mouth:mix(world,mouth,ease((b.pickupProgress-.54)/.14))):world;
+  return {...screen,owner:'mouth',occluded:!!b.occluded||!mouth,behind:false};
+ }
+ return {...world,owner:'world',occluded:false,behind:b.z<state.z-.01};
+}
+export function paintCompanionObjects(pixels,width,height,projection,report,state,mouth=null,ballScreen=projectCompanionBall(width,height,projection,report,state,mouth)){
  const objects=[];
- // Interaction drawings already include the toy/food. Never paint a second
- // floating ball over the baked mouth, or a biscuit through the puppy's chest.
- if(report.gesture)return pixels;
+ // The ball keeps its attachment through the gesture. Only the baked food
+ // marker is omitted; an unrelated resting ball must stay on the floor.
  // Tiny procedural butterfly: two paired wings and a body. World-space size,
  // same fixed camera and palette as the pet; no image/cache or extra render pass.
  if(report.butterfly){
@@ -35,9 +55,8 @@ export function paintCompanionObjects(pixels,width,height,projection,report,stat
    const j=(y*width+x)*4;pixels[j]=pixels[j+1]=pixels[j+2]=Math.max(pixels[j],tone);
   }
  }
- if(report.ball?.carried){if(mouth&&[mouth.x,mouth.y,mouth.rx,mouth.ry].every(Number.isFinite)&&mouth.rx>0&&mouth.ry>0)objects.push({kind:'ball',screen:mouth});}
- else if(report.ball)objects.push({...report.ball,radius:.035,kind:'ball'});
- if(report.treat)objects.push({...report.treat,height:report.treat.height??.018,radius:.022,kind:'treat'});
+ if(ballScreen&&!ballScreen.occluded)objects.push({...report.ball,kind:'ball',screen:ballScreen,behind:ballScreen.behind});
+ if(report.treat&&!report.gesture)objects.push({...report.treat,height:report.treat.height??.018,radius:.022,kind:'treat'});
  for(const o of objects){
   let cx,cy,rx,ry;
   if(o.screen)({x:cx,y:cy,rx,ry}=o.screen);
@@ -53,7 +72,8 @@ export function paintCompanionObjects(pixels,width,height,projection,report,stat
     const u=(x+.5-cx)/rx,v=(y+.5-cy)/ry;if(u*u+v*v>1)continue;
     const stripe=(v*cos+u*sin)+.25*(u*cos-v*sin);
     const tone=o.kind==='treat'?((x+y)%3?190:85):Math.abs(stripe)<.18?85:225;
-    const j=(y*width+x)*4;pixels[j]=pixels[j+1]=pixels[j+2]=tone;
+    const j=(y*width+x)*4;if(o.behind&&pixels[j]>0)continue;
+    pixels[j]=pixels[j+1]=pixels[j+2]=tone;
    }
  }
  return pixels;

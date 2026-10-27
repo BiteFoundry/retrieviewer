@@ -181,6 +181,12 @@ the complete package is **not MIT-only**.
 The puppy artwork was developed with AI-generated imagery and programmatic pose,
 grounding and frame processing.
 
+## 0.0.25
+
+The ball stays connected as the puppy picks it up, carries it and puts it down.
+Rear-body occlusion preserves the object, and the floor ball stays visible
+after the fetch and during feeding. Artwork and frame caches are unchanged.
+
 ## 0.0.24
 
 The cat can revisit the wheel or tower after a treat. Passive alerts wait for

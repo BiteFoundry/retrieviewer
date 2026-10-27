@@ -3,8 +3,8 @@
   "platform": "win32-x64",
   "files": {
     "runtime.bundle.mjs": {
-      "bytes": 254762,
-      "sha256": "a1f04879aa4098bf94953dc0575a89bc8037d2fced9730003b6d814fd64b117f"
+      "bytes": 258123,
+      "sha256": "4b0a45455735be540f41182da829ac76698e15234cdcd30a2c42676c9e6c0a31"
     },
     "bin/win32-x64/retrieviewer-native.exe": {
       "bytes": 1563136,

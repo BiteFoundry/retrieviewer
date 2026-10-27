@@ -50,7 +50,7 @@ test('real life controller uses rear pickup before turning to return, without a 
  let rearPickup=0,carried=false,done=false;
  for(let n=0;n<1800;n++){
   const s=p.step();life.update(1/60);const r=life.report;
-  if(s.state==='pickup'){rearPickup++;assert.equal(s.view,'rear');assert.equal(r.gesture,null);assert.equal(r.ball,null,'occluded rear muzzle must not paint through the torso');assert.ok(s.z> -4&&s.z< -3.5);}
+  if(s.state==='pickup'){rearPickup++;assert.equal(s.view,'rear');assert.equal(r.gesture,null);assert.ok(r.ball,'the same logical ball survives pickup');if(r.ball.carried)assert.equal(r.ball.occluded,true,'rear muzzle stays behind the torso');assert.ok(s.z> -4&&s.z< -3.5);}
   if(r.ball?.carried)carried=true;
   if(!r.busy){done=true;break;}
  }

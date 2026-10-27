@@ -1109,6 +1109,25 @@ function createPawTransport(feet, pins, { opaque = null } = {}) {
 
 // puppy-companion-sprites.mjs
 init_puppy_frame_store();
+var BALL_ART = "8438ee6cfc52b28f8e327bf37453c8e5ad7d568b2569cd4c5ed1e051d7026905";
+var BALL_KEYS = {
+  "ball-drop": [[156, 171], [158, 218], [157, 229], [156, 227], [164, 285], [164, 285], [164, 285], [164, 285]],
+  "ball-pickup": [[164, 285], [164, 285], [160, 285], [160, 285], [160, 218], [154, 217], [154, 217], [157, 170], [157, 170], [157, 170], [157, 170]]
+};
+function spritePose(info, { clip, progress }) {
+  const list = info.clips[clip];
+  if (!list || !Number.isFinite(progress) || progress < 0 || progress > 1)
+    throw Error("Invalid companion sprite pose");
+  const q = progress * list.length, index = Math.min(list.length - 1, Math.floor(q)), sample = Math.round((q - index) * 8);
+  return { frame: list[index] * 9 + sample, index, blend: sample / 8 };
+}
+function companionBallAnchor(info, pose) {
+  const keys = BALL_KEYS[pose.clip];
+  if (!keys || info.sha256 !== BALL_ART)
+    return null;
+  const { frame, index, blend } = spritePose(info, pose), a = keys[index], b = keys[index + 1];
+  return { x: a[0] + (b[0] - a[0]) * blend, y: a[1] + (b[1] - a[1]) * blend, scale: 1, score: null, frame };
+}
 function createCompanionSpriteSampler(bytes, info, output, kernel = null) {
   const n = 320 * 320;
   if (!isGrayFrameSource(bytes) || info?.width !== 320 || info.height !== 320 || info.samples !== 9 || !Number.isInteger(info.pairs) || info.pairs < 1 || info.pairs > 128 || bytes.byteLength !== info.pairs * 9 * n)
@@ -1122,10 +1141,7 @@ function createCompanionSpriteSampler(bytes, info, output, kernel = null) {
   for (let i = 3;i < rgba.length; i += 4)
     rgba[i] = 255;
   return ({ clip, progress }) => {
-    const list = info.clips[clip];
-    if (!list || !Number.isFinite(progress) || progress < 0 || progress > 1)
-      throw Error("Invalid companion sprite pose");
-    const q = progress * list.length, index = Math.min(list.length - 1, Math.floor(q)), s2 = Math.round((q - index) * 8), frame = frames.getFrame(list[index] * 9 + s2);
+    const frame = frames.getFrame(spritePose(info, { clip, progress }).frame);
     if (kernel?.copyGray)
       kernel.copyGray(rgba, frame);
     else
@@ -2349,6 +2365,13 @@ function createPaperRenderer(cache, info, meta, width, height, { rear, approach,
         out[i] = 255;
     }
     render.lastPlacement = { left, top, side, sideX };
+    const toy = state.interactionPose && interactions ? companionBallAnchor(interactions.info, state.interactionPose) : null;
+    render.lastBall = toy ? projectMouth(toy, { left, top, side, sideX }, state.flip, { family: "interactions", frame: toy.frame }) : null;
+    if (render.lastBall && isSeat) {
+      const family = state.seatVariant === "arrival" && arrivalSeatSample ? "arrivalSeat" : "seat", info2 = family === "arrivalSeat" ? arrivalSeat.info : seat.info;
+      const frame = mouthSourceFrame(family, state, info2);
+      render.lastBall.rest = projectMouth(mouthAnchor(family, frame, info2.sha256), { left, top, side, sideX }, state.flip, { family, frame });
+    }
     const mouthFamily = isInteraction ? null : isAction ? "actions" : isBehavior ? "behaviors" : isSeat ? state.seatVariant === "arrival" && arrivalSeatSample ? "arrivalSeat" : "seat" : isApproach ? "approach" : null;
     const mouthInfo = { actions: actions?.info, behaviors: behaviors?.info, seat: seat?.info, arrivalSeat: arrivalSeat?.info, approach: approach?.info }[mouthFamily];
     const mouthFrame = mouthFamily ? mouthSourceFrame(mouthFamily, state, mouthInfo) : null;
@@ -2845,7 +2868,6 @@ function createCompanionLife(actor, { seed = 731, energy = 0.8, returnStyle = "a
     }),
     wait(3, "offer"),
     fx(() => {
-      ball = null;
       fetchPlan = null;
     })
   ];
@@ -3133,10 +3155,10 @@ function createCompanionLife(actor, { seed = 731, energy = 0.8, returnStyle = "a
     if (!ball)
       return null;
     const pose = actor.sample(clock);
-    if (pose.state === "pickup" && pose.view === "rear")
-      return null;
-    if (pose.state === "pickup" && pose.comfortPose?.progress >= 0.5)
-      return { x: pose.x, z: pose.z, height: CARRY_HEIGHT, carried: true };
+    if (pose.state === "pickup" && pose.comfortPose?.progress >= 0.54)
+      return { x: ball.x, z: ball.z, height: 0, carried: true, pickupProgress: pose.comfortPose.progress, occluded: pose.view === "rear" };
+    if (gesture?.clip === "ball-drop" && gesture.elapsed / gesture.duration >= 0.55)
+      return { ...OFFER, height: 0, carried: false };
     if (ball.mode === "flight" || ball.mode === "dropped")
       return { ...ball.path.at(clock - ball.start), carried: false };
     if (ball.mode === "carried") {
@@ -3183,10 +3205,35 @@ function createCompanionLife(actor, { seed = 731, energy = 0.8, returnStyle = "a
 }
 
 // puppy-companion-objects.mjs
-function paintCompanionObjects(pixels, width, height, projection, report, state, mouth = null) {
+var ease = (p) => {
+  const t = Math.max(0, Math.min(1, p));
+  return t * t * (3 - 2 * t);
+};
+var mix2 = (a, b, t) => ({ x: a.x + (b.x - a.x) * t, y: a.y + (b.y - a.y) * t, rx: a.rx + (b.rx - a.rx) * t, ry: a.ry + (b.ry - a.ry) * t });
+function projectCompanionBall(width, height, projection, report, state, mouth = null, sprite = null) {
+  const b = report.ball;
+  if (!b)
+    return null;
+  const radius = 0.035, p = projection.project(b.x, (b.height ?? 0) + radius, b.z), edge = projection.project(b.x + radius, (b.height ?? 0) + radius, b.z), up = projection.project(b.x, (b.height ?? 0) + 2 * radius, b.z);
+  const world = { x: p.x * width, y: p.y * height, rx: Math.abs(edge.x - p.x) * width, ry: Math.abs(up.y - p.y) * height };
+  const gesture = report.gesture;
+  if (gesture && ["ball-drop", "ball-pickup"].includes(gesture.clip)) {
+    if (!sprite)
+      return null;
+    const q = gesture.progress, drop = gesture.clip === "ball-drop", rest = sprite.rest ?? sprite;
+    let screen = mix2(drop ? rest : world, sprite, ease(q / (drop ? 0.15 : 0.22)));
+    const end = drop ? 0.57 : 0.82;
+    screen = mix2(screen, drop ? world : rest, ease((q - end) / (1 - end)));
+    return { ...screen, owner: "gesture", occluded: false, behind: false };
+  }
+  if (b.carried) {
+    const screen = mouth ? b.pickupProgress === undefined ? mouth : mix2(world, mouth, ease((b.pickupProgress - 0.54) / 0.14)) : world;
+    return { ...screen, owner: "mouth", occluded: !!b.occluded || !mouth, behind: false };
+  }
+  return { ...world, owner: "world", occluded: false, behind: b.z < state.z - 0.01 };
+}
+function paintCompanionObjects(pixels, width, height, projection, report, state, mouth = null, ballScreen = projectCompanionBall(width, height, projection, report, state, mouth)) {
   const objects = [];
-  if (report.gesture)
-    return pixels;
   if (report.butterfly) {
     const b = report.butterfly, p = projection.project(b.x, b.height, b.z);
     const edge = projection.project(b.x + 0.04, b.height, b.z), up = projection.project(b.x, b.height + 0.035, b.z);
@@ -3220,12 +3267,9 @@ function paintCompanionObjects(pixels, width, height, projection, report, state,
             pixels[j] = pixels[j + 1] = pixels[j + 2] = Math.max(pixels[j], tone);
           }
   }
-  if (report.ball?.carried) {
-    if (mouth && [mouth.x, mouth.y, mouth.rx, mouth.ry].every(Number.isFinite) && mouth.rx > 0 && mouth.ry > 0)
-      objects.push({ kind: "ball", screen: mouth });
-  } else if (report.ball)
-    objects.push({ ...report.ball, radius: 0.035, kind: "ball" });
-  if (report.treat)
+  if (ballScreen && !ballScreen.occluded)
+    objects.push({ ...report.ball, kind: "ball", screen: ballScreen, behind: ballScreen.behind });
+  if (report.treat && !report.gesture)
     objects.push({ ...report.treat, height: report.treat.height ?? 0.018, radius: 0.022, kind: "treat" });
   for (const o of objects) {
     let cx, cy, rx, ry;
@@ -3250,6 +3294,8 @@ function paintCompanionObjects(pixels, width, height, projection, report, state,
         const stripe = v * cos + u * sin + 0.25 * (u * cos - v * sin);
         const tone = o.kind === "treat" ? (x + y) % 3 ? 190 : 85 : Math.abs(stripe) < 0.18 ? 85 : 225;
         const j = (y * width + x) * 4;
+        if (o.behind && pixels[j] > 0)
+          continue;
         pixels[j] = pixels[j + 1] = pixels[j + 2] = tone;
       }
   }
@@ -3426,10 +3472,11 @@ function createPetFromAssets(options, lease, kernel = null) {
       if (report.gesture)
         state.interactionPose = report.gesture;
       const placement = projection.placement(state.x, state.z, state.bodyLift ?? 0), pixels = paint(state, { ...placement, contactEnabled: !!contactEnabled });
-      paintCompanionObjects(pixels, width, height, projection, report, state, paint.lastMouth);
+      const ballScreen = projectCompanionBall(width, height, projection, report, state, paint.lastMouth, paint.lastBall);
+      paintCompanionObjects(pixels, width, height, projection, report, state, paint.lastMouth, ballScreen);
       const { text } = rgbaToBraille(pixels, width, height, { method: "stable", brightness: 1.18, contrast: 1.1, kernel });
       lastHeldFrameKey = heldFrameKey(state, report, { columns, rows, cellAspect, camera, poseFps, contactEnabled });
-      return { text, columns, rows, pixels, state, report, placement, projection, artProfile, mouth: paint.lastMouth, contacts: paint.report() };
+      return { text, columns, rows, pixels, state, report, placement, projection, artProfile, mouth: paint.lastMouth, ballScreen, contacts: paint.report() };
     },
     interact(kind) {
       alive();

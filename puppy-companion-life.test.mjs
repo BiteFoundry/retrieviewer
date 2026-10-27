@@ -64,7 +64,7 @@ test('ball interrupts an autonomous roll plan and completes a safe fetch/return'
   if(!f.report.busy){complete=true;break;}
  }
  assert.ok(complete);for(const intent of ['pickup','carry','drop','offer'])assert.ok(intents.has(intent),intent);
- assert.equal(puppy.life.report.ball,null);
+ assert.equal(puppy.life.report.ball.phase,'rest');
 });
 
 test('hand-fed treat never turns into an autonomous walk while eating',()=>{

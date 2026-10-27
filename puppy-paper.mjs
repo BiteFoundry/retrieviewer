@@ -8,7 +8,7 @@ import {createPaperBehaviorSampler,paperBehaviorPose} from './puppy-paper-behavi
 import {createPaperAreaSampler} from './puppy-paper-area.mjs';
 import {PAPER_ACTION_DURATIONS,createPaperActionSampler,paperActionPose} from './puppy-paper-actions.mjs';
 import {createPawTransport} from './puppy-paper-paw-transport.mjs';
-import {createCompanionSpriteSampler} from './puppy-companion-sprites.mjs';
+import {createCompanionSpriteSampler,companionBallAnchor} from './puppy-companion-sprites.mjs';
 import {createComfortSpriteSampler,comfortMotion,comfortMotionKey,comfortProgress} from './puppy-comfort-sprites.mjs';
 import {mouthSourceFrame,mouthAnchor,projectMouth} from './puppy-mouth-anchor.mjs';
 import {trickClipEdges} from './puppy-paper-trick-timing.mjs';
@@ -431,6 +431,13 @@ export function createPaperRenderer(cache,info,meta,width,height,{rear,approach,
   const minify=side<320||sideX<320,filter=isAction?actionArea:area;if(minify&&!(kernel?.blit&&transport))filter.prepare(image);
   if(kernel?.clear)kernel.clear(out);else{out.fill(0);for(let i=3;i<out.length;i+=4)out[i]=255;}
   render.lastPlacement={left,top,side,sideX};
+  const toy=state.interactionPose&&interactions?companionBallAnchor(interactions.info,state.interactionPose):null;
+  render.lastBall=toy?projectMouth(toy,{left,top,side,sideX},state.flip,{family:'interactions',frame:toy.frame}):null;
+  if(render.lastBall&&isSeat){
+   const family=state.seatVariant==='arrival'&&arrivalSeatSample?'arrivalSeat':'seat',info=family==='arrivalSeat'?arrivalSeat.info:seat.info;
+   const frame=mouthSourceFrame(family,state,info);
+   render.lastBall.rest=projectMouth(mouthAnchor(family,frame,info.sha256),{left,top,side,sideX},state.flip,{family,frame});
+  }
   // Measured drawn mouth of the EXACT sample above (same priority, quantization,
   // placement and mirror). Unmeasured or occluded samples remain unsupported.
   const mouthFamily=isInteraction?null:isAction?'actions':isBehavior?'behaviors':isSeat?(state.seatVariant==='arrival'&&arrivalSeatSample?'arrivalSeat':'seat'):isApproach?'approach':null;

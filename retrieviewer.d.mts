@@ -54,7 +54,7 @@ export interface LifeReport {
   decisions: number;
   cooldowns: {ball: number; treat: number; tug: number};
   gesture: {clip: string; progress: number} | null;
-  ball: {x: number; z: number; height: number; carried: boolean; spin?: number; speed?: number; phase?: 'flight' | 'roll' | 'rest'; settled?: boolean} | null;
+  ball: {x: number; z: number; height: number; carried: boolean; occluded?: boolean; pickupProgress?: number; spin?: number; speed?: number; phase?: 'flight' | 'roll' | 'rest'; settled?: boolean} | null;
   /** Local deterministic fetch variation; null outside a ball interaction. */
   fetchPattern: 'clean' | 'rolling' | 'miss' | 'tumble' | null;
   /** Ball-carry gait, selected independently of the fetch/roaming random stream. */
@@ -79,6 +79,8 @@ export interface PetFrame {
   state: PetState;
   report: LifeReport;
   mouth: {x: number; y: number; rx: number; ry: number; family: string; frame: number} | null;
+  /** Current ball center/radii in raster pixels; occlusion does not delete it. */
+  ballScreen: {x: number; y: number; rx: number; ry: number; owner: 'world' | 'mouth' | 'gesture'; occluded: boolean; behind: boolean} | null;
   placement: {x: number; y: number; size: number; pixelAspect: number; depth: number};
   projection: {
     project(x: number, y: number, z: number): {x: number; y: number; depth: number};

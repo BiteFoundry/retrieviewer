@@ -53,7 +53,7 @@ test('repeated clean, rolling and missed catches recover and return the ball hom
   for(let i=0;i<1800;i++){
    const f=step(),b=f.report.ball;if(b?.phase==='roll'&&b.speed>0)rolling=true;
    if(f.report.intent==='miss')missed=true;
-   if(!f.report.busy){assert.ok(Math.hypot(f.state.x,f.state.z-.2)<.002);assert.equal(b,null);complete=true;break;}
+   if(!f.report.busy){assert.ok(Math.hypot(f.state.x,f.state.z-.2)<.002);assert.equal(b.phase,'rest');assert.equal(b.carried,false);complete=true;break;}
   }
   assert.ok(complete,'fetch must not hang while waiting for a rolling target');
  }

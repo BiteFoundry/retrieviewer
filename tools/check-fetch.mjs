@@ -31,7 +31,7 @@ try{
    const f=pet.frame({columns,rows,poseFps:30});
    if(f.state.state==='pickup'){
     assert.ok(['rear','front'].includes(f.state.view));assert.equal(f.state.seatProgress,null);assert.equal(f.state.speed,0);assert.equal(f.report.gesture,null);
-    if(f.state.view==='rear')assert.equal(f.report.ball,null,'rear pickup ball is occluded');
+    if(f.state.view==='rear'){assert.ok(f.report.ball,'rear pickup keeps the same ball');if(f.report.ball.carried)assert.equal(f.report.ball.occluded,true,'carried rear muzzle is occluded');}
     else assert.equal(f.mouth?.family,'comfort','visible side pickup ball follows an authored mouth');
    }
    if(capture)frames.push({...cropFrame(f,1),intent:f.report.intent,pose:f.state.state,time:i/60,ball:f.report.ball,xWorld:f.state.x,zWorld:f.state.z,speed:f.state.speed,view:f.state.view,comfortPose:f.state.comfortPose,returnMode:f.report.returnMode});

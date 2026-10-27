@@ -184,7 +184,7 @@ export function createCompanionLife(actor,{seed=731,energy=.8,returnStyle='auto'
   cmd('sit',[{urgent:true}],'pickup',()=>!directionalPickup()&&unseated()),{...play('ball-pickup','pickup'),when:()=>!directionalPickup()},
   fx(()=>{ball={mode:'carried'};}),cmd(fetchGo,[HOME.x,HOME.z,{returnMode:fetchPlan.returnMode}],'carry'),
   cmd('sit',[{urgent:true}],'drop',unseated),play('ball-drop','drop'),
-  fx(()=>{ball={mode:'dropped',start:clock,path:createBallPath({from:OFFER,landing:OFFER,stop:{x:OFFER.x+.035,z:OFFER.z+.06},flight:0,peak:0,deceleration:.2})};needs.social-=.4;}),wait(3,'offer'),fx(()=>{ball=null;fetchPlan=null;})
+  fx(()=>{ball={mode:'dropped',start:clock,path:createBallPath({from:OFFER,landing:OFFER,stop:{x:OFFER.x+.035,z:OFFER.z+.06},flight:0,peak:0,deceleration:.2})};needs.social-=.4;}),wait(3,'offer'),fx(()=>{fetchPlan=null;})
  ];
  // Hand-feed where the puppy already is: sit only if not front-seated, never go/walk/chase/come.
  const TREAT_STEPS=()=>[
@@ -344,10 +344,10 @@ export function createCompanionLife(actor,{seed=731,energy=.8,returnStyle='auto'
  function ballReport(){
   if(!ball)return null;
   const pose=actor.sample(clock);
-  // On a rear pickup the muzzle/ball is occluded behind the connected body.
-  // Do not draw the ground ball through the hindquarters to make it visible.
-  if(pose.state==='pickup'&&pose.view==='rear')return null;
-  if(pose.state==='pickup'&&pose.comfortPose?.progress>=.5)return {x:pose.x,z:pose.z,height:CARRY_HEIGHT,carried:true};
+  // Keep the object alive while it changes attachment. The renderer handles
+  // the rear body's occlusion instead of deleting the ground ball early.
+  if(pose.state==='pickup'&&pose.comfortPose?.progress>=.54)return {x:ball.x,z:ball.z,height:0,carried:true,pickupProgress:pose.comfortPose.progress,occluded:pose.view==='rear'};
+  if(gesture?.clip==='ball-drop'&&gesture.elapsed/gesture.duration>=.55)return {...OFFER,height:0,carried:false};
   if(ball.mode==='flight'||ball.mode==='dropped')return {...ball.path.at(clock-ball.start),carried:false};
   if(ball.mode==='carried'){const s=actor.sample(clock);return {x:s.x,z:s.z,height:CARRY_HEIGHT,carried:true};}
   return {x:ball.x,z:ball.z,height:0,carried:false};

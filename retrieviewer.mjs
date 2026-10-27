@@ -3,7 +3,7 @@ import {createPaperProjection,createPaperBody} from './puppy-paper-world.mjs';
 import {rgbaToBraille} from './braille.mjs';
 import {createSnappyTrickTimings} from './puppy-paper-trick-timing.mjs';
 import {createCompanionLife,FETCH_RETURN_STYLES} from './puppy-companion-life.mjs';
-import {paintCompanionObjects} from './puppy-companion-objects.mjs';
+import {paintCompanionObjects,projectCompanionBall} from './puppy-companion-objects.mjs';
 import {readPackedFrames} from './puppy-frame-store.mjs';
 import {expandIndexedArchive} from './puppy-frame-indexed.mjs';
 import {BAKED_MOTION} from './puppy-motion-tables.generated.mjs';
@@ -181,10 +181,11 @@ export function createPetFromAssets(options,lease,kernel=null){
    const state=actor.sample(time,{poseFps}),report=life.report;
    if(report.gesture)state.interactionPose=report.gesture;
    const placement=projection.placement(state.x,state.z,state.bodyLift??0),pixels=paint(state,{...placement,contactEnabled:!!contactEnabled});
-   paintCompanionObjects(pixels,width,height,projection,report,state,paint.lastMouth);
+   const ballScreen=projectCompanionBall(width,height,projection,report,state,paint.lastMouth,paint.lastBall);
+   paintCompanionObjects(pixels,width,height,projection,report,state,paint.lastMouth,ballScreen);
    const {text}=rgbaToBraille(pixels,width,height,{method:'stable',brightness:1.18,contrast:1.1,kernel});
    lastHeldFrameKey=heldFrameKey(state,report,{columns,rows,cellAspect,camera,poseFps,contactEnabled});
-   return {text,columns,rows,pixels,state,report,placement,projection,artProfile,mouth:paint.lastMouth,contacts:paint.report()};
+   return {text,columns,rows,pixels,state,report,placement,projection,artProfile,mouth:paint.lastMouth,ballScreen,contacts:paint.report()};
   },
   // 'ball' | 'treat' | 'tug'. False when busy or cooling down; unknown kinds throw.
   interact(kind){alive();if(!INTERACTIONS.includes(kind))throw TypeError(`Unknown interaction: ${kind}`);return life.interact(kind);},
