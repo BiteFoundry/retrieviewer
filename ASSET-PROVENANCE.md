@@ -132,3 +132,16 @@ registration and approved extensions; research photos were observation only,
 not generation inputs or bundled runtime assets. Original source sheets,
 research media and the unused tuxedo prototype are excluded. Alternative RVZ5
 encoding preserves every decoded Q5 pixel. See the cat ASSETS-LICENSE.md.
+
+## Standing-turn repair ¡¤ 2026-10-27
+
+The three generated whole-body turn sheets extend the existing CC BY-SA 4.0
+puppy artwork. The front and rear sheets, corrected half-turn sheet, and side
+bridge sheet have SHA-256 hashes respectively:
+`97fdc729724b98e609f60d4faf033686a067d296bccc206324bdea424ea488ab`,
+`b80dd6578f08254233700cee078eb9ade08f8b50a7d6221e7a5a700abbc067e2`,
+`fee3c82bc811efbdb13accc0b4dc5f59d613aba0bf35502316d4eab58924303b`,
+`663a33c45a88c9515519af3519e61443b3b0067bff78ea200d83e9a34729e8f8`.
+Each sheet uses a shared scale, floor registration and whole-frame translation;
+original endpoint frames and all non-target decoded samples remain exact.
+Source sheets are excluded from npm. Paw contacts are image-space proxies.

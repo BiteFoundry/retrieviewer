@@ -46,6 +46,7 @@ export function buildMotionTables(root=ROOT,readSource=readFileSync){
  const {rear,approach,actions,behaviors,comfort}=info;
  const range=(start,n)=>Array.from({length:n},(_,i)=>start+i);
  const support={front:bakeSupportTrack(rear.frontFeet,range(0,8),17),rear:bakeSupportTrack(rear.rearFeet,range(5,8),9),approach:bakeSupportTrack(approach.feet,range(5,8),9),walk:bakeSupportTrack(actions.feet,actions.clips.walk,9)};
+ for(const name of ['walk-face-front','walk-face-rear','walk-turn'])support['action/'+name]=bakeSupportTrack(actions.feet,actions.clips[name],9,{cyclic:false});
  for(const [name,indices] of Object.entries(behaviors.clips))support['behavior/'+name]=bakeSupportTrack(behaviors.feet,indices,9,{cyclic:name==='walk'});
  const actionClips=Object.fromEntries(Object.entries(actions.clips).map(([name,list])=>{const weights=actions.weights?.[name]??list.map(()=>1);return[name,{list,weights,total:weights.reduce((a,b)=>a+b,0)}];}));
  // Independent compressed frame stores: no runtime assets are rewritten.

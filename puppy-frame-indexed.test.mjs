@@ -41,7 +41,7 @@ test('every indexed frame is pixel-identical to the approved dog, including rand
   }finally{current.dispose();current.dispose();}
   assert.equal(current.stats().closed,true);assert.equal(current.residentBytes,0);assert.throws(()=>current.getFrame(0),/disposed/);
  }
- assert.equal(frames,2401);assert.ok(resident<2_500_000,'even visiting every family keeps bounded decoded frames');
+ assert.equal(frames,2419);assert.ok(resident<2_500_000,'even visiting every family keeps bounded decoded frames');
 });
 
 test('portable/custom loading restores exact RVQ5 archive bytes',async()=>{

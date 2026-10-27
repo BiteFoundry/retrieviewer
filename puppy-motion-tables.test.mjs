@@ -36,6 +36,7 @@ test('LF and Windows CRLF metadata produce the same bake without normalizing bin
 
 test('baked contact episodes match the original algorithm at every source sample, cycle and wrap',()=>{
  const cases=[['front',rear.frontFeet,Array.from({length:8},(_,i)=>i),17,true],['rear',rear.rearFeet,Array.from({length:8},(_,i)=>5+i),9,true],['approach',approach.feet,Array.from({length:8},(_,i)=>5+i),9,true],['walk',actions.feet,actions.clips.walk,9,true],
+  ...['walk-face-front','walk-face-rear','walk-turn'].map(name=>['action/'+name,actions.feet,actions.clips[name],9,false]),
   ...Object.entries(behaviors.clips).map(([name,list])=>['behavior/'+name,behaviors.feet,list,9,name==='walk'])];
  let samples=0;
  for(const [key,labels,list,n,cyclic] of cases){

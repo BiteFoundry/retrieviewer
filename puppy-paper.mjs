@@ -383,6 +383,7 @@ export function createPaperRenderer(cache,info,meta,width,height,{rear,approach,
  const actionSample=actions?createPaperActionSampler(actions.bytes,actions.info,actionScratch.subarray(0,actions.info.width*actions.info.height*4),motionTables?.actionClips,kernel):null,actionArea=actions?createPaperAreaSampler(actions.info.width):null;
  const episodes=(key,labels,indices,samples,options)=>motionTables?.support[key]?createBakedSupportEpisodes(motionTables.support[key]):createPaperSupportEpisodes(labels,indices,samples,options);
  const walkEpisodes=actions?episodes('walk',actions.info.feet,actions.info.clips.walk,9):null;
+ const turnEpisodes=actions?Object.fromEntries(['walk-face-front','walk-face-rear','walk-turn'].map(name=>[name,episodes('action/'+name,actions.info.feet,actions.info.clips[name],9,{cyclic:false})])):{};
  const sourceEpisodes=rear?{
   front:episodes('front',rear.info.frontFeet,[0,1,2,3,4,5,6,7],17),
   rear:episodes('rear',rear.info.rearFeet,[5,6,7,8,9,10,11,12],9),
@@ -411,6 +412,9 @@ export function createPaperRenderer(cache,info,meta,width,height,{rear,approach,
    if(state.flip)feet=feet.map(p=>({...p,x:319-p.x}));
   }else if(contactEnabled&&isAction&&state.actionName==='walk'){
    const p=paperActionPose('walk',state.actionProgress,actions.info,motionTables?.actionClips);feet=walkEpisodes(actions.info.feet[p.pair][Math.round(p.blend*8)],p.pair,p.blend,state.actionProgress);
+   if(state.flip)feet=feet.map(p=>({...p,x:319-p.x}));
+  }else if(contactEnabled&&isAction&&turnEpisodes[state.actionName]){
+   const p=paperActionPose(state.actionName,state.actionProgress,actions.info,motionTables?.actionClips);feet=turnEpisodes[state.actionName](actions.info.feet[p.pair][Math.round(p.blend*8)],p.pair,p.blend,state.actionProgress);
    if(state.flip)feet=feet.map(p=>({...p,x:319-p.x}));
   }else if(contactEnabled&&rear&&state.state==='run'&&!isAction&&!isComfort){
    const b=isBehavior?paperBehaviorPose(state,behaviors.info):null;

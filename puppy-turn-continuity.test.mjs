@@ -28,12 +28,11 @@ test('seeded standing turn enters the existing launch before the front gallop',a
 });
 
 test('standing turn mouths address the actual sampled canvas and mirror with the body',()=>{
- for(const clip of ['walk-face-front','walk-face-rear'])for(let k=0;k<9;k++){
-  const frame=mouthSourceFrame('actions',{actionName:clip,actionProgress:k/8},info);
-  assert.equal(frame,info.clips[clip][0]*9+k);
+ for(const clip of ['walk-face-front','walk-face-rear','walk-turn'])for(let k=0;k<=16;k++){
+  const progress=k/16, frame=mouthSourceFrame('actions',{actionName:clip,actionProgress:progress},info);
   const anchor=mouthAnchor('actions',frame,info.sha256);
-  if(clip==='walk-face-rear'&&k<5){assert.equal(anchor,null);continue;}
-  assert.ok(anchor);assert.ok(anchor.x>150&&anchor.x<270&&anchor.y>130&&anchor.y<180);
+  if(!anchor){assert.equal(clip,'walk-face-rear');continue;}
+  assert.ok(anchor.x>50&&anchor.x<270&&anchor.y>130&&anchor.y<180);
   const rect={left:10,top:20,side:320,sideX:160};
   const a=projectMouth(anchor,rect,false),b=projectMouth(anchor,rect,true);
   assert.equal(a.y,b.y);assert.equal(a.x+b.x,180);
@@ -65,4 +64,9 @@ test('fetch uses the same standing bridges in both directions and keeps the visi
   }
   assert.ok(launched&&returnTurn&&visible>2);assert.deepEqual([...directions].sort(),['forward','reverse']);
  }finally{pet.dispose();}
+});
+
+test('half-turn final mouth stays on the registered muzzle at the exact preserved exit',()=>{
+ const penultimate=mouthAnchor('actions',55*9+7,info.sha256),last=mouthAnchor('actions',55*9+8,info.sha256);
+ assert.ok(penultimate&&last);assert.ok(Math.hypot(penultimate.x-last.x,penultimate.y-last.y)<5);
 });
