@@ -33,16 +33,27 @@ test('Windows toolbar: ball stays first, tug follows treat, nothing clips',()=>{
  assert.match(cs,/\(\(Button\)bar\.Controls\[0\]\)\.PerformClick\(\)/,'diagnostic first-ball click unchanged');
  const width=Number(cs.match(/bar\.Size=new Size\((\d+),40\)/)[1]),status=cs.match(/status\.Location=new Point\((\d+),12\);status\.Size=new Size\((\d+),22\)/);
  noOverlap(buttons,Number(status[1]),width);assert.ok(Number(status[1])+Number(status[2])<=width);
+ assert.match(cs,/barToggle=MakeButton\("Hide",538,ToggleBar\)/);
+ assert.match(cs,/foreach\(Control control in bar\.Controls\)if\(control!=barToggle\)control\.Visible=!barCollapsed/);
+ assert.match(cs,/barToggle\.Text=barCollapsed\?"Menu":"Hide";barToggle\.Left=barCollapsed\?8:538;bar\.Width=barCollapsed\?80:610/);
+ assert.ok(Number(status[1])+Number(status[2])<=538);assert.ok(538+64<=610);assert.ok(8+64<=80);
 });
 
-test('macOS toolbar: tug selector, ASCII label escape and layout inside BAR_WIDTH',()=>{
+test('macOS toolbar: tug selector and expanded/collapsed layout',()=>{
  const jxa=read('./integrations/macos-overlay/overlay.jxa');
  assert.match(jxa,/'onTug:': guarded\('onTug'\)/);assert.match(jxa,/shell\.onTug = function \(\) \{ core\.interact\('tug'\); \};/);
  const buttons=[...jxa.matchAll(/makeButton\('([^']+)', \{ x: (\d+), y: 6, width: (\d+), height: 28 \}, '(on\w+):'\)/g)].map(m=>[m[4],Number(m[2]),Number(m[3]),m[1]]);
- assert.deepEqual(buttons.map(b=>b[0]),['onBall','onTreat','onTug','onPick','onPause','onQuit']);
+ assert.deepEqual(buttons.map(b=>b[0]),['onBall','onTreat','onTug','onPick','onPause','onQuit','onToggleBar']);
  assert.equal(buttons[2][3],'Tug');
- const width=Number(jxa.match(/var BAR_WIDTH = (\d+),/)[1]),status=jxa.match(/makeLabel\(TEXT\.preparing, \{ x: (\d+), y: 10, width: (\d+)/);
- noOverlap(buttons,Number(status[1]),width);assert.ok(Number(status[1])+Number(status[2])<=width);
+ const baseWidth=Number(jxa.match(/var BAR_WIDTH = (\d+),/)[1]),status=jxa.match(/makeLabel\(TEXT\.preparing, \{ x: (\d+), y: 10, width: (\d+)/);
+ assert.match(jxa,/var width = barCollapsed \? 80 : BAR_WIDTH \+ 72/);
+ const width=baseWidth+72, regular=buttons.slice(0,-1), toggle=buttons.at(-1);
+ noOverlap(regular,Number(status[1]),baseWidth);assert.ok(Number(status[1])+Number(status[2])<=toggle[1]);
+ assert.deepEqual(toggle,['onToggleBar',538,64,'Hide']);assert.ok(toggle[1]+toggle[2]<=width);
+ assert.match(jxa,/barToggle\.setTitle\(\$\(barCollapsed \? 'Menu' : 'Hide'\)\)/);
+ assert.match(jxa,/barToggle\.setFrame\(nsRect\(\{ x: barCollapsed \? 8 : 538, y: 6, width: 64, height: 28 \}\)\)/);
+ assert.match(jxa,/barControls\.forEach\(function \(control\) \{ control\.setHidden\(barCollapsed\); \}\)/);
+ assert.ok(8+64<=80);
 });
 
 test('desktop-owned picker, controls, tray and status copy are English on every platform',()=>{
@@ -67,12 +78,16 @@ class UI(object):
     def __getattr__(self,name): return lambda *a: None
 sent=[]; c=o.Companion(UI(),sent.append,cell=16)
 c.press('tug'); before=list(sent); c.loaded=True; c.press('tug'); loaded=sent[-1]; c.paused=True; n=len(sent); c.press('tug')
-d=o.XDisplay.__new__(o.XDisplay)
+d=o.XDisplay.__new__(o.XDisplay); d.bar_collapsed=False; d.bar_target_canvas=None
+expanded=[d.bar_hit(6+58*i+10,15) for i in range(len(o.XDisplay.BAR_BUTTONS))]
+d.bar_collapsed=True
+collapsed=[d.bar_hit(x,y) for x,y in [(6,4),(59,30),(5,15),(60,15),(64,15),(16,3),(16,31),(74,15)]]
 print(json.dumps({'before':[m for m in before if m.get('type')=='interact'],'loaded':loaded,'paused':len(sent)==n,
- 'buttons':[b[0] for b in o.XDisplay.BAR_BUTTONS],'hit':[d.bar_hit(6+58*i+10,15) for i in range(len(o.XDisplay.BAR_BUTTONS))]}))`],{encoding:'utf8',timeout:60000});
+ 'buttons':[b[0] for b in o.XDisplay.BAR_BUTTONS],'hit':expanded,'collapsed':collapsed}))`],{encoding:'utf8',timeout:60000});
  assert.equal(r.status,0,r.stderr);const out=JSON.parse(r.stdout.trim().split('\n').pop());
  assert.deepEqual(out.before,[]);assert.deepEqual(out.loaded,{type:'interact',kind:'tug'});assert.equal(out.paused,true);
- assert.deepEqual(out.buttons,['ball','treat','tug','window','pause','quit']);assert.deepEqual(out.hit,out.buttons);
+ assert.deepEqual(out.buttons,['ball','treat','tug','window','pause','quit','toggle']);assert.deepEqual(out.hit,out.buttons);
+ assert.deepEqual(out.collapsed,['toggle','toggle',null,null,null,null,null,null]);
 });
 
 test('browser preview: third tug button, EN/KO copy, cooldown loops and cache-busted app',()=>{
