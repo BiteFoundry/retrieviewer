@@ -10,6 +10,8 @@ public static class NativePickerFixture {
  [DllImport("user32.dll",CharSet=CharSet.Unicode)] static extern int GetWindowText(IntPtr w,StringBuilder b,int n);
  [DllImport("user32.dll")] static extern bool SetWindowPos(IntPtr w,IntPtr after,int x,int y,int cx,int cy,uint flags);
  [DllImport("user32.dll")] static extern bool IsWindowVisible(IntPtr w);
+ [DllImport("user32.dll")] static extern IntPtr GetForegroundWindow();
+ [DllImport("user32.dll",EntryPoint="GetWindowLongW")] static extern int GetWindowLong(IntPtr w,int index);
  [DllImport("user32.dll")] static extern IntPtr SetThreadDpiAwarenessContext(IntPtr context);
  [DllImport("user32.dll")] static extern bool ShowWindow(IntPtr w,int how);
  [DllImport("user32.dll",CharSet=CharSet.Unicode)] static extern int GetClassName(IntPtr w,StringBuilder text,int n);
@@ -22,11 +24,12 @@ public static class NativePickerFixture {
  public static void Attach(int pid,string title){var picker=Find(pid,"Retrieviewer - choose an app window");if(!IsWindowVisible(picker))throw new Exception("Native picker is hidden");var list=GetDlgItem(picker,100);int n=(int)SendMessage(list,0x18b,IntPtr.Zero,IntPtr.Zero);int selected=-1;for(int i=0;i<n;i++){var b=new StringBuilder(1024);SendMessage(list,0x189,new IntPtr(i),b);if(b.ToString()==title){selected=i;break;}}if(selected<0)throw new Exception("Owned fixture absent from picker");SendMessage(list,0x186,new IntPtr(selected),IntPtr.Zero);SendMessage(picker,0x111,new IntPtr(101),IntPtr.Zero);}
  [StructLayout(LayoutKind.Sequential)] struct RECT {public int Left,Top,Right,Bottom;}
  [DllImport("user32.dll")] static extern bool GetWindowRect(IntPtr w,out RECT r);
- public static string BarState(int pid,string action){SetThreadDpiAwarenessContext(new IntPtr(-4));var bar=Find(pid,"Retrieviewer controls");if(action=="toggle")SendMessage(bar,0x111,new IntPtr(10),IntPtr.Zero);else if(action=="pause")SendMessage(bar,0x111,new IntPtr(4),IntPtr.Zero);else if(action=="cat")SendMessage(bar,0x8001,new IntPtr(2),IntPtr.Zero);RECT r;if(!GetWindowRect(bar,out r))throw new Exception("Bar bounds unavailable");return "{\"ok\":true,\"width\":"+(r.Right-r.Left)+",\"right\":"+r.Right+",\"toggle\":\""+Text(GetDlgItem(bar,10))+"\",\"comboVisible\":"+(IsWindowVisible(GetDlgItem(bar,9))?"true":"false")+"}";}
+ public static string BarState(int pid,string action){SetThreadDpiAwarenessContext(new IntPtr(-4));var bar=Find(pid,"Retrieviewer controls");if(action=="toggle")SendMessage(bar,0x111,new IntPtr(10),IntPtr.Zero);else if(action=="pause")SendMessage(bar,0x111,new IntPtr(4),IntPtr.Zero);else if(action=="cat")SendMessage(bar,0x8001,new IntPtr(2),IntPtr.Zero);RECT r;if(!GetWindowRect(bar,out r))throw new Exception("Bar bounds unavailable");return "{\"ok\":true,\"width\":"+(r.Right-r.Left)+",\"right\":"+r.Right+",\"toggle\":\""+Text(GetDlgItem(bar,10))+"\",\"barVisible\":"+(IsWindowVisible(bar)?"true":"false")+",\"comboVisibleStyle\":"+((GetWindowLong(GetDlgItem(bar,9),-16)&0x10000000)!=0?"true":"false")+"}";}
  public static void PickAgain(int pid){var bar=Find(pid,"Retrieviewer controls");SendMessage(bar,0x111,new IntPtr(5),IntPtr.Zero);}
  public static void NativeResize(int pid,int width,int height){if(width<640||height<400||width>3840||height>2160)throw new Exception("Invalid owned resize");SetThreadDpiAwarenessContext(new IntPtr(-4));var window=Find(pid,"Retrieviewer diagnostic scene");if(!SetWindowPos(window,IntPtr.Zero,-12000,-12000,width,height,0x14))throw new Exception("Native resize failed");}
  public static void NativeMinimize(int pid,bool minimize){var window=Find(pid,"Retrieviewer diagnostic scene");ShowWindow(window,minimize?6:4);if(!minimize)SetWindowPos(window,IntPtr.Zero,-12000,-12000,0,0,0x55);}
  public static int NativePanels(int pid){int n=0;EnumWindows((w,p)=>{uint owner;GetWindowThreadProcessId(w,out owner);if(owner==(uint)pid){var b=new StringBuilder(128);GetClassName(w,b,128);if(b.ToString()=="RetrieviewerNativeDots")n++;}return true;},IntPtr.Zero);return n;}
+ public static bool TargetForeground(){return GetForegroundWindow()==target.Handle;}
  public static void Minimize(){target.Invoke((Action)(()=>target.WindowState=FormWindowState.Minimized));}
  public static void Restore(){target.Invoke((Action)(()=>{target.WindowState=FormWindowState.Normal;target.SetBounds(-12000,-12000,1920,1080);}));}
  public static void Close(){target.Invoke((Action)(()=>target.Close()));thread.Join(5000);}
@@ -43,6 +46,7 @@ try {
     'attach' {[NativePickerFixture]::Attach([int]$request.pid,$Title)}
     'picker' {[NativePickerFixture]::PickAgain([int]$request.pid)}
     'bar' {$fixtureResult = [NativePickerFixture]::BarState([int]$request.pid,[string]$request.action) | ConvertFrom-Json}
+    'foreground' {$fixtureResult = @{ok=$true;targetForeground=[NativePickerFixture]::TargetForeground()}}
     'minimize' {[NativePickerFixture]::Minimize()}
     'restore' {[NativePickerFixture]::Restore()}
     'native-resize' {[NativePickerFixture]::NativeResize([int]$request.pid,[int]$request.width,[int]$request.height)}

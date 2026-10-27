@@ -13,20 +13,21 @@ const lines=createInterface({input:fixture.stdout});lines.on('line',line=>{const
 const receive=()=>new Promise((resolve,reject)=>{const timer=setTimeout(()=>reject(Error('Fixture timeout: '+stderr)),10000);pending=r=>{clearTimeout(timer);resolve(r);};});
 const command=async op=>{const result=receive();fixture.stdin.write(JSON.stringify(op)+'\n');const response=await result;assert.equal(response.ok,true,response.error);return response;};
 const options={stateDir:await mkdtemp(join(tmpdir(),'pet-picker-')),nativeDiagnostic:true,nativePickerTest:true};let started;
-const poll=async test=>{for(let i=0;i<50;i++){const s=await desktopStatus(options);if(test(s))return s;await new Promise(r=>setTimeout(r,50));}throw Error('Native picker state did not settle');};
+const poll=async test=>{let s;for(let i=0;i<50;i++){s=await desktopStatus(options);if(test(s))return s;await new Promise(r=>setTimeout(r,50));}throw Error('Native picker state did not settle: '+JSON.stringify(s));};
 try{
  assert.equal((await receive()).ready,true);started=await startDesktop(options);assert.equal(started.pickerVisible,true);
- await command({op:'attach',pid:started.pid});const attached=await poll(s=>s.selected&&!s.pickerVisible&&s.visible);
- const expanded=await command({op:'bar',pid:started.pid});
+ await command({op:'attach',pid:started.pid});await poll(s=>s.selected&&!s.pickerVisible);
+ await new Promise(r=>setTimeout(r,150));const attached=await desktopStatus(options);const foreground=await command({op:'foreground'});
+ await command({op:'minimize'});
+ let expanded;for(let i=0;i<50;i++){expanded=await command({op:'bar',pid:started.pid});if(!expanded.barVisible)break;await new Promise(r=>setTimeout(r,50));}assert.equal(expanded.barVisible,false);assert.equal(expanded.comboVisibleStyle,true);const minimized=await poll(s=>s.selected&&!s.visible);
  await command({op:'bar',pid:started.pid,action:'pause'});const hidden=await command({op:'bar',pid:started.pid,action:'toggle'});
- assert.equal(hidden.width,82);assert.equal(hidden.right,expanded.right);assert.equal(hidden.toggle,'Menu');assert.equal(hidden.comboVisible,false);
+ assert.equal(hidden.width,82);assert.equal(hidden.right,expanded.right);assert.equal(hidden.toggle,'Menu');assert.equal(hidden.comboVisibleStyle,false);
  await command({op:'bar',pid:started.pid,action:'cat'});const stillHidden=await command({op:'bar',pid:started.pid});assert.equal(stillHidden.width,82);assert.equal(stillHidden.toggle,'Menu');
- const restored=await command({op:'bar',pid:started.pid,action:'toggle'});assert.equal(restored.right,hidden.right);assert.ok(restored.width>expanded.width);assert.equal(restored.toggle,'Hide');assert.equal(restored.comboVisible,true);
+ const restored=await command({op:'bar',pid:started.pid,action:'toggle'});assert.equal(restored.right,hidden.right);assert.ok(restored.width>expanded.width);assert.equal(restored.toggle,'Hide');assert.equal(restored.comboVisibleStyle,true);
  const preserved=await poll(s=>s.pet==='cat'&&s.paused);assert.equal(preserved.selected,true);
- await command({op:'minimize'});const minimized=await poll(s=>s.selected&&!s.visible);
  await command({op:'restore'});await command({op:'picker',pid:started.pid});await poll(s=>s.pickerVisible);
  await command({op:'attach',pid:started.pid});await poll(s=>s.selected&&!s.pickerVisible);
  await command({op:'quit'});await poll(s=>s.pickerVisible&&!s.selected);
- const report={engine:attached.engine,realWindowPicker:true,ownedTargetOnly:true,selected:true,minimizedHidden:!minimized.visible,reselection:true,closedTargetReopensPicker:true};
+ const report={engine:attached.engine,realWindowPicker:true,ownedTargetOnly:true,selected:true,attachedVisible:attached.visible,attachedTargetForeground:foreground.targetForeground,barHiddenDuringLayout:!expanded.barVisible,minimizedHidden:!minimized.visible,reselection:true,closedTargetReopensPicker:true};
  await mkdir(new URL('../dist/native-picker/',import.meta.url),{recursive:true});await writeFile(new URL('../dist/native-picker/report.json',import.meta.url),JSON.stringify(report,null,2)+'\n');console.log(JSON.stringify(report));
 }finally{if(started)await stopDesktop(options);fixture.stdin.end();if(fixture.exitCode===null){await new Promise(resolve=>{const timer=setTimeout(()=>{fixture.kill();resolve();},3000);fixture.once('exit',()=>{clearTimeout(timer);resolve();});});}}
