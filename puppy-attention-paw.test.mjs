@@ -65,13 +65,19 @@ test('notification paws exactly once after front contact; resolution/direct inte
 });
 test('actual public renderer samples pawing with unchanged projected placement and no props',async()=>{
  const pet=await createPet({seed:731});try{
-  pet.notify({kind:'input'});const hashes=new Set();let anchor=null,found=0,done=false;
+  pet.notify({kind:'input'});const hashes=new Set();let anchor=null,found=0,done=false,previousContacts=null;
   for(let i=0;i<900;i++){
    pet.step(DT);if(i%3)continue;const f=pet.frame({columns:100,rows:60,poseFps:30});
    if(f.state.state==='attention-paw'){
     found++;const placement=[f.state.x,f.state.z,f.placement.x,f.placement.y,f.placement.size];if(!anchor)anchor=placement;else assert.deepEqual(placement,anchor);
-    hashes.add(createHash('sha256').update(f.pixels).digest('hex'));assert.equal(f.report.ball,null);assert.equal(f.report.tug,null);assert.equal(f.contacts.max,0);assert.equal(f.contacts.rawMax,0);
+    hashes.add(createHash('sha256').update(f.pixels).digest('hex'));assert.equal(f.report.ball,null);assert.equal(f.report.tug,null);
+    // Contact statistics are lifetime totals, including the approach turn. No
+    // contact samples may be added by this gesture, even on its first frame.
+    assert.ok(previousContacts);assert.deepEqual(f.contacts,previousContacts);
+    const enabled=Uint8ClampedArray.from(f.pixels),withoutContacts=pet.frame({columns:100,rows:60,poseFps:30,contactEnabled:false});
+    assert.deepEqual(withoutContacts.pixels,enabled,'contact correction does not alter the gesture');
    }
+   previousContacts=f.contacts;
    if(found&&!f.report.attention){done=true;break;}
   }
   assert.ok(found>10&&hashes.size>=5&&done);

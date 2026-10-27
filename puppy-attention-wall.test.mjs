@@ -69,13 +69,18 @@ test('wall and gentle paw variants alternate only for accepted notices; direct p
 });
 test('public wall cue keeps projection/root fixed, draws new poses and completes without props',async()=>{
  const pet=await createPet({seed:731});try{
-  assert.equal(pet.notify({kind:'input',gesture:'wall'}),true);let initial=null,seen=0,finished=false;const pixels=new Set();
+  assert.equal(pet.notify({kind:'input',gesture:'wall'}),true);let initial=null,seen=0,finished=false,previousContacts=null;const pixels=new Set();
   for(let i=0;i<1200;i++){
    pet.step(DT);if(i%3)continue;const f=pet.frame({columns:200,rows:72,poseFps:30});
    if(f.state.state==='attention-wall'){
     seen++;const current=[f.state.x,f.state.z,f.placement.x,f.placement.y,f.placement.size,f.placement.depth];initial??=current;assert.deepEqual(current,initial);
-    pixels.add(hash(f.pixels));assert.equal(f.report.ball,null);assert.equal(f.report.tug,null);assert.equal(f.contacts.rawMax,0);
+    pixels.add(hash(f.pixels));assert.equal(f.report.ball,null);assert.equal(f.report.tug,null);
+    // The approach turn can have contact samples; the gesture must add none.
+    assert.ok(previousContacts);assert.deepEqual(f.contacts,previousContacts);
+    const enabled=Uint8ClampedArray.from(f.pixels),withoutContacts=pet.frame({columns:200,rows:72,poseFps:30,contactEnabled:false});
+    assert.deepEqual(withoutContacts.pixels,enabled,'contact correction does not alter the gesture');
    }
+   previousContacts=f.contacts;
    if(seen&&!f.report.attention){finished=true;break;}
   }
   assert.ok(seen>20&&pixels.size>=8&&finished);
