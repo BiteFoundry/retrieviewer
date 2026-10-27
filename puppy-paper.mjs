@@ -56,7 +56,7 @@ export function createPaperActor(animal,info,{manualTricks=false,trickTimings=nu
  let arrived=false;
  let straight=false,seatProgress=0,seatVariant='default',travel=null,approachPlan=null,travelAge=0,travelDistance=0,motionSpeed=0,motionStage='rest',completed=false;
  let watchSide='left',restProgress=0,idleHold=2.5;
- let pendingAction=null,activeAction=null,actionDone=null,deferred=null,movementMode='run',stayDown=false,manualDown=false,spinReady=false;
+ let pendingAction=null,activeAction=null,actionDone=null,deferred=null,movementMode='run',stayDown=false,manualDown=false,spinReady=false,runLaunchReady=false;
  let comfort=null,comfortSeconds=0,sleepLook=null,nextSleepLook={variant:'side',right:false};
  const director=createPaperDirector();
  const points=[[.12,PAPER_GROUND.away]];
@@ -103,6 +103,10 @@ export function createPaperActor(animal,info,{manualTricks=false,trickTimings=nu
   // interaction queued during it must not start the obsolete walk afterwards.
   if(skipEntry&&deferred){drain();return;}
   if(movementMode==='walk'&&!skipEntry){playAction('walk-enter',()=>issue(true));return;}
+  // The front gallop begins at the crouched end of the existing launch strip.
+  // Reach that pose from the standing turn before starting distance-driven gait.
+  if(walkTransitions&&movementMode==='run'&&view==='front'&&!runLaunchReady){runLaunchReady=true;enter('launch');return;}
+  runLaunchReady=false;
   arrived=false;completed=false;travelAge=0;travelDistance=0;const x=animal.position.x,z=animal.position.z;if(straight&&view==='approach')target[0]=x;
   const dx=target[0]-x,dz=target[1]-z,distance=Math.hypot(dx,dz),run=movementMode==='walk'?planPaperWalk(distance):planPaperRun(distance);phase=Math.ceil(phase);
   travel={x,z,dx,dz,heading:Math.atan2(dx,dz),stride:view==='approach'?PAPER_GAITS.approach.stride:run.stride,plan:view==='approach'?planPaperApproachTravel(distance):run.plan};approachPlan=view==='approach'?planPaperApproach(distance):null;stop();enter('run');
@@ -161,6 +165,7 @@ export function createPaperActor(animal,info,{manualTricks=false,trickTimings=nu
  };
  const requestAction=(name,{urgent=false}={})=>{
   preparationRate=urgent?3:1;
+  runLaunchReady=false;
   if(name==='roll'&&manualDown&&state==='down'){route=false;target=null;waypoints=[];pendingAction=null;stayDown=false;manualDown=false;restProgress=0;playAction('roll-down',()=>finishTrick('roll'));return true;}
   if(name==='roll'&&state==='down'&&restProgress===.25){route=false;target=null;waypoints=[];pendingAction=null;stayDown=false;restProgress=0;playAction('roll-down',()=>finishTrick('roll'));return true;}
   if(name==='belly'&&state==='down'&&(manualDown||restProgress===.25)){route=false;target=null;waypoints=[];pendingAction=null;startBelly(comfortSeconds);return true;}
@@ -178,6 +183,7 @@ export function createPaperActor(animal,info,{manualTricks=false,trickTimings=nu
  function go(x,z,{direct=false,walking=false,urgent=false,scramble=false,returnMode=null}={}){
   if(![x,z].every(Number.isFinite))throw Error('Invalid paper target');
   preparationRate=urgent?3:1;
+  runLaunchReady=false;
   carryMode=returnMode;
   scrambleArmed=!!(scramble&&fetchMotions);movingScramble=null;
   target=paperGroundTarget(x,z);

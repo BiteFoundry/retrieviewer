@@ -5,6 +5,28 @@ import {createPet} from './retrieviewer.mjs';
 import {mouthAnchor,mouthSourceFrame,projectMouth,MOUTH_ANCHORS} from './puppy-mouth-anchor.mjs';
 const info=JSON.parse(readFileSync(new URL('./puppy-paper-actions-v9.json',import.meta.url)));
 
+test('seeded standing turn enters the existing launch before the front gallop',async()=>{
+ const pet=await createPet({seed:731}),frames=[];
+ try{
+  for(let i=1;i<=3740;i++){
+   pet.step(1/60);
+   if(i>=3710&&i%2===0){
+    const f=pet.frame({columns:160,rows:60,poseFps:30}),ys=[];
+    for(let p=0;p<f.pixels.length;p+=4)if(f.pixels[p]>24)ys.push(Math.floor((p/4)/320));
+    frames.push({state:f.state.state,height:Math.max(...ys)-Math.min(...ys)+1,x:f.state.x,z:f.state.z,size:f.placement.size});
+   }
+  }
+  const launch=frames.findIndex(f=>f.state==='launch'),run=frames.findIndex(f=>f.state==='run');
+  assert.ok(launch>0&&run>launch);
+  assert.equal(frames[launch-1].state,'turn');
+  for(let i=launch;i<=run;i++){
+   assert.ok(Math.abs(frames[i].height-frames[i-1].height)<=3,'silhouette jumps at frame '+i);
+   assert.equal(frames[i].size,frames[launch].size);
+   if(i<run){assert.equal(frames[i].x,frames[launch].x);assert.equal(frames[i].z,frames[launch].z);}
+  }
+ }finally{pet.dispose();}
+});
+
 test('standing turn mouths address the actual sampled canvas and mirror with the body',()=>{
  for(const clip of ['walk-face-front','walk-face-rear'])for(let k=0;k<9;k++){
   const frame=mouthSourceFrame('actions',{actionName:clip,actionProgress:k/8},info);
