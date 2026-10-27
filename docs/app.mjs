@@ -62,7 +62,7 @@ const ko = {
   runStep: "실행 → 앱 창 선택 → Attach 누르기",
   desktopLanguage: "데스크톱 창 선택창과 조작 메뉴는 영어로 표시됩니다.",
   latestUpdate:
-    '0.0.25 · 공을 물고 내려놓는 동작을 매끄럽게 연결했어요. 내려놓은 공도 바닥에 남아요. <a href="https://github.com/BiteFoundry/retrieviewer/blob/main/RELEASING.md">변경 기록</a>',
+    '0.0.26 · 터그와 정면 복귀에서 그림 조각이 분리되던 문제를 고쳤어요. <a href="https://github.com/BiteFoundry/retrieviewer/blob/main/RELEASING.md">변경 기록</a>',
   copy: "복사",
   copied: "명령을 복사했어요.",
   copyFailed: "복사하지 못했어요. 위 명령을 직접 선택해 복사해 주세요.",
@@ -287,7 +287,7 @@ async function load() {
   playing = false;
   cancelLoop();
   try {
-    const { createPet } = await import("./runtime/0.0.25/retrieviewer.mjs");
+    const { createPet } = await import("./runtime/0.0.26/retrieviewer.mjs");
     const next = await createPet({ seed: 731, returnStyle: $("#return-style").value });
     if (closed) {
       next.dispose();
@@ -328,7 +328,7 @@ $("#sleep-pose").addEventListener("change",async()=>{
   }
   study=key;playing=false;cancelLoop();syncControls();status('previewLoading');
   try{
-    const response=await fetch('./sleep-'+key+'.txt?v=0.0.25');
+    const response=await fetch('./sleep-'+key+'.txt?v=0.0.26');
     if(!response.ok)throw Error('Sleep preview HTTP '+response.status);
     const text=await response.text();if(request!==studyRequest||closed)return;
     art.textContent=text.replace(/^(?:\u2800*\n)+/,'').replace(/(?:\n\u2800*)+$/,'');

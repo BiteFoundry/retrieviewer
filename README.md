@@ -181,6 +181,11 @@ the complete package is **not MIT-only**.
 The puppy artwork was developed with AI-generated imagery and programmatic pose,
 grounding and frame processing.
 
+## 0.0.26
+
+Fixed stray artwork during tug and gaps between the legs during the return
+approach. Existing poses and the two-frame cache are preserved.
+
 ## 0.0.25
 
 The ball stays connected as the puppy picks it up, carries it and puts it down.

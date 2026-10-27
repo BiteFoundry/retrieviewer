@@ -1,3 +1,28 @@
+# Retrieviewer 0.0.26 release process
+
+Target: `@bitefoundry/retrieviewer@0.0.26`, public `latest`.
+Ship the reviewed tug-remnant cleanup and connected paw transport, with the
+matching native bundle. Four tug source keys change only in reviewed spill
+regions; all other comfort frames and the cat source `3e2531d` are preserved.
+No drawings, frame caches or runtime dependencies are added. Code remains MIT
+and both pets' artwork remains CC BY-SA4.0.
+
+The owner requested npm publication. Run release/package checks, install the
+exact fresh archive, and exercise the installed fragment regressions and native
+adapter. Push the source and wait for Windows/Linux CI, publish that archive,
+then verify registry integrity and a fresh consumer. Align the product page's
+version and runtime with this release.
+
+Local evidence:271 tests passed,2 macOS skips;204 native/Node pixel records
+matched;the approach replay's24 contact-only detached components fell to0.
+An aligned Windows screen sample preserved the dog/rope pixels while removing
+the stray fragment. The 24-second4K native workload measured26.44MiB median RSS
+and34.50MiB lifetime peak, compared with25.85/34.50MiB before. Mean rendering
+cost was13.21ms versus10.68ms. These are bounded basic-mode samples, not a
+long-run ceiling or a measurement of the optional watcher/LLM mode.
+
+## Previous 0.0.25 scope (historical)
+
 # Retrieviewer 0.0.25 release process
 
 Current target: `@bitefoundry/retrieviewer@0.0.25`, public `latest`.
