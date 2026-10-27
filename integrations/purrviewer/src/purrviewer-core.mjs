@@ -11,6 +11,15 @@ export function createCatFromAssets({seed=731}={},lease,kernel=null){
  const wheelPose=s=>s.wheelGait==='push'?{clip:'wheel-push',progress:s.wheelStage==='brake'?Math.min(1,s.beltSpeed/.1):Math.min(1,s.wheelElapsed/.5)}:
   {clip:s.wheelGait==='run'?'wheel-run':'wheel-walk',progress:((s.wheelGaitPhase%1)+1)%1};
  let pixels=null,disposed=false,lastClip='sit',lastFrame=null,prep=null,view='front',mirror=false,standing=false,settle=null,lastMoving=false,lastLifeClip='sit',lastPaintKey='',lastText='',rasterizations=0,heldHits=0;
+ let toy=null;
+ // Bat key14's visible toe at (230,264) touches the top of this grounded ball.
+ const toyReach=(230-159.5)*.6/320,toyRadius=.024375,toyDrag=.55;
+ function advanceToy(dt){
+  if(!toy||toy.speed===0)return;
+  const used=Math.min(dt,toy.speed/toyDrag),distance=toy.speed*used-.5*toyDrag*used*used;
+  toy.x+=toy.direction*.6*distance;toy.z-=.8*distance;toy.angle+=distance/toy.radius;
+  toy.speed=Math.max(0,toy.speed-toyDrag*dt);
+ }
  const alive=()=>{if(disposed)throw Error('Cat is disposed');};
  const direct=command=>{
   if(command.kind==='go')motion.go(command.x,command.z,{gait:command.gait});
@@ -38,6 +47,7 @@ export function createCatFromAssets({seed=731}={},lease,kernel=null){
   step(dt){
    alive();if(!Number.isFinite(dt)||dt<0||dt>.25)throw RangeError('Invalid cat dt');
    let left=dt;while(left>1e-10){const step=Math.min(1/60,left);left-=step;
+    advanceToy(step);
     if(prep){
      prep.age+=step;const part=prep.steps[prep.index];
      if(prep.age>=part.seconds){view=part.view;mirror=part.mirror;standing=!part.seated;
@@ -52,6 +62,10 @@ export function createCatFromAssets({seed=731}={},lease,kernel=null){
     motion.step(step);const s=motion.sample();
     const command=life.step(step,s);if(command)issue(command);
     const report=life.report,clip=report.clip;
+    const target=report.toyTarget;
+    if(target&&toy?.id!==target.id)toy={id:target.id,x:target.x+target.direction*toyReach,z:target.z,
+      radius:toyRadius,direction:target.direction,speed:0,angle:0,struck:false};
+    if(toy&&!toy.struck&&clip==='bat'&&report.progress>=2/asset.meta.clips.bat.length){toy.struck=true;toy.speed=.28;}
     if(s.moving&&!prep&&!s.exercising){if(s.airborne){mirror=Math.sin(s.heading)<0;view='side';}standing=true;settle=null;}
     if(clip!==lastLifeClip){
      if(['stretch-enter','knead-enter','feed-enter'].includes(clip)&&standing)prepare('front',false,{seated:true});
@@ -108,11 +122,13 @@ export function createCatFromAssets({seed=731}={},lease,kernel=null){
     const anchor=asset.meta.perch.anchors[keys.indexOf(key)],q=projectCat(s.perchContact.x,s.perchContact.y,s.perchContact.z,{width,height});
     p.x=q.x-(mirror?-1:1)*(anchor.x-160)*p.size/320;p.y=q.y-(anchor.y-290)*p.size/320;
    }
-   const paintKey=[width,height,key,mirror,p.x,p.y,p.size,food,r.mat,wheelAngle].join('/');
+   const toyPoint=toy?projectCat(toy.x,toy.radius,toy.z,{width,height}):null;
+   const toyScreen=toyPoint?{x:toyPoint.x,y:toyPoint.y,radius:toyPoint.size*toy.radius/.6}:null;
+   const paintKey=[width,height,key,mirror,p.x,p.y,p.size,food,r.mat,wheelAngle,toy?.id,toy?.x,toy?.z,toy?.angle].join('/');
    const dish=p&&food!==null?{x:p.x+p.size*(269/320-.5),y:p.y+p.size*(288-290)/320,
      radius:p.size*18/320,remaining:food}:null;
    const mat=r.mat?{x:p.x,y:p.y+p.size*3/320,radiusX:p.size*72/320,radiusY:p.size*12/320}:null;
-   const result=text=>({text,pixels,columns,rows,color:asset.meta.color,state:{...s,clip,frame:key},contacts:pins,report:r,placement:p,dish,mat});
+   const result=text=>({text,pixels,columns,rows,color:asset.meta.color,state:{...s,clip,frame:key},contacts:pins,report:r,placement:p,dish,mat,toy:toy?{...toy}:null,toyScreen});
    lastClip=clip;lastFrame=key;
    if(paintKey===lastPaintKey){heldHits++;return result(lastText);}
    if(kernel?.clear)kernel.clear(pixels);else for(let i=0;i<n;i+=4)pixels[i]=pixels[i+1]=pixels[i+2]=0;
@@ -152,6 +168,16 @@ export function createCatFromAssets({seed=731}={},lease,kernel=null){
       }
     }
    }
+   if(toyScreen){
+    const q=toyScreen,behind=toy.z<s.z-.01,cos=Math.cos(toy.angle),sin=Math.sin(toy.angle);
+    for(let y=Math.max(0,Math.floor(q.y-q.radius));y<Math.min(height,Math.ceil(q.y+q.radius));y++)
+     for(let x=Math.max(0,Math.floor(q.x-q.radius));x<Math.min(width,Math.ceil(q.x+q.radius));x++){
+      const dx=(x+.5-q.x)/q.radius,dy=(y+.5-q.y)/q.radius,e=dx*dx+dy*dy;
+      if(e>1)continue;const at=(y*width+x)*4;if(behind&&pixels[at])continue;
+      const stripe=Math.abs(dx*cos+dy*sin)<.16,value=Math.round((stripe?90:210)*(1-.25*e));
+      pixels[at]=pixels[at+1]=pixels[at+2]=value;
+     }
+   }
    const onWheel=clip.startsWith('wheel-')&&Math.abs(s.x-CAT_HABITAT.wheel.catX)<.02;
    if(onWheel)clipWheelPaws(pixels,width,height,p);
    paintHabitat(pixels,width,height,wheelAngle);
@@ -165,6 +191,6 @@ export function createCatFromAssets({seed=731}={},lease,kernel=null){
   notify(){alive();if(life.report.busy)return false;const accepted=life.interact('greet');if(accepted&&prep)prep.command=null;return accepted;},
   get report(){alive();return life.report;},
   get stats(){alive();return {residentPixelBytes:asset.store.residentPixelBytes??asset.store.residentBytes,cachedFrames:asset.store.stats().cachedFrames,rgbaBytes:pixels?.byteLength??0,lastClip,lastFrame,leases:lease.users?.()??1,rasterizations,heldHits};},
-  dispose(){if(disposed)return;disposed=true;pixels=null;prep=null;contacts.reset();wheelContacts.reset();asset=null;lastText=lastPaintKey='';release();}
+  dispose(){if(disposed)return;disposed=true;pixels=null;prep=null;toy=null;contacts.reset();wheelContacts.reset();asset=null;lastText=lastPaintKey='';release();}
  };
 }

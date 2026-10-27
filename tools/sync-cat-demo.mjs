@@ -6,11 +6,11 @@ import {createHash} from 'node:crypto';
 import {fileURLToPath} from 'node:url';
 const source=resolve(process.argv[2]??'../purrviewer');
 const commit=execFileSync('git',['-C',source,'rev-parse','HEAD'],{encoding:'utf8'}).trim();
-if(!commit.startsWith('3e2531d'))throw Error('Expected reviewed Purrviewer3e2531d');
+if(commit!=='4260c404750e65420564a6be02cf1a4bd19f3980')throw Error('Expected reviewed Purrviewer4260c40');
 const files=['src/purrviewer.mjs','src/purrviewer-core.mjs','src/facing.mjs','src/world.mjs','src/walk-cycle.mjs','src/life.mjs','src/contact.mjs','src/habitat.mjs',
  'vendor/retrieviewer/braille.mjs','vendor/retrieviewer/puppy-frame-store.mjs','vendor/retrieviewer/puppy-frame-predictive.mjs',
  'vendor/retrieviewer/puppy-frame-file.mjs','vendor/retrieviewer/puppy-frame-indexed.mjs','vendor/retrieviewer/LICENSE-CODE','LICENSE','ASSETS-LICENSE.md','ART.md','art/ginger.json','art/ginger.bin.gz'];
-const target=new URL('../docs/purrviewer/runtime/3e2531d/',import.meta.url),hashes={};
+const target=new URL('../docs/purrviewer/runtime/4260c40/',import.meta.url),hashes={};
 for(const name of files){
  const bytes=execFileSync('git',['-C',source,'show',commit+':'+name],{maxBuffer:2_000_000});
  hashes[name]=createHash('sha256').update(bytes).digest('hex');

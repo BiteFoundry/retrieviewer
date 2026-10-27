@@ -27,6 +27,7 @@ export function createCatLife({seed = 731} = {}) {
   let companyAfter = 60, attentionUntil = 0, eyeAfter = 0;
   let habitatAfter=100;
   let pending = null;
+  let toyTarget=null,toyId=0;
   let stopSent = false;
   let episode = {intent: 'observe', label: 'Watching quietly', direct: false,
     phases: [hold('sit', 1.2), hold('eye-greeting',3.4),hold('tail-swish', 3.6), hold('loaf-enter', .9),
@@ -40,6 +41,7 @@ export function createCatLife({seed = 731} = {}) {
     const dx = target.x - sample.x;
     const dz = target.z - sample.z;
     const distance = Math.hypot(dx, dz);
+    toyTarget={id:++toyId,x:target.x,z:target.z,direction:dx<0?-1:1};
     const phases = [];
     if (distance > .35) {
       phases.push(travel('creep', {kind: 'go', x: target.x - dx / distance * .3,
@@ -170,7 +172,7 @@ export function createCatLife({seed = 731} = {}) {
         break;
       }
       case 'play':
-        label = 'An imagined little hunt';
+        label = 'A little toy hunt';
         phases = toyPhases(sample, localToy(sample));
         playAfter = clock + 120;
         break;
@@ -279,6 +281,7 @@ export function createCatLife({seed = 731} = {}) {
       const phase = current();
       return {intent: episode.intent, label: episode.label, clip: phase.clip,
         progress: phase.progress, busy: Boolean(pending || episode.direct || ['roam', 'play'].includes(episode.intent)),
+        toyTarget:toyTarget?{...toyTarget}:null,
         food: phase.clip.startsWith('feed-') ? {remaining: phase.clip === 'feed-lick' ? 1-phase.progress :
           ['feed-finish','feed-leave'].includes(phase.clip) ? 0 : 1} : null,
         mat: Boolean(phase.mat),facing:phase.facing??null,resting:['sleep','loaf-rest'].includes(phase.clip)&&!pending,

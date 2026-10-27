@@ -6,8 +6,8 @@
   "artRedistributionApproved": true,
   "publicPublishApproved": true,
   "artLicense": "CC-BY-SA-4.0",
-  "approvalDate": "2026-10-27",
+  "approvalDate": "2026-10-28",
   "rightsReview": "ASSET-PROVENANCE.md",
-  "approvedRelease": "0.0.26",
-  "releaseScope": "Owner requested npm publication of the reviewed tug-remnant and grounded-paw seam repairs. Preserve existing pose registration, other artwork, bounded caches and dependencies; code MIT and artwork CC BY-SA-4.0 remain unchanged. Verify release gates, exact archive, installed fragment regressions, Windows/Linux CI and native painting, publish the tested tarball, then verify registry integrity and a fresh consumer."
+  "approvedRelease": "0.0.27",
+  "releaseScope": "Owner accepted the wheel-braking and visible-toy comparison and requested npm and website publication. Ship monotonic wheel downshifts and the grounded ball with authored paw contact and simulation-owned rolling. Preserve drawings, bounded caches, dependencies and licenses. Rebuild native runtime, verify exact installed archive and native pixels, wait for Windows/Linux CI, publish the tested tarball and verify registry integrity, fresh installation and matching websites."
 }

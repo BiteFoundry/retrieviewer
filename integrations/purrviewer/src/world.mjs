@@ -168,8 +168,8 @@ export function createCatMotion(config = {}) {
           wheelGaitPhase+=ds/a.stride;
           const boundary=Math.floor(wheelGaitPhase)!==previous;
           if(wheelGait==='push'&&beltSpeed>=.16){wheelGait='walk';wheelGaitPhase=0;}
-          else if(boundary&&wheelGait==='walk'&&beltSpeed>=.65){wheelGait='run';wheelGaitPhase=Math.floor(wheelGaitPhase);}
-          else if(wheelGait==='run'&&wheelStage==='brake'&&wheelGaitPhase%1<.5){wheelGait='walk';}
+          else if(boundary&&wheelGait==='walk'&&wheelStage!=='brake'&&beltSpeed>=.65){wheelGait='run';wheelGaitPhase=Math.floor(wheelGaitPhase);}
+          else if(wheelGait==='run'&&wheelStage==='brake'&&beltSpeed<.65&&wheelGaitPhase%1<.5){wheelGait='walk';}
           if(beltSpeed<.1&&wheelStage==='brake')wheelGait='push';
           a.covered=covered;
           if(done){beltSpeed=0;if(Math.abs(wheelPhase-Math.round(wheelPhase))<1e-9)wheelPhase=Math.round(wheelPhase);

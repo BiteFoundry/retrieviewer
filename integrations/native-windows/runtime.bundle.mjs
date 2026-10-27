@@ -3858,10 +3858,10 @@ function createCatMotion(config = {}) {
           if (wheelGait === "push" && beltSpeed >= 0.16) {
             wheelGait = "walk";
             wheelGaitPhase = 0;
-          } else if (boundary && wheelGait === "walk" && beltSpeed >= 0.65) {
+          } else if (boundary && wheelGait === "walk" && wheelStage !== "brake" && beltSpeed >= 0.65) {
             wheelGait = "run";
             wheelGaitPhase = Math.floor(wheelGaitPhase);
-          } else if (wheelGait === "run" && wheelStage === "brake" && wheelGaitPhase % 1 < 0.5) {
+          } else if (wheelGait === "run" && wheelStage === "brake" && beltSpeed < 0.65 && wheelGaitPhase % 1 < 0.5) {
             wheelGait = "walk";
           }
           if (beltSpeed < 0.1 && wheelStage === "brake")
@@ -4135,6 +4135,7 @@ function createCatLife({ seed = 731 } = {}) {
   let companyAfter = 60, attentionUntil = 0, eyeAfter = 0;
   let habitatAfter = 100;
   let pending = null;
+  let toyTarget = null, toyId = 0;
   let stopSent = false;
   let episode = {
     intent: "observe",
@@ -4158,6 +4159,7 @@ function createCatLife({ seed = 731 } = {}) {
     const dx = target.x - sample.x;
     const dz2 = target.z - sample.z;
     const distance = Math.hypot(dx, dz2);
+    toyTarget = { id: ++toyId, x: target.x, z: target.z, direction: dx < 0 ? -1 : 1 };
     const phases = [];
     if (distance > 0.35) {
       phases.push(travel2("creep", {
@@ -4319,7 +4321,7 @@ function createCatLife({ seed = 731 } = {}) {
         break;
       }
       case "play":
-        label = "An imagined little hunt";
+        label = "A little toy hunt";
         phases = toyPhases(sample, localToy(sample));
         playAfter = clock + 120;
         break;
@@ -4436,6 +4438,7 @@ function createCatLife({ seed = 731 } = {}) {
         clip: phase.clip,
         progress: phase.progress,
         busy: Boolean(pending || episode.direct || ["roam", "play"].includes(episode.intent)),
+        toyTarget: toyTarget ? { ...toyTarget } : null,
         food: phase.clip.startsWith("feed-") ? { remaining: phase.clip === "feed-lick" ? 1 - phase.progress : ["feed-finish", "feed-leave"].includes(phase.clip) ? 0 : 1 } : null,
         mat: Boolean(phase.mat),
         facing: phase.facing ?? null,
@@ -4613,6 +4616,17 @@ function createCatFromAssets({ seed = 731 } = {}, lease, kernel = null) {
   const wheelContacts = createWheelContacts(asset.meta.wheel, CAT_HABITAT.wheel);
   const wheelPose = (s3) => s3.wheelGait === "push" ? { clip: "wheel-push", progress: s3.wheelStage === "brake" ? Math.min(1, s3.beltSpeed / 0.1) : Math.min(1, s3.wheelElapsed / 0.5) } : { clip: s3.wheelGait === "run" ? "wheel-run" : "wheel-walk", progress: (s3.wheelGaitPhase % 1 + 1) % 1 };
   let pixels = null, disposed = false, lastClip = "sit", lastFrame = null, prep = null, view = "front", mirror = false, standing = false, settle = null, lastMoving = false, lastLifeClip = "sit", lastPaintKey = "", lastText = "", rasterizations = 0, heldHits = 0;
+  let toy = null;
+  const toyReach = (230 - 159.5) * 0.6 / 320, toyRadius = 0.024375, toyDrag = 0.55;
+  function advanceToy(dt) {
+    if (!toy || toy.speed === 0)
+      return;
+    const used = Math.min(dt, toy.speed / toyDrag), distance = toy.speed * used - 0.5 * toyDrag * used * used;
+    toy.x += toy.direction * 0.6 * distance;
+    toy.z -= 0.8 * distance;
+    toy.angle += distance / toy.radius;
+    toy.speed = Math.max(0, toy.speed - toyDrag * dt);
+  }
   const alive = () => {
     if (disposed)
       throw Error("Cat is disposed");
@@ -4669,6 +4683,7 @@ function createCatFromAssets({ seed = 731 } = {}, lease, kernel = null) {
       while (left > 0.0000000001) {
         const step = Math.min(1 / 60, left);
         left -= step;
+        advanceToy(step);
         if (prep) {
           prep.age += step;
           const part = prep.steps[prep.index];
@@ -4695,6 +4710,22 @@ function createCatFromAssets({ seed = 731 } = {}, lease, kernel = null) {
         if (command)
           issue(command);
         const report = life.report, clip = report.clip;
+        const target = report.toyTarget;
+        if (target && toy?.id !== target.id)
+          toy = {
+            id: target.id,
+            x: target.x + target.direction * toyReach,
+            z: target.z,
+            radius: toyRadius,
+            direction: target.direction,
+            speed: 0,
+            angle: 0,
+            struck: false
+          };
+        if (toy && !toy.struck && clip === "bat" && report.progress >= 2 / asset.meta.clips.bat.length) {
+          toy.struck = true;
+          toy.speed = 0.28;
+        }
         if (s3.moving && !prep && !s3.exercising) {
           if (s3.airborne) {
             mirror = Math.sin(s3.heading) < 0;
@@ -4818,7 +4849,9 @@ function createCatFromAssets({ seed = 731 } = {}, lease, kernel = null) {
         p.x = q.x - (mirror ? -1 : 1) * (anchor.x - 160) * p.size / 320;
         p.y = q.y - (anchor.y - 290) * p.size / 320;
       }
-      const paintKey = [width, height, key, mirror, p.x, p.y, p.size, food, r.mat, wheelAngle].join("/");
+      const toyPoint = toy ? projectCat(toy.x, toy.radius, toy.z, { width, height }) : null;
+      const toyScreen = toyPoint ? { x: toyPoint.x, y: toyPoint.y, radius: toyPoint.size * toy.radius / 0.6 } : null;
+      const paintKey = [width, height, key, mirror, p.x, p.y, p.size, food, r.mat, wheelAngle, toy?.id, toy?.x, toy?.z, toy?.angle].join("/");
       const dish = p && food !== null ? {
         x: p.x + p.size * (269 / 320 - 0.5),
         y: p.y + p.size * (288 - 290) / 320,
@@ -4826,7 +4859,7 @@ function createCatFromAssets({ seed = 731 } = {}, lease, kernel = null) {
         remaining: food
       } : null;
       const mat = r.mat ? { x: p.x, y: p.y + p.size * 3 / 320, radiusX: p.size * 72 / 320, radiusY: p.size * 12 / 320 } : null;
-      const result = (text) => ({ text, pixels, columns, rows, color: asset.meta.color, state: { ...s3, clip, frame: key }, contacts: pins, report: r, placement: p, dish, mat });
+      const result = (text) => ({ text, pixels, columns, rows, color: asset.meta.color, state: { ...s3, clip, frame: key }, contacts: pins, report: r, placement: p, dish, mat, toy: toy ? { ...toy } : null, toyScreen });
       lastClip = clip;
       lastFrame = key;
       if (paintKey === lastPaintKey) {
@@ -4889,6 +4922,20 @@ function createCatFromAssets({ seed = 731 } = {}, lease, kernel = null) {
             }
         }
       }
+      if (toyScreen) {
+        const q = toyScreen, behind = toy.z < s3.z - 0.01, cos = Math.cos(toy.angle), sin = Math.sin(toy.angle);
+        for (let y = Math.max(0, Math.floor(q.y - q.radius));y < Math.min(height, Math.ceil(q.y + q.radius)); y++)
+          for (let x = Math.max(0, Math.floor(q.x - q.radius));x < Math.min(width, Math.ceil(q.x + q.radius)); x++) {
+            const dx = (x + 0.5 - q.x) / q.radius, dy2 = (y + 0.5 - q.y) / q.radius, e = dx * dx + dy2 * dy2;
+            if (e > 1)
+              continue;
+            const at = (y * width + x) * 4;
+            if (behind && pixels[at])
+              continue;
+            const stripe = Math.abs(dx * cos + dy2 * sin) < 0.16, value = Math.round((stripe ? 90 : 210) * (1 - 0.25 * e));
+            pixels[at] = pixels[at + 1] = pixels[at + 2] = value;
+          }
+      }
       const onWheel = clip.startsWith("wheel-") && Math.abs(s3.x - CAT_HABITAT.wheel.catX) < 0.02;
       if (onWheel)
         clipWheelPaws(pixels, width, height, p);
@@ -4932,6 +4979,7 @@ function createCatFromAssets({ seed = 731 } = {}, lease, kernel = null) {
       disposed = true;
       pixels = null;
       prep = null;
+      toy = null;
       contacts.reset();
       wheelContacts.reset();
       asset = null;

@@ -1,0 +1,2527 @@
+{
+  "version": 1,
+  "width": 320,
+  "height": 320,
+  "frames": 89,
+  "clips": {
+    "idle": [
+      0
+    ],
+    "sit": [
+      0
+    ],
+    "blink": [
+      0,
+      3,
+      0
+    ],
+    "tower-load": [
+      1,
+      32,
+      33
+    ],
+    "tower-up": [
+      33,
+      88
+    ],
+    "tower-down": [
+      33,
+      37
+    ],
+    "tower-flight": [
+      34,
+      64,
+      74,
+      35,
+      75,
+      36,
+      76
+    ],
+    "tower-fall": [
+      34,
+      74,
+      35,
+      75,
+      36,
+      76
+    ],
+    "tower-land": [
+      37,
+      38,
+      39,
+      1
+    ],
+    "wheel-enter": [
+      1,
+      77
+    ],
+    "wheel-run": [
+      81,
+      82,
+      83,
+      84
+    ],
+    "wheel-leave": [
+      77,
+      1
+    ],
+    "eye-greeting": [
+      0,
+      0,
+      0,
+      51,
+      51,
+      0,
+      51,
+      51,
+      52,
+      52,
+      52,
+      52,
+      51,
+      51,
+      51,
+      0,
+      0
+    ],
+    "knead-enter": [
+      0,
+      45,
+      53
+    ],
+    "knead": [
+      53,
+      54,
+      53,
+      55
+    ],
+    "knead-leave": [
+      53,
+      45,
+      44
+    ],
+    "rise": [
+      0,
+      4,
+      5,
+      6,
+      1
+    ],
+    "sit-down": [
+      1,
+      6,
+      5,
+      4,
+      0
+    ],
+    "rise-front": [
+      0,
+      4,
+      5
+    ],
+    "sit-front": [
+      5,
+      4,
+      0
+    ],
+    "walk": [
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23
+    ],
+    "walk-front": [
+      24,
+      25,
+      26,
+      27
+    ],
+    "walk-rear": [
+      28,
+      29,
+      30,
+      31
+    ],
+    "creep": [
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23
+    ],
+    "crouch": [
+      1,
+      32,
+      33
+    ],
+    "pounce": [
+      34,
+      74,
+      35,
+      75,
+      36,
+      76
+    ],
+    "land": [
+      37,
+      38,
+      39,
+      1
+    ],
+    "groom": [
+      0,
+      11,
+      12,
+      13,
+      12,
+      13,
+      11,
+      0
+    ],
+    "loaf-enter": [
+      0,
+      45,
+      44
+    ],
+    "loaf-rest": [
+      44
+    ],
+    "loaf-leave": [
+      44,
+      45,
+      0
+    ],
+    "feed-enter": [
+      0,
+      4,
+      5,
+      6,
+      1,
+      40,
+      41,
+      42
+    ],
+    "feed-sniff": [
+      42
+    ],
+    "feed-lick": [
+      42,
+      43,
+      42,
+      42
+    ],
+    "feed-finish": [
+      42
+    ],
+    "feed-leave": [
+      42,
+      41,
+      40,
+      1,
+      6,
+      5,
+      4,
+      0
+    ],
+    "loaf": [
+      0,
+      8,
+      9,
+      10,
+      2
+    ],
+    "sleep": [
+      2,
+      72,
+      2,
+      73,
+      2
+    ],
+    "curl": [
+      2
+    ],
+    "tail-swish": [
+      0,
+      50,
+      49,
+      48,
+      49,
+      50,
+      0
+    ],
+    "tail-tip": [
+      0,
+      49,
+      48,
+      49,
+      0,
+      0
+    ],
+    "stretch-enter": [
+      0,
+      4,
+      5,
+      6,
+      1
+    ],
+    "stretch-reach": [
+      1,
+      47,
+      46,
+      7
+    ],
+    "stretch-hold": [
+      7
+    ],
+    "stretch-release": [
+      7,
+      46,
+      47,
+      1
+    ],
+    "stretch-leave": [
+      1,
+      6,
+      5,
+      4,
+      0
+    ],
+    "stretch": [
+      0,
+      4,
+      5,
+      6,
+      1,
+      47,
+      46,
+      7,
+      7,
+      7,
+      46,
+      47,
+      1,
+      6,
+      5,
+      4,
+      0
+    ],
+    "wake": [
+      2,
+      10,
+      9,
+      8,
+      4,
+      5,
+      6,
+      1
+    ],
+    "bat": [
+      1,
+      6,
+      14,
+      15,
+      14,
+      15,
+      0
+    ],
+    "turn-front-side": [
+      5,
+      65,
+      66,
+      67,
+      1
+    ],
+    "turn-side-rear": [
+      1,
+      68,
+      69,
+      70,
+      71
+    ],
+    "stand-rear": [
+      71
+    ],
+    "wheel-push": [
+      77,
+      78
+    ],
+    "wheel-walk": [
+      77,
+      78,
+      79,
+      80
+    ],
+    "tower-rise": [
+      34,
+      64
+    ],
+    "tower-pull": [
+      85,
+      86,
+      87,
+      88
+    ],
+    "tower-settle": [
+      88,
+      1
+    ]
+  },
+  "walk": {
+    "stride": 0.18141,
+    "feet": [
+      [
+        {
+          "id": "hind-near",
+          "x": 163.35,
+          "y": 293.5,
+          "stance": true
+        },
+        {
+          "id": "hind-far",
+          "x": 111.59,
+          "y": 290.5,
+          "stance": true
+        },
+        {
+          "id": "fore-near",
+          "x": 206.45,
+          "y": 281.5,
+          "stance": false
+        },
+        {
+          "id": "fore-far",
+          "x": 243.05,
+          "y": 292.5,
+          "stance": true
+        }
+      ],
+      [
+        {
+          "id": "hind-near",
+          "x": 150.76,
+          "y": 292.5,
+          "stance": true
+        },
+        {
+          "id": "hind-far",
+          "x": 100.76,
+          "y": 281.5,
+          "stance": false
+        },
+        {
+          "id": "fore-near",
+          "x": 255.21,
+          "y": 281.5,
+          "stance": false
+        },
+        {
+          "id": "fore-far",
+          "x": 218.7,
+          "y": 292.5,
+          "stance": true
+        }
+      ],
+      [
+        {
+          "id": "hind-near",
+          "x": 140.76,
+          "y": 294.5,
+          "stance": true
+        },
+        {
+          "id": "hind-far",
+          "x": 105.5,
+          "y": 276.5,
+          "stance": false
+        },
+        {
+          "id": "fore-near",
+          "x": 244,
+          "y": 294.5,
+          "stance": true
+        },
+        {
+          "id": "fore-far",
+          "x": 190.46,
+          "y": 290.5,
+          "stance": true
+        }
+      ],
+      [
+        {
+          "id": "hind-near",
+          "x": 122,
+          "y": 294.5,
+          "stance": true
+        },
+        {
+          "id": "hind-far",
+          "x": 154.2,
+          "y": 279.5,
+          "stance": false
+        },
+        {
+          "id": "fore-near",
+          "x": 244.24,
+          "y": 294.5,
+          "stance": true
+        },
+        {
+          "id": "fore-far",
+          "x": 183,
+          "y": 292.5,
+          "stance": true
+        }
+      ],
+      [
+        {
+          "id": "hind-near",
+          "x": 108.54,
+          "y": 296.5,
+          "stance": true
+        },
+        {
+          "id": "hind-far",
+          "x": 163.44,
+          "y": 281.5,
+          "stance": false
+        },
+        {
+          "id": "fore-near",
+          "x": 240.4,
+          "y": 296.5,
+          "stance": true
+        },
+        {
+          "id": "fore-far",
+          "x": 184,
+          "y": 281.5,
+          "stance": false
+        }
+      ],
+      [
+        {
+          "id": "hind-near",
+          "x": 102.88,
+          "y": 295.5,
+          "stance": true
+        },
+        {
+          "id": "hind-far",
+          "x": 164.78,
+          "y": 290.5,
+          "stance": true
+        },
+        {
+          "id": "fore-near",
+          "x": 235,
+          "y": 294.5,
+          "stance": true
+        },
+        {
+          "id": "fore-far",
+          "x": 193.74,
+          "y": 277.5,
+          "stance": false
+        }
+      ],
+      [
+        {
+          "id": "hind-near",
+          "x": 104,
+          "y": 282.5,
+          "stance": false
+        },
+        {
+          "id": "hind-far",
+          "x": 154.46,
+          "y": 293.5,
+          "stance": true
+        },
+        {
+          "id": "fore-near",
+          "x": 252,
+          "y": 283.5,
+          "stance": false
+        },
+        {
+          "id": "fore-far",
+          "x": 218.37,
+          "y": 298.5,
+          "stance": true
+        }
+      ],
+      [
+        {
+          "id": "hind-near",
+          "x": 122.76,
+          "y": 279.5,
+          "stance": false
+        },
+        {
+          "id": "hind-far",
+          "x": 157,
+          "y": 288.5,
+          "stance": true
+        },
+        {
+          "id": "fore-near",
+          "x": 254.16,
+          "y": 289.5,
+          "stance": true
+        },
+        {
+          "id": "fore-far",
+          "x": 210,
+          "y": 295.5,
+          "stance": true
+        }
+      ]
+    ],
+    "starts": {
+      "hind-near": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        -1,
+        -1
+      ],
+      "hind-far": [
+        5,
+        -1,
+        -1,
+        -1,
+        -1,
+        5,
+        5,
+        5
+      ],
+      "fore-near": [
+        -1,
+        -1,
+        2,
+        2,
+        2,
+        2,
+        -1,
+        7
+      ],
+      "fore-far": [
+        6,
+        6,
+        6,
+        6,
+        -1,
+        -1,
+        6,
+        6
+      ]
+    },
+    "order": [
+      0,
+      1,
+      2,
+      7,
+      3,
+      4,
+      5,
+      6
+    ],
+    "evidence": "human-inspected visible toe proxies; .60m source canvas"
+  },
+  "color": "#f1b66b",
+  "gzipBytes": 571507,
+  "sourceSha256": "af4322edb7d1f001d002b55535369f8dd067cd4621ddd453318251b0caa1d559",
+  "registration": [
+    {
+      "name": "sit",
+      "source": "ginger-identity-v1.png",
+      "sourceBox": [
+        0,
+        0,
+        462,
+        750
+      ],
+      "scale": 0.3,
+      "translation": [
+        89,
+        87
+      ]
+    },
+    {
+      "name": "stand",
+      "source": "ginger-identity-v1.png",
+      "sourceBox": [
+        462,
+        0,
+        1368,
+        750
+      ],
+      "scale": 0.264,
+      "translation": [
+        38,
+        113
+      ]
+    },
+    {
+      "name": "curl",
+      "source": "ginger-identity-v1.png",
+      "sourceBox": [
+        1368,
+        0,
+        1942,
+        750
+      ],
+      "scale": 0.3,
+      "translation": [
+        78,
+        91
+      ]
+    },
+    {
+      "name": "blink",
+      "source": "ginger-blink-v2.png",
+      "sourceBox": [
+        0,
+        0,
+        984,
+        1598
+      ],
+      "scale": 0.14080100125156444,
+      "translation": [
+        89,
+        87
+      ],
+      "canvasReference": [
+        462,
+        750
+      ]
+    },
+    {
+      "name": "rise",
+      "source": "ginger-rest-v1.png",
+      "sourceBox": [
+        224,
+        0,
+        717,
+        313
+      ],
+      "scale": 0.68,
+      "translation": [
+        6,
+        86
+      ]
+    },
+    {
+      "name": "front-stand",
+      "source": "ginger-rest-v1.png",
+      "sourceBox": [
+        537,
+        0,
+        1030,
+        313
+      ],
+      "scale": 0.68,
+      "translation": [
+        10,
+        86
+      ]
+    },
+    {
+      "name": "quarter",
+      "source": "ginger-rest-v1.png",
+      "sourceBox": [
+        850,
+        0,
+        1254,
+        313
+      ],
+      "scale": 0.5984,
+      "translation": [
+        37,
+        112
+      ]
+    },
+    {
+      "name": "stretch",
+      "source": "ginger-stretch-deep-v2.png",
+      "sourceSha256": "7b575b11186ef8837abcf498699c1b65bbbc9a33a64328aadb45788a5fbe55f5",
+      "scale": 0.2,
+      "translation": [
+        19,
+        118
+      ],
+      "canvasReference": [
+        1066,
+        850
+      ],
+      "registrationFamily": "stretch-v2"
+    },
+    {
+      "name": "lower",
+      "source": "ginger-lower-repair-v1.png",
+      "sourceSha256": "5f8e22e17f08bb49d668ea1adf12938978bf7399eb03d851a0da140f27b34b07",
+      "scale": 0.25,
+      "translation": [
+        11,
+        8
+      ],
+      "registrationFamily": "motion-repair-v1",
+      "replaces": 8
+    },
+    {
+      "name": "loaf",
+      "source": "ginger-loaf-v3.png",
+      "sourceBox": [
+        0,
+        0,
+        1254,
+        1254
+      ],
+      "scale": 0.2551834130781499,
+      "translation": [
+        0,
+        20
+      ],
+      "canvasReference": [
+        320,
+        320
+      ]
+    },
+    {
+      "name": "curl-entry",
+      "source": "ginger-rest-v1.png",
+      "sourceBox": [
+        224,
+        578,
+        717,
+        862
+      ],
+      "scale": 0.5644,
+      "translation": [
+        16,
+        148
+      ]
+    },
+    {
+      "name": "groom-lift",
+      "source": "ginger-groom-lift-v2.png",
+      "sourceBox": [
+        0,
+        0,
+        984,
+        1599
+      ],
+      "scale": 0.14071294559099437,
+      "translation": [
+        89,
+        93
+      ],
+      "canvasReference": [
+        462,
+        750
+      ]
+    },
+    {
+      "name": "groom-lick",
+      "source": "ginger-groom-lick-v2.png",
+      "sourceBox": [
+        0,
+        0,
+        984,
+        1599
+      ],
+      "scale": 0.14071294559099437,
+      "translation": [
+        89,
+        94
+      ],
+      "canvasReference": [
+        462,
+        750
+      ]
+    },
+    {
+      "name": "groom-cheek",
+      "source": "ginger-groom-cheek-v2.png",
+      "sourceBox": [
+        0,
+        0,
+        984,
+        1599
+      ],
+      "scale": 0.14071294559099437,
+      "translation": [
+        89,
+        93
+      ],
+      "canvasReference": [
+        462,
+        750
+      ]
+    },
+    {
+      "name": "bat-out",
+      "source": "ginger-rest-v1.png",
+      "sourceBox": [
+        537,
+        862,
+        1030,
+        1254
+      ],
+      "scale": 0.5304000000000001,
+      "translation": [
+        44,
+        136
+      ]
+    },
+    {
+      "name": "bat-in",
+      "source": "ginger-rest-v1.png",
+      "sourceBox": [
+        850,
+        862,
+        1254,
+        1254
+      ],
+      "scale": 0.5304000000000001,
+      "translation": [
+        50,
+        136
+      ]
+    },
+    {
+      "name": "walk-0",
+      "source": "ginger-step-v2-00.png",
+      "sourceSize": [
+        1404,
+        1120
+      ],
+      "sourceSha256": "063471c15f2c308cea7061ae5372ee9464c357999baf49a82dd4bd791d664230",
+      "canvasReference": [
+        1066,
+        850
+      ],
+      "scale": 0.20035714285714287,
+      "translation": [
+        19,
+        116
+      ],
+      "preparedKey": 0
+    },
+    {
+      "name": "walk-1",
+      "source": "ginger-step-v2-01.png",
+      "sourceSize": [
+        1404,
+        1120
+      ],
+      "sourceSha256": "c2b97912be21a3b6f08040d2f952a69c38de5519cac7a39f8dff0b80289f43f3",
+      "canvasReference": [
+        1066,
+        850
+      ],
+      "scale": 0.20035714285714287,
+      "translation": [
+        19,
+        116
+      ],
+      "preparedKey": 1
+    },
+    {
+      "name": "walk-2",
+      "source": "ginger-step-v2-02.png",
+      "sourceSize": [
+        1404,
+        1120
+      ],
+      "sourceSha256": "9f9c524a3e4689a50e416415a1c0054b47c53a60d2aacd1bb8083d756f7deaee",
+      "canvasReference": [
+        1066,
+        850
+      ],
+      "scale": 0.20035714285714287,
+      "translation": [
+        19,
+        116
+      ],
+      "preparedKey": 2
+    },
+    {
+      "name": "walk-3",
+      "source": "ginger-step-v2-07.png",
+      "sourceSize": [
+        1404,
+        1120
+      ],
+      "sourceSha256": "8069e9a4d55a5efd0565eceef14188b618223d2e7519c412dd2122516cd76f89",
+      "canvasReference": [
+        1066,
+        850
+      ],
+      "scale": 0.20035714285714287,
+      "translation": [
+        19,
+        116
+      ],
+      "preparedKey": 7
+    },
+    {
+      "name": "walk-4",
+      "source": "ginger-step-v2-03.png",
+      "sourceSize": [
+        1404,
+        1120
+      ],
+      "sourceSha256": "96236960c3e86a6abbaba655047cd926065c09ff93f55815bbc94797b434479c",
+      "canvasReference": [
+        1066,
+        850
+      ],
+      "scale": 0.20035714285714287,
+      "translation": [
+        19,
+        116
+      ],
+      "preparedKey": 3
+    },
+    {
+      "name": "walk-5",
+      "source": "ginger-step-v2-04.png",
+      "sourceSize": [
+        1404,
+        1120
+      ],
+      "sourceSha256": "c278ce79936c48cffcb401be0d38fc2daea18fef84af51aa8ba5f3d4d735f338",
+      "canvasReference": [
+        1066,
+        850
+      ],
+      "scale": 0.20035714285714287,
+      "translation": [
+        19,
+        116
+      ],
+      "preparedKey": 4
+    },
+    {
+      "name": "walk-6",
+      "source": "ginger-step-v2-05.png",
+      "sourceSize": [
+        1404,
+        1120
+      ],
+      "sourceSha256": "d8072c183c6f977424fdf267407953617b8ee4283cbbca436ea6c52e1e8bb755",
+      "canvasReference": [
+        1066,
+        850
+      ],
+      "scale": 0.20035714285714287,
+      "translation": [
+        19,
+        116
+      ],
+      "preparedKey": 5
+    },
+    {
+      "name": "walk-7",
+      "source": "ginger-step-v2-06.png",
+      "sourceSize": [
+        1404,
+        1120
+      ],
+      "sourceSha256": "ca16252055180702dbee11e9cbf776140a491aee8c991e9129c8b311c9ce363b",
+      "canvasReference": [
+        1066,
+        850
+      ],
+      "scale": 0.20035714285714287,
+      "translation": [
+        19,
+        116
+      ],
+      "preparedKey": 6
+    },
+    {
+      "name": "front-0",
+      "source": "ginger-walk-v1.png",
+      "sourceBox": [
+        0,
+        458,
+        474,
+        709
+      ],
+      "scale": 0.8,
+      "translation": [
+        -4,
+        98
+      ]
+    },
+    {
+      "name": "front-1",
+      "source": "ginger-walk-v1.png",
+      "sourceBox": [
+        294,
+        458,
+        858,
+        709
+      ],
+      "scale": 0.8,
+      "translation": [
+        -72,
+        98
+      ]
+    },
+    {
+      "name": "front-2",
+      "source": "ginger-walk-v1.png",
+      "sourceBox": [
+        678,
+        458,
+        1242,
+        709
+      ],
+      "scale": 0.8,
+      "translation": [
+        -61,
+        97
+      ]
+    },
+    {
+      "name": "front-3",
+      "source": "ginger-walk-v1.png",
+      "sourceBox": [
+        1062,
+        458,
+        1536,
+        709
+      ],
+      "scale": 0.8,
+      "translation": [
+        -63,
+        98
+      ]
+    },
+    {
+      "name": "rear-0",
+      "source": "ginger-walk-v1.png",
+      "sourceBox": [
+        0,
+        709,
+        474,
+        1024
+      ],
+      "scale": 0.8,
+      "translation": [
+        22,
+        72
+      ]
+    },
+    {
+      "name": "rear-1",
+      "source": "ginger-walk-v1.png",
+      "sourceBox": [
+        294,
+        709,
+        858,
+        1024
+      ],
+      "scale": 0.8,
+      "translation": [
+        -54,
+        71
+      ]
+    },
+    {
+      "name": "rear-2",
+      "source": "ginger-walk-v1.png",
+      "sourceBox": [
+        678,
+        709,
+        1242,
+        1024
+      ],
+      "scale": 0.8,
+      "translation": [
+        -52,
+        69
+      ]
+    },
+    {
+      "name": "rear-3",
+      "source": "ginger-walk-v1.png",
+      "sourceBox": [
+        1062,
+        709,
+        1536,
+        1024
+      ],
+      "scale": 0.8,
+      "translation": [
+        -46,
+        74
+      ]
+    },
+    {
+      "name": "crouch",
+      "source": "ginger-pounce-v1.png",
+      "sourceBox": [
+        0,
+        0,
+        430,
+        470
+      ],
+      "scale": 0.64,
+      "translation": [
+        18,
+        60
+      ]
+    },
+    {
+      "name": "load",
+      "source": "ginger-pounce-v1.png",
+      "sourceBox": [
+        420,
+        0,
+        746,
+        470
+      ],
+      "scale": 0.64,
+      "translation": [
+        54,
+        60
+      ]
+    },
+    {
+      "name": "launch",
+      "source": "ginger-pounce-v1.png",
+      "sourceBox": [
+        746,
+        0,
+        1105,
+        470
+      ],
+      "scale": 0.64,
+      "translation": [
+        45,
+        41
+      ]
+    },
+    {
+      "name": "flight",
+      "source": "ginger-pounce-v1.png",
+      "sourceBox": [
+        1105,
+        0,
+        1536,
+        470
+      ],
+      "scale": 0.64,
+      "translation": [
+        24,
+        39
+      ]
+    },
+    {
+      "name": "reach",
+      "source": "ginger-pounce-v1.png",
+      "sourceBox": [
+        0,
+        470,
+        430,
+        1024
+      ],
+      "scale": 0.64,
+      "translation": [
+        26,
+        84
+      ]
+    },
+    {
+      "name": "fore-land",
+      "source": "ginger-pounce-v1.png",
+      "sourceBox": [
+        384,
+        470,
+        746,
+        1024
+      ],
+      "scale": 0.64,
+      "translation": [
+        44,
+        83
+      ]
+    },
+    {
+      "name": "gather",
+      "source": "ginger-pounce-v1.png",
+      "sourceBox": [
+        746,
+        470,
+        1105,
+        1024
+      ],
+      "scale": 0.64,
+      "translation": [
+        42,
+        84
+      ]
+    },
+    {
+      "name": "recover",
+      "source": "ginger-pounce-v1.png",
+      "sourceBox": [
+        1105,
+        470,
+        1536,
+        1024
+      ],
+      "scale": 0.64,
+      "translation": [
+        24,
+        84
+      ]
+    },
+    {
+      "name": "feed-high",
+      "source": "ginger-feed-high-v1.png",
+      "sourceBox": [
+        0,
+        0,
+        1404,
+        1120
+      ],
+      "sourceSha256": "6d36b8f76ca9c9978afb68372311d086d27bc6f2deba6eafa02ec2a476211205",
+      "scale": 0.2,
+      "translation": [
+        19,
+        108
+      ],
+      "localEditBox": null,
+      "canvasReference": [
+        1066,
+        850
+      ]
+    },
+    {
+      "name": "feed-mid",
+      "source": "ginger-feed-mid-v1.png",
+      "sourceBox": [
+        0,
+        0,
+        1402,
+        1122
+      ],
+      "sourceSha256": "6e4179fc7a4923c123e968a28145cfcbb6129d6118078aa4799ddd7b71eba4f5",
+      "scale": 0.19964349376114082,
+      "translation": [
+        19,
+        108
+      ],
+      "localEditBox": null,
+      "canvasReference": [
+        1066,
+        850
+      ]
+    },
+    {
+      "name": "feed-down",
+      "source": "ginger-feed-down-v1.png",
+      "sourceBox": [
+        0,
+        0,
+        1404,
+        1120
+      ],
+      "sourceSha256": "b43c3131ccc4ed848082075e299773ad0b5dc280f04480e9d4a4e90334b175d9",
+      "scale": 0.2,
+      "translation": [
+        19,
+        108
+      ],
+      "localEditBox": null,
+      "canvasReference": [
+        1066,
+        850
+      ]
+    },
+    {
+      "name": "feed-tongue",
+      "source": "ginger-feed-tongue-v1.png",
+      "sourceBox": [
+        0,
+        0,
+        1405,
+        1119
+      ],
+      "sourceSha256": "6f47d51b3320b8a44bab32bdb0dc2c08fd0f8681860156dbc4cff9f754a00620",
+      "scale": 0.20017873100983022,
+      "translation": [
+        19,
+        108
+      ],
+      "localEditBox": [
+        255,
+        274,
+        276,
+        290
+      ],
+      "canvasReference": [
+        1066,
+        850
+      ]
+    },
+    {
+      "name": "compact-loaf",
+      "source": "ginger-compact-loaf-v1.png",
+      "sourceBox": [
+        0,
+        0,
+        984,
+        1599
+      ],
+      "sourceSha256": "f91f88d23a182708b1648834421a82317a3667ef9940045a9e6d063d9bddfde3",
+      "scale": 0.14071294559099437,
+      "translation": [
+        89,
+        105
+      ],
+      "localEditBox": null,
+      "canvasReference": [
+        462,
+        750
+      ]
+    },
+    {
+      "name": "loaf-fold",
+      "source": "ginger-loaf-fold-v1.png",
+      "sourceBox": [
+        0,
+        0,
+        984,
+        1599
+      ],
+      "sourceSha256": "c2d67fca7daa8c176e88896cfd67c480a344c7a2abc1ee5578b1d43febf13019",
+      "scale": 0.14071294559099437,
+      "translation": [
+        89,
+        106
+      ],
+      "localEditBox": null,
+      "canvasReference": [
+        462,
+        750
+      ]
+    },
+    {
+      "name": "stretch-reach",
+      "source": "ginger-stretch-reach-v2.png",
+      "sourceSha256": "e786b33ab17c92a08a2bac638cd8f16d65a1a9ef970e6071aea91acca9e499ef",
+      "scale": 0.2,
+      "translation": [
+        19,
+        118
+      ],
+      "canvasReference": [
+        1066,
+        850
+      ],
+      "registrationFamily": "stretch-v2"
+    },
+    {
+      "name": "stretch-begin",
+      "source": "ginger-stretch-begin-v2.png",
+      "sourceSha256": "e69100d7178e7c81cff163d76b180e39b5f21e47c3c8f27affb792d6a4574211",
+      "scale": 0.2,
+      "translation": [
+        19,
+        118
+      ],
+      "canvasReference": [
+        1066,
+        850
+      ],
+      "registrationFamily": "stretch-v2"
+    },
+    {
+      "name": "tail-up",
+      "source": "ginger-tail-tip-up-v1.png",
+      "sourceSha256": "af54e1ef74e89b157b2d7cf7594fc3241b253262b41a789777d192b1cae05eff",
+      "scale": 0.14080100125156444,
+      "translation": [
+        89,
+        87
+      ],
+      "canvasReference": [
+        462,
+        750
+      ],
+      "localEditBox": [
+        90,
+        248,
+        145,
+        291
+      ]
+    },
+    {
+      "name": "tail-mid",
+      "source": "ginger-tail-tip-mid-v1.png",
+      "sourceSha256": "9ad2a138856c58a789accc78a7348786e1d29392b7be41743f7bb9884d9b33d9",
+      "scale": 0.14080100125156444,
+      "translation": [
+        89,
+        87
+      ],
+      "canvasReference": [
+        462,
+        750
+      ],
+      "localEditBox": [
+        90,
+        248,
+        145,
+        291
+      ]
+    },
+    {
+      "name": "tail-out",
+      "source": "ginger-tail-tip-out-v1.png",
+      "sourceSha256": "d18e8dbfbd39aa3e1e3e2088e0b470e904c5b99638aa74c532db8d3c72bc656e",
+      "scale": 0.14071294559099437,
+      "translation": [
+        89,
+        87
+      ],
+      "canvasReference": [
+        462,
+        750
+      ],
+      "localEditBox": [
+        90,
+        248,
+        145,
+        291
+      ]
+    },
+    {
+      "name": "eyes-half",
+      "source": "ginger-affection-half-v1.png",
+      "sourceSha256": "79d459f9cb624e7f88f165b12f1ad0b07dbcbf8f95030200a1a6a33636f660d7",
+      "scale": 0.14071294559099437,
+      "translation": [
+        89,
+        87
+      ],
+      "canvasReference": [
+        462,
+        750
+      ],
+      "localEditBox": [
+        133,
+        136,
+        190,
+        159
+      ],
+      "canonicalBody": "sit"
+    },
+    {
+      "name": "eyes-closed",
+      "source": "ginger-affection-closed-v1.png",
+      "sourceSha256": "de662b43497ffba15e4eb088adf43d989ce64a24a04bd45ab48a4e958feeb886",
+      "scale": 0.14071294559099437,
+      "translation": [
+        89,
+        87
+      ],
+      "canvasReference": [
+        462,
+        750
+      ],
+      "localEditBox": [
+        133,
+        136,
+        190,
+        159
+      ],
+      "canonicalBody": "sit"
+    },
+    {
+      "name": "knead-center",
+      "source": "ginger-knead-center-v1.png",
+      "sourceSha256": "494ef3a4cb72bb3ccc4c0a8144d423672c534a0eb55ca23c1489f73ee2164487",
+      "scale": 0.14071294559099437,
+      "translation": [
+        89,
+        106
+      ],
+      "canvasReference": [
+        462,
+        750
+      ],
+      "registrationFamily": "knead-v1"
+    },
+    {
+      "name": "knead-left",
+      "source": "ginger-knead-left-v1.png",
+      "sourceSha256": "ea429c251f600d2ea7740ece6a7cdba5467b7a42729eefce9481ac7d6e9833b1",
+      "scale": 0.14071294559099437,
+      "translation": [
+        89,
+        106
+      ],
+      "canvasReference": [
+        462,
+        750
+      ],
+      "registrationFamily": "knead-v1"
+    },
+    {
+      "name": "knead-right",
+      "source": "ginger-knead-right-v1.png",
+      "sourceSha256": "a4949a53ac1cedb2db7ca4a04d151393573668fb900d6f80245ea8e70486e121",
+      "scale": 0.14071294559099437,
+      "translation": [
+        89,
+        106
+      ],
+      "canvasReference": [
+        462,
+        750
+      ],
+      "registrationFamily": "knead-v1"
+    },
+    {
+      "name": "wheel-0",
+      "source": "ginger-wheel-gallop-v1.png",
+      "sourceBox": [
+        0,
+        0,
+        768,
+        512
+      ],
+      "sourceSha256": "b74f5808f7fe4a5b36137250273178152c4accb867b2e3bf7c4f201f5da62592",
+      "scale": 0.337,
+      "translation": [
+        30,
+        138
+      ],
+      "registrationFamily": "wheel-gallop-v1"
+    },
+    {
+      "name": "wheel-1",
+      "source": "ginger-wheel-gallop-v1.png",
+      "sourceBox": [
+        768,
+        0,
+        1536,
+        512
+      ],
+      "sourceSha256": "b74f5808f7fe4a5b36137250273178152c4accb867b2e3bf7c4f201f5da62592",
+      "scale": 0.337,
+      "translation": [
+        30,
+        138
+      ],
+      "registrationFamily": "wheel-gallop-v1"
+    },
+    {
+      "name": "wheel-2",
+      "source": "ginger-wheel-gallop-v1.png",
+      "sourceBox": [
+        0,
+        512,
+        800,
+        1024
+      ],
+      "sourceSha256": "b74f5808f7fe4a5b36137250273178152c4accb867b2e3bf7c4f201f5da62592",
+      "scale": 0.337,
+      "translation": [
+        30,
+        138
+      ],
+      "registrationFamily": "wheel-gallop-v1"
+    },
+    {
+      "name": "wheel-3",
+      "source": "ginger-wheel-gallop-v1.png",
+      "sourceBox": [
+        800,
+        512,
+        1536,
+        1024
+      ],
+      "sourceSha256": "b74f5808f7fe4a5b36137250273178152c4accb867b2e3bf7c4f201f5da62592",
+      "scale": 0.337,
+      "translation": [
+        41,
+        138
+      ],
+      "registrationFamily": "wheel-gallop-v1"
+    },
+    {
+      "name": "wheel-between-0",
+      "source": "ginger-wheel-breakdowns-v1.png",
+      "sourceBox": [
+        0,
+        0,
+        768,
+        512
+      ],
+      "sourceSha256": "049c07e2b928c85050b78ad754bef2b21dd19bf5f9a5062c64db047a11f3c032",
+      "scale": 0.337,
+      "translation": [
+        30,
+        138
+      ],
+      "registrationFamily": "wheel-gallop-v1"
+    },
+    {
+      "name": "wheel-between-1",
+      "source": "ginger-wheel-breakdowns-v1.png",
+      "sourceBox": [
+        768,
+        0,
+        1536,
+        512
+      ],
+      "sourceSha256": "049c07e2b928c85050b78ad754bef2b21dd19bf5f9a5062c64db047a11f3c032",
+      "scale": 0.337,
+      "translation": [
+        30,
+        138
+      ],
+      "registrationFamily": "wheel-gallop-v1"
+    },
+    {
+      "name": "wheel-between-2",
+      "source": "ginger-wheel-breakdowns-v1.png",
+      "sourceBox": [
+        0,
+        512,
+        800,
+        1024
+      ],
+      "sourceSha256": "049c07e2b928c85050b78ad754bef2b21dd19bf5f9a5062c64db047a11f3c032",
+      "scale": 0.337,
+      "translation": [
+        30,
+        138
+      ],
+      "registrationFamily": "wheel-gallop-v1"
+    },
+    {
+      "name": "wheel-between-3",
+      "source": "ginger-wheel-breakdowns-v1.png",
+      "sourceBox": [
+        800,
+        512,
+        1536,
+        1024
+      ],
+      "sourceSha256": "049c07e2b928c85050b78ad754bef2b21dd19bf5f9a5062c64db047a11f3c032",
+      "scale": 0.337,
+      "translation": [
+        41,
+        138
+      ],
+      "registrationFamily": "wheel-gallop-v1"
+    },
+    {
+      "name": "tower-reach",
+      "source": "ginger-tower-reach-v1.png",
+      "sourceSha256": "b0ab086564932ad34d07e4a3d0a416da9422540dc87c8c2dd696496e7674dac8",
+      "scale": 0.2,
+      "translation": [
+        19,
+        103
+      ],
+      "canvasReference": [
+        1066,
+        850
+      ],
+      "registrationFamily": "tower-v1"
+    },
+    {
+      "name": "yaw-22",
+      "source": "ginger-yaw-v1.png",
+      "sourceSha256": "e87554521d27eba2f97a5ec9ae411fdf224d69d5a1181d1880b70947777dbda2",
+      "scale": 0.61,
+      "translation": [
+        29,
+        56
+      ],
+      "registrationFamily": "motion-repair-v1",
+      "cell": 1
+    },
+    {
+      "name": "yaw-45",
+      "source": "ginger-yaw-v1.png",
+      "sourceSha256": "e87554521d27eba2f97a5ec9ae411fdf224d69d5a1181d1880b70947777dbda2",
+      "scale": 0.61,
+      "translation": [
+        29,
+        56
+      ],
+      "registrationFamily": "motion-repair-v1",
+      "cell": 2
+    },
+    {
+      "name": "yaw-67",
+      "source": "ginger-yaw-v1.png",
+      "sourceSha256": "e87554521d27eba2f97a5ec9ae411fdf224d69d5a1181d1880b70947777dbda2",
+      "scale": 0.61,
+      "translation": [
+        29,
+        79
+      ],
+      "registrationFamily": "motion-repair-v1",
+      "cell": 3
+    },
+    {
+      "name": "yaw-112",
+      "source": "ginger-yaw-v1.png",
+      "sourceSha256": "e87554521d27eba2f97a5ec9ae411fdf224d69d5a1181d1880b70947777dbda2",
+      "scale": 0.61,
+      "translation": [
+        29,
+        77
+      ],
+      "registrationFamily": "motion-repair-v1",
+      "cell": 5
+    },
+    {
+      "name": "yaw-135",
+      "source": "ginger-yaw-v1.png",
+      "sourceSha256": "e87554521d27eba2f97a5ec9ae411fdf224d69d5a1181d1880b70947777dbda2",
+      "scale": 0.61,
+      "translation": [
+        29,
+        90
+      ],
+      "registrationFamily": "motion-repair-v1",
+      "cell": 6
+    },
+    {
+      "name": "yaw-157",
+      "source": "ginger-yaw-v1.png",
+      "sourceSha256": "e87554521d27eba2f97a5ec9ae411fdf224d69d5a1181d1880b70947777dbda2",
+      "scale": 0.61,
+      "translation": [
+        29,
+        92
+      ],
+      "registrationFamily": "motion-repair-v1",
+      "cell": 7
+    },
+    {
+      "name": "rear-stand",
+      "source": "ginger-yaw-v1.png",
+      "sourceSha256": "e87554521d27eba2f97a5ec9ae411fdf224d69d5a1181d1880b70947777dbda2",
+      "scale": 0.61,
+      "translation": [
+        29,
+        92
+      ],
+      "registrationFamily": "motion-repair-v1",
+      "cell": 8
+    },
+    {
+      "name": "sleep-breath",
+      "source": "ginger-sleep-details-v1.png",
+      "sourceSha256": "7e2c797ad3e510583af53da60c708a4b7e452491b2531ffe9167521536f70e21",
+      "scale": 0.33,
+      "translation": [
+        20,
+        10
+      ],
+      "registrationFamily": "motion-repair-v1",
+      "cell": 0,
+      "localPatch": [
+        100,
+        198,
+        157,
+        241
+      ]
+    },
+    {
+      "name": "sleep-ear",
+      "source": "ginger-sleep-details-v1.png",
+      "sourceSha256": "7e2c797ad3e510583af53da60c708a4b7e452491b2531ffe9167521536f70e21",
+      "scale": 0.33,
+      "translation": [
+        20,
+        10
+      ],
+      "registrationFamily": "motion-repair-v1",
+      "cell": 1,
+      "localPatch": [
+        172,
+        193,
+        199,
+        223
+      ]
+    },
+    {
+      "name": "jump-extend",
+      "source": "ginger-jump-breakdowns-v1.png",
+      "sourceSha256": "fa46905d52110a94eafaa75d9920d1c92d0991ddd42741a4cb1d12c593dbf54b",
+      "scale": 0.36,
+      "translation": [
+        16,
+        54
+      ],
+      "registrationFamily": "motion-repair-v1",
+      "cell": 0,
+      "sourceBox": [
+        0,
+        0,
+        780,
+        724
+      ]
+    },
+    {
+      "name": "jump-gather",
+      "source": "ginger-jump-breakdowns-v1.png",
+      "sourceSha256": "fa46905d52110a94eafaa75d9920d1c92d0991ddd42741a4cb1d12c593dbf54b",
+      "scale": 0.36,
+      "translation": [
+        16,
+        54
+      ],
+      "registrationFamily": "motion-repair-v1",
+      "cell": 1,
+      "sourceBox": [
+        780,
+        0,
+        1460,
+        724
+      ]
+    },
+    {
+      "name": "jump-descend",
+      "source": "ginger-jump-breakdowns-v1.png",
+      "sourceSha256": "fa46905d52110a94eafaa75d9920d1c92d0991ddd42741a4cb1d12c593dbf54b",
+      "scale": 0.36,
+      "translation": [
+        16,
+        54
+      ],
+      "registrationFamily": "motion-repair-v1",
+      "cell": 2,
+      "sourceBox": [
+        1460,
+        0,
+        2172,
+        724
+      ]
+    },
+    {
+      "name": "wheel-curved-0",
+      "source": "ginger-wheel-contact-v2.png",
+      "sourceBox": [
+        5,
+        121,
+        335,
+        336
+      ],
+      "scale": 0.7382,
+      "translation": [
+        35,
+        134
+      ],
+      "rigidContact": {
+        "rotation": 0.048216523855383955,
+        "translation": [
+          13.987385630480475,
+          -12.513632547528516
+        ],
+        "sourcePaws": [
+          [
+            114,
+            288
+          ],
+          [
+            235,
+            289
+          ]
+        ],
+        "circle": [
+          181.3333333333333,
+          65.99999999999997,
+          224.00000000000003
+        ]
+      },
+      "sourceSha256": "e1edc8c9cb11a531118113e1b23edcf97028193386c1be26573a804fb58d423c",
+      "registrationFamily": "habitat-contact-v2"
+    },
+    {
+      "name": "wheel-curved-1",
+      "source": "ginger-wheel-contact-v2.png",
+      "sourceBox": [
+        340,
+        124,
+        716,
+        335
+      ],
+      "scale": 0.7382,
+      "translation": [
+        0,
+        136
+      ],
+      "rigidContact": {
+        "rotation": 0.15552444768199394,
+        "translation": [
+          46.284334180259975,
+          -33.72378290024517
+        ],
+        "sourcePaws": [
+          [
+            72,
+            289
+          ],
+          [
+            236,
+            289
+          ]
+        ],
+        "circle": [
+          181.3333333333333,
+          65.99999999999997,
+          224.00000000000003
+        ]
+      },
+      "sourceSha256": "e1edc8c9cb11a531118113e1b23edcf97028193386c1be26573a804fb58d423c",
+      "registrationFamily": "habitat-contact-v2"
+    },
+    {
+      "name": "wheel-curved-2",
+      "source": "ginger-wheel-contact-v2.png",
+      "sourceBox": [
+        717,
+        122,
+        1074,
+        335
+      ],
+      "scale": 0.7382,
+      "translation": [
+        14,
+        135
+      ],
+      "rigidContact": {
+        "rotation": -0.017232921142351042,
+        "translation": [
+          -4.918134198271019,
+          -5.019469050605437
+        ],
+        "sourcePaws": [
+          [
+            115,
+            288
+          ],
+          [
+            255,
+            287
+          ]
+        ],
+        "circle": [
+          181.3333333333333,
+          65.99999999999997,
+          224.00000000000003
+        ]
+      },
+      "sourceSha256": "e1edc8c9cb11a531118113e1b23edcf97028193386c1be26573a804fb58d423c",
+      "registrationFamily": "habitat-contact-v2"
+    },
+    {
+      "name": "wheel-curved-3",
+      "source": "ginger-wheel-contact-v2.png",
+      "sourceBox": [
+        1081,
+        124,
+        1435,
+        334
+      ],
+      "scale": 0.7382,
+      "translation": [
+        16,
+        136
+      ],
+      "rigidContact": {
+        "rotation": 0.03328650841757807,
+        "translation": [
+          9.630656111315801,
+          -16.283865780442852
+        ],
+        "sourcePaws": [
+          [
+            95,
+            287
+          ],
+          [
+            251,
+            287
+          ]
+        ],
+        "circle": [
+          181.3333333333333,
+          65.99999999999997,
+          224.00000000000003
+        ]
+      },
+      "sourceSha256": "e1edc8c9cb11a531118113e1b23edcf97028193386c1be26573a804fb58d423c",
+      "registrationFamily": "habitat-contact-v2"
+    },
+    {
+      "name": "wheel-curved-8",
+      "source": "ginger-wheel-contact-v2.png",
+      "sourceBox": [
+        6,
+        782,
+        356,
+        973
+      ],
+      "scale": 0.7382,
+      "translation": [
+        20,
+        151
+      ],
+      "rigidContact": {
+        "rotation": -0.05526002012472997,
+        "translation": [
+          -15.551608610960585,
+          4.264806921804336
+        ],
+        "sourcePaws": [
+          [
+            132,
+            289
+          ],
+          [
+            261,
+            286
+          ]
+        ],
+        "circle": [
+          181.3333333333333,
+          65.99999999999997,
+          224.00000000000003
+        ]
+      },
+      "sourceSha256": "e1edc8c9cb11a531118113e1b23edcf97028193386c1be26573a804fb58d423c",
+      "registrationFamily": "habitat-contact-v2"
+    },
+    {
+      "name": "wheel-curved-9",
+      "source": "ginger-wheel-contact-v2.png",
+      "sourceBox": [
+        355,
+        777,
+        709,
+        973
+      ],
+      "scale": 0.7382,
+      "translation": [
+        17,
+        148
+      ],
+      "rigidContact": {
+        "rotation": 0.10604045284257699,
+        "translation": [
+          31.2059989107253,
+          -30.797479019959837
+        ],
+        "sourcePaws": [
+          [
+            78,
+            290
+          ],
+          [
+            255,
+            284
+          ]
+        ],
+        "circle": [
+          181.3333333333333,
+          65.99999999999997,
+          224.00000000000003
+        ]
+      },
+      "sourceSha256": "e1edc8c9cb11a531118113e1b23edcf97028193386c1be26573a804fb58d423c",
+      "registrationFamily": "habitat-contact-v2"
+    },
+    {
+      "name": "wheel-curved-10",
+      "source": "ginger-wheel-contact-v2.png",
+      "sourceBox": [
+        715,
+        775,
+        1060,
+        942
+      ],
+      "scale": 0.7382,
+      "translation": [
+        23,
+        146
+      ],
+      "airborne": true,
+      "sourceSha256": "e1edc8c9cb11a531118113e1b23edcf97028193386c1be26573a804fb58d423c",
+      "registrationFamily": "habitat-contact-v2"
+    },
+    {
+      "name": "wheel-curved-11",
+      "source": "ginger-wheel-contact-v2.png",
+      "sourceBox": [
+        1074,
+        776,
+        1441,
+        948
+      ],
+      "scale": 0.7382,
+      "translation": [
+        14,
+        147
+      ],
+      "airborne": true,
+      "sourceSha256": "e1edc8c9cb11a531118113e1b23edcf97028193386c1be26573a804fb58d423c",
+      "registrationFamily": "habitat-contact-v2"
+    },
+    {
+      "name": "perch-contact-0",
+      "source": "ginger-tower-low-contact-v2.png",
+      "sourceBox": [
+        18,
+        238,
+        504,
+        621
+      ],
+      "scale": 0.5274336586121366,
+      "translation": [
+        60,
+        82
+      ],
+      "sourceToe": [
+        416,
+        538
+      ],
+      "anchor": {
+        "x": 270,
+        "y": 240
+      },
+      "sourceSha256": "27db3d2a79d9185c0969b2f0718663a0b55889b291fd44983efcddf311273d20",
+      "registrationFamily": "habitat-contact-v2"
+    },
+    {
+      "name": "perch-contact-1",
+      "source": "ginger-tower-low-contact-v2.png",
+      "sourceBox": [
+        555,
+        239,
+        1049,
+        542
+      ],
+      "scale": 0.5274336586121366,
+      "translation": [
+        45,
+        102
+      ],
+      "sourceToe": [
+        944,
+        538
+      ],
+      "anchor": {
+        "x": 250,
+        "y": 260
+      },
+      "sourceSha256": "27db3d2a79d9185c0969b2f0718663a0b55889b291fd44983efcddf311273d20",
+      "registrationFamily": "habitat-contact-v2"
+    },
+    {
+      "name": "perch-contact-2",
+      "source": "ginger-tower-low-contact-v2.png",
+      "sourceBox": [
+        1098,
+        248,
+        1592,
+        621
+      ],
+      "scale": 0.5274336586121366,
+      "translation": [
+        36,
+        127
+      ],
+      "sourceToe": [
+        1476,
+        538
+      ],
+      "anchor": {
+        "x": 235,
+        "y": 280
+      },
+      "sourceSha256": "27db3d2a79d9185c0969b2f0718663a0b55889b291fd44983efcddf311273d20",
+      "registrationFamily": "habitat-contact-v2"
+    },
+    {
+      "name": "perch-contact-3",
+      "source": "ginger-tower-low-contact-v2.png",
+      "sourceBox": [
+        1650,
+        244,
+        2135,
+        543
+      ],
+      "scale": 0.5274336586121366,
+      "translation": [
+        29,
+        134
+      ],
+      "sourceToe": [
+        2022.5,
+        539
+      ],
+      "anchor": {
+        "x": 225,
+        "y": 290
+      },
+      "sourceSha256": "27db3d2a79d9185c0969b2f0718663a0b55889b291fd44983efcddf311273d20",
+      "registrationFamily": "habitat-contact-v2"
+    }
+  ],
+  "repair": {
+    "baseline": "5452da3",
+    "unchangedOriginalKeys": 64,
+    "replaced": [
+      8
+    ],
+    "appended": 12
+  },
+  "retired": [
+    56,
+    57,
+    58,
+    59,
+    60,
+    61,
+    62,
+    63
+  ],
+  "perch": {
+    "anchors": [
+      {
+        "x": 270,
+        "y": 240
+      },
+      {
+        "x": 250,
+        "y": 260
+      },
+      {
+        "x": 235,
+        "y": 280
+      },
+      {
+        "x": 225,
+        "y": 290
+      }
+    ]
+  },
+  "wheel": {
+    "wheel-push": {
+      "feet": [
+        [
+          {
+            "id": "hind0",
+            "x": 114.02211473634104,
+            "y": 279.6473726751348,
+            "stance": true
+          },
+          {
+            "id": "fore0",
+            "x": 234.97788526365895,
+            "y": 283.48163611715495,
+            "stance": true
+          }
+        ],
+        [
+          {
+            "id": "hind0",
+            "x": 72.80463252741676,
+            "y": 261.9528542822989,
+            "stance": true
+          },
+          {
+            "id": "fore0",
+            "x": 230.19536747258326,
+            "y": 284.60581332566335,
+            "stance": true
+          }
+        ]
+      ],
+      "starts": {
+        "hind0": [
+          1,
+          0
+        ],
+        "fore0": [
+          1,
+          0
+        ]
+      }
+    },
+    "wheel-walk": {
+      "feet": [
+        [
+          {
+            "id": "hind0",
+            "x": 114.02211473634104,
+            "y": 279.6473726751348,
+            "stance": true
+          },
+          {
+            "id": "fore0",
+            "x": 234.97788526365895,
+            "y": 283.48163611715495,
+            "stance": true
+          }
+        ],
+        [
+          {
+            "id": "hind0",
+            "x": 72.80463252741676,
+            "y": 261.9528542822989,
+            "stance": true
+          },
+          {
+            "id": "fore0",
+            "x": 230.19536747258326,
+            "y": 284.60581332566335,
+            "stance": true
+          }
+        ],
+        [
+          {
+            "id": "hind1",
+            "x": 115.01039381776053,
+            "y": 279.95622845342376,
+            "stance": true
+          },
+          {
+            "id": "fore1",
+            "x": 254.9896061822395,
+            "y": 277.5437389052379,
+            "stance": true
+          }
+        ],
+        [
+          {
+            "id": "hind1",
+            "x": 95.0598478653102,
+            "y": 272.71934042367394,
+            "stance": true
+          },
+          {
+            "id": "fore1",
+            "x": 250.94015213468978,
+            "y": 278.910522934765,
+            "stance": true
+          }
+        ]
+      ],
+      "starts": {
+        "hind0": [
+          0,
+          0,
+          0,
+          3
+        ],
+        "fore0": [
+          0,
+          0,
+          0,
+          3
+        ],
+        "hind1": [
+          2,
+          1,
+          2,
+          2
+        ],
+        "fore1": [
+          2,
+          1,
+          2,
+          2
+        ]
+      }
+    },
+    "wheel-run": {
+      "feet": [
+        [
+          {
+            "id": "hind0",
+            "x": 132.15368769382283,
+            "y": 284.5345795401089,
+            "stance": true
+          },
+          {
+            "id": "fore0",
+            "x": 260.8463123061772,
+            "y": 275.4127173188488,
+            "stance": true
+          }
+        ],
+        [
+          {
+            "id": "hind1",
+            "x": 78.17958098223104,
+            "y": 264.83486458840025,
+            "stance": true
+          },
+          {
+            "id": "fore1",
+            "x": 254.82041901776898,
+            "y": 277.6025714343009,
+            "stance": true
+          }
+        ],
+        [],
+        []
+      ],
+      "starts": {
+        "hind0": [
+          0,
+          0,
+          2,
+          3
+        ],
+        "fore0": [
+          0,
+          0,
+          2,
+          3
+        ],
+        "hind1": [
+          0,
+          1,
+          1,
+          3
+        ],
+        "fore1": [
+          0,
+          1,
+          1,
+          3
+        ]
+      }
+    }
+  }
+}

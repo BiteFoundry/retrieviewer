@@ -9,6 +9,8 @@ if(root){
  const bits=[[1,8],[2,16],[4,32],[64,128]];
  Object.assign(words.en,{meetCatLink:'There is a cat here, too.',catTitle:'I made a cat, too.',catIntro:'A slow blink, a little kneading. Then off to the cat tower or exercise wheel.',catNote:'Browser preview · Cat artwork loads when you start (about0.6MB). On desktop: retrieviewer desktop --pet cat.',catTerms:'Cat demo credits & artwork terms'});
  Object.assign(words.ko,{meetCatLink:'고양이 친구도 만나보기',catTitle:'고양이도 만들었습니다.',catIntro:'느리게 눈인사하고, 꾹꾹이하다가. 캣타워에 올라가 쉬거나 캣휠에서 달립니다.',catNote:'브라우저 체험 · 시작할 때 고양이 그림 약0.6MB를 불러와요. 데스크톱에서는 retrieviewer desktop --pet cat으로 실행하세요.',catTerms:'고양이 체험 크레딧 · 그림 이용 조건'});
+ Object.assign(words.en,{toy:'Play with a toy'});
+ Object.assign(words.ko,{toy:'장난감 놀이'});
  let cat=null,playing=false,loading=false,closed=false,timer=null,last=0,visible=true,columns=160,rows=90,painted='',statusKey='initial',failed=false;
  const t=key=>words[document.documentElement.lang==='ko'?'ko':'en'][key];
  function localize(){
@@ -48,7 +50,7 @@ if(root){
   if(typeof DecompressionStream==='undefined'){setStatus('unsupported');return;}
   loading=true;failed=false;setStatus('loading');sync();
   try{
-   const {createCat}=await import('./runtime/3e2531d/src/purrviewer.mjs');
+   const {createCat}=await import('./runtime/4260c40/src/purrviewer.mjs');
    const loaded=await createCat({seed:731});if(closed){loaded.dispose();return;}
    cat=loaded;playing=true;poster.hidden=true;canvas.hidden=false;root.dataset.ready='true';fit();setStatus('running');schedule();
   }catch{if(!closed){failed=true;setStatus('failed');}}

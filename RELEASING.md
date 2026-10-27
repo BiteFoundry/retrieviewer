@@ -1,3 +1,21 @@
+# Retrieviewer 0.0.27 release process
+
+Target: `@bitefoundry/retrieviewer@0.0.27`, public `latest`.
+The owner accepted the wheel-braking and visible-toy comparison and requested
+npm and website publication on2026-10-28. Ship monotonic wheel downshifts and a
+grounded ball that rolls from the authored paw contact and remains after play.
+Cat source: `4260c404750e65420564a6be02cf1a4bd19f3980`.
+
+Rebuild the Windows runtime bundle, run the suite and native pixel comparison,
+then pack and install the exact archive outside the source tree. Wait for
+Windows/Linux CI, publish that tested tarball, and verify registry integrity and
+a fresh installation. Update the bilingual Pages runtime, toy control and
+shinick.dev project entry. All89 cat drawings, dog art, bounded caches,
+dependencies and code/art licenses are preserved. Prior memory figures retain
+their original version and workload; memory is not remeasured for this release.
+
+## Previous 0.0.26 scope (historical)
+
 # Retrieviewer 0.0.26 release process
 
 Target: `@bitefoundry/retrieviewer@0.0.26`, public `latest`.

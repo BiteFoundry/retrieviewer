@@ -1,8 +1,17 @@
 # Cat art and motion review
 
-Current default: the owner-approved ginger identity and77-key ginger motion
+Current default: the owner-approved ginger identity and89-key ginger motion
 atlas described below. The tuxedo material is retained as historical source
 and is not fetched by the default renderer.
+
+## Wheel braking and visible toy (2026-10-28)
+
+Wheel braking now downshifts through supported run, walk and push poses without
+re-entering a faster gait. A small world-space ball is registered below the
+extended bat paw and rolls away at contact, then remains at rest through other
+actions. Simulation owns its motion; rendering samples it into the existing
+output buffer. All89 drawings and the two-frame art cache are unchanged.
+The prototype notes below describe earlier stages, including the former invisible toy.
 
 ## Initial tuxedo prototype
 

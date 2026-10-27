@@ -181,6 +181,12 @@ the complete package is **not MIT-only**.
 The puppy artwork was developed with AI-generated imagery and programmatic pose,
 grounding and frame processing.
 
+## 0.0.27
+
+The cat slows down on the wheel without jumping back into a faster gait.
+A visible ball waits at its reach, rolls when swatted and stays after play.
+Existing artwork and the two-frame cache are preserved.
+
 ## 0.0.26
 
 Fixed stray artwork during tug and gaps between the legs during the return
