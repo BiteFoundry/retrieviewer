@@ -185,6 +185,7 @@ grounding and frame processing.
 
 The cat slows down on the wheel without jumping back into a faster gait.
 A visible ball waits at its reach, rolls when swatted and stays after play.
+Choose Toy in the cat's Windows controls, or try it in the web demo.
 Existing artwork and the two-frame cache are preserved.
 
 ## 0.0.26

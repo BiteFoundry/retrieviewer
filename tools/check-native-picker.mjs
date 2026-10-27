@@ -20,10 +20,13 @@ try{
  await new Promise(r=>setTimeout(r,150));const attached=await desktopStatus(options);const foreground=await command({op:'foreground'});
  await command({op:'minimize'});
  let expanded;for(let i=0;i<50;i++){expanded=await command({op:'bar',pid:started.pid});if(!expanded.barVisible)break;await new Promise(r=>setTimeout(r,50));}assert.equal(expanded.barVisible,false);assert.equal(expanded.comboVisibleStyle,true);const minimized=await poll(s=>s.selected&&!s.visible);
+ assert.equal(expanded.toyVisibleStyle,false);
  await command({op:'bar',pid:started.pid,action:'pause'});const hidden=await command({op:'bar',pid:started.pid,action:'toggle'});
  assert.equal(hidden.width,82);assert.equal(hidden.right,expanded.right);assert.equal(hidden.toggle,'Menu');assert.equal(hidden.comboVisibleStyle,false);
  await command({op:'bar',pid:started.pid,action:'cat'});const stillHidden=await command({op:'bar',pid:started.pid});assert.equal(stillHidden.width,82);assert.equal(stillHidden.toggle,'Menu');
  const restored=await command({op:'bar',pid:started.pid,action:'toggle'});assert.equal(restored.right,hidden.right);assert.ok(restored.width>expanded.width);assert.equal(restored.toggle,'Hide');assert.equal(restored.comboVisibleStyle,true);
+ assert.equal(restored.toyVisibleStyle,true);assert.equal(restored.toyLabel,'Toy');
+ await command({op:'bar',pid:started.pid,action:'toy'});await poll(s=>s.lastInteraction?.kind==='toy'&&s.lastInteraction.accepted);
  const preserved=await poll(s=>s.pet==='cat'&&s.paused);assert.equal(preserved.selected,true);
  await command({op:'restore'});await command({op:'picker',pid:started.pid});await poll(s=>s.pickerVisible);
  await command({op:'attach',pid:started.pid});await poll(s=>s.selected&&!s.pickerVisible);

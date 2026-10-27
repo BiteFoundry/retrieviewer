@@ -4,6 +4,7 @@ Target: `@bitefoundry/retrieviewer@0.0.27`, public `latest`.
 The owner accepted the wheel-braking and visible-toy comparison and requested
 npm and website publication on2026-10-28. Ship monotonic wheel downshifts and a
 grounded ball that rolls from the authored paw contact and remains after play.
+Expose Toy in the native Windows cat controls and the bilingual web demo.
 Cat source: `4260c404750e65420564a6be02cf1a4bd19f3980`.
 
 Rebuild the Windows runtime bundle, run the suite and native pixel comparison,
