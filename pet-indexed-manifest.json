@@ -71,14 +71,14 @@
     },
     {
       "file": "puppy-paper-actions-v9-q5.rvz",
-      "bytes": 4800947,
+      "bytes": 4790726,
       "indexBytes": 14012,
       "frames": 612,
       "uniqueFrames": 481,
-      "sha256": "8b4cad6b8609c5194d5d1a52ac8ae1b3de8aacb33c3fb3c0f079e03bd766a5f4",
+      "sha256": "68de27bbe0da648746562a0d9626b06a6b48d0b1446c8d44802a23da1b3796c6",
       "source": "puppy-paper-actions-v9-q5.bin.gz",
-      "sourceSha256": "69bc70e290c0d35a864a2ca3f89cfa29e569c28785f909562ab9bdc637764016",
-      "restoredRvq5Sha256": "d430b87e681b7dbb263222ee52e6a86c25432f9c71a4d7e8aad12be0d8797eee"
+      "sourceSha256": "d56c682040db6ff1fe6f3307c9b36aa8f73245734b062c816bb06504c216549e",
+      "restoredRvq5Sha256": "4d1f5aff8b14882fe1d7ddceca7632b2afc26d9a7c16715aeca40f66f50ef0f8"
     },
     {
       "file": "puppy-companion-interactions-v3-q5.rvz",

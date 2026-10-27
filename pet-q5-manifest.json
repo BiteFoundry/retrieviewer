@@ -152,13 +152,13 @@
    "height": 480,
    "frames": 612,
    "uniqueFrames": 481,
-   "sourceSha256": "de015b02d3f4c24f4b94fd655eec1bf6045f9d4890a21e3d236373f05ab53216",
-   "sourcePackedSha256": "da3c3ed236266eebcbd3596027dd1b45a69e473f688c9b102ba51b7ba7c7abff",
-   "encodedBytes": 21614437,
-   "gzipBytes": 4707942,
-   "residentPixelBytes": 13442414,
-   "encodedSha256": "d430b87e681b7dbb263222ee52e6a86c25432f9c71a4d7e8aad12be0d8797eee",
-   "quantizedSha256": "af28df7be122f0f6560599b2747346741e4a424fab98a74370dcef0f7200750d"
+   "sourceSha256": "5783f148ad2603e51a16f4cd158885412fd638cb9dedda28f28ee27c9dbe45db",
+   "sourcePackedSha256": "1843884cdbf5f2a7fa020a432809b0e7931314d0a3268adcb40ef43ea6f10f86",
+   "encodedBytes": 21524884,
+   "gzipBytes": 4697386,
+   "residentPixelBytes": 13386510,
+   "encodedSha256": "4d1f5aff8b14882fe1d7ddceca7632b2afc26d9a7c16715aeca40f66f50ef0f8",
+   "quantizedSha256": "7a708d88d0a8058ccea4d746a458ec3502c8c77391faf5873479c242f482379b"
   },
   "puppy-companion-interactions-v3": {
    "file": "puppy-companion-interactions-v3-q5.bin.gz",

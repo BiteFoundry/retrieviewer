@@ -145,3 +145,10 @@ bridge sheet have SHA-256 hashes respectively:
 Each sheet uses a shared scale, floor registration and whole-frame translation;
 original endpoint frames and all non-target decoded samples remain exact.
 Source sheets are excluded from npm. Paw contacts are image-space proxies.
+
+The rear-turn local repair replaces only decoded frame indices 475, 476, 603
+and 604 (476 and 603 are the shared boundary sample). The three connected
+whole-body source keys were registered at one scale and translated to the
+existing floor/root; the input sheet SHA-256 is
+`bf0c10dc568c7ba0026c781bbae182d3e5142772c23641d24bbc6e5b837b2312`.
+All other decoded frames remain exact. The sheet is excluded from npm.
