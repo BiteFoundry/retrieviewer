@@ -181,6 +181,12 @@ the complete package is **not MIT-only**.
 The puppy artwork was developed with AI-generated imagery and programmatic pose,
 grounding and frame processing.
 
+## 0.0.24
+
+The cat can revisit the wheel or tower after a treat. Passive alerts wait for
+feeding or direct play to finish. The Node desktop adapter bounds stalled time
+so a delayed frame does not close the cat. Artwork and caches stay the same.
+
 ## 0.0.23
 
 The cat starts the wheel on supported paws, builds into a gallop, then walks it

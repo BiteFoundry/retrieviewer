@@ -1,3 +1,21 @@
+# Retrieviewer 0.0.24 release process
+
+Current target: `@bitefoundry/retrieviewer@0.0.24`, public `latest`.
+Ship the accepted audit fixes: complete already-arrived cat habitat approaches,
+bound Node desktop catch-up after delayed frames, and let direct feeding/play
+finish before a passive cat alert. Align product documents with desktop cat
+support and its existing CC BY-SA4.0 artwork terms.
+Cat source: `3e2531d7efac7066922b5a821e5ccf29b173502b`. The art, two-frame cache,
+dog behavior and native executable are preserved; the native JS bundle is rebuilt.
+
+Run release/package checks and the full suite, then exercise the exact installed
+artifact. Push both source repositories and wait for Windows/Linux CI. Publish
+that tested tarball and verify registry integrity and a fresh consumer. Verify
+the matching bilingual Pages deployment and its pinned cat runtime. Keep prior
+memory measurements under their original versions and conditions.
+
+## Previous 0.0.23 scope (historical)
+
 # Retrieviewer 0.0.23 release process
 
 Current target: `@bitefoundry/retrieviewer@0.0.23`, public `latest`.
