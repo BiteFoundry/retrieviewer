@@ -94,7 +94,7 @@ const ko = {
   supportLink: "필요 조건과 실제 검증 범위 보기 ↗",
   goodbyeTitle: "헤어질 때도, 간단하게.",
   goodbyeBody:
-    "컨트롤에서 종료하거나 desktop-stop을 실행하세요. 되돌려야 할 자동 시작·에이전트 패치·셸 래퍼는 만들지 않아요.",
+    "컨트롤에서 종료하거나 desktop-stop을 실행하세요.",
   removeTitle: "완전히 제거하기",
   removeNote:
     "OpenCode 연동을 별도로 활성화했다면 해당 등록을 먼저 disconnect해 주세요.",
@@ -141,6 +141,8 @@ let language = "en",
   timer = null,
   last = 0,
   statusKey = "demoNote",
+  copyStatusKey = null,
+  visible = true,
   snapshot = "", study = null, studyRequest = 0;
 const columns = 144,
   rows = 60,
@@ -175,6 +177,7 @@ function setLanguage(next) {
       ? "Retrieviewer — 일하는 화면에, 작은 친구 하나"
       : "Retrieviewer — a little company for your screen";
   status(statusKey);
+  if (copyStatusKey) $("#copy-status").textContent = t(copyStatusKey);
   syncControls();
   try {
     localStorage.setItem("retrieviewer-language", next);
@@ -193,9 +196,11 @@ for (const button of document.querySelectorAll("[data-copy]"))
   button.addEventListener("click", async () => {
     try {
       await navigator.clipboard.writeText(button.dataset.copy);
-      $("#copy-status").textContent = t("copied");
+      copyStatusKey = "copied";
+      $("#copy-status").textContent = t(copyStatusKey);
     } catch {
-      $("#copy-status").textContent = t("copyFailed");
+      copyStatusKey = "copyFailed";
+      $("#copy-status").textContent = t(copyStatusKey);
     }
   });
 function fit() {
@@ -240,12 +245,17 @@ function cancelLoop() {
   timer = null;
   last = 0;
 }
+function inView() {
+  const r = stage.getBoundingClientRect();
+  return r.bottom > 0 && r.top < innerHeight && r.right > 0 && r.left < innerWidth;
+}
 function schedule() {
   cancelLoop();
-  if (closed || !playing || document.hidden) return;
+  visible = inView();
+  if (closed || !pet || !playing || !visible || document.hidden) return;
   const tick = () => {
     timer = null;
-    if (closed || !playing || document.hidden) {
+    if (closed || !playing || !visible || document.hidden) {
       last = 0;
       return;
     }
@@ -351,11 +361,14 @@ for(const gesture of ['paw','wall'])$('#attention-'+gesture).addEventListener('c
   paint();
 });
 
-document.addEventListener("visibilitychange", () => {
-  if (document.hidden) cancelLoop();
-  else if (playing) schedule();
-});
-const observer = new ResizeObserver(fit);
+const visibility = () => schedule();
+const scroll = () => { if (inView() !== visible) schedule(); };
+document.addEventListener("visibilitychange", visibility);
+window.addEventListener("scroll", scroll, { passive: true });
+const intersection = typeof IntersectionObserver === "function"
+  ? new IntersectionObserver(() => schedule(), { threshold: 0 }) : null;
+intersection?.observe(stage);
+const observer = new ResizeObserver(() => { fit(); schedule(); });
 observer.observe(stage);
 document.fonts.ready.then(fit);
 try {
@@ -381,9 +394,12 @@ window.addEventListener("pagehide", (event) => {
   playing = false;
   cancelLoop();
   observer.disconnect();
+  intersection?.disconnect();
+  document.removeEventListener("visibilitychange", visibility);
+  window.removeEventListener("scroll", scroll);
+  window.removeEventListener("pageshow", pageshow);
   pet?.dispose();
   pet = null;
 });
-window.addEventListener("pageshow", () => {
-  if (!closed && playing) schedule();
-});
+const pageshow = () => { if (!closed) schedule(); };
+window.addEventListener("pageshow", pageshow);
