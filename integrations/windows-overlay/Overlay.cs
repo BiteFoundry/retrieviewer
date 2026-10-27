@@ -109,13 +109,13 @@ sealed class Companion : ApplicationContext {
     readonly NotifyIcon tray=new NotifyIcon();readonly System.Windows.Forms.Timer clock=new System.Windows.Forms.Timer();
     readonly JavaScriptSerializer json=new JavaScriptSerializer();readonly object inputLock=new object();
     readonly Queue<Dictionary<string,object>> messages=new Queue<Dictionary<string,object>>();
-    TargetItem target;Form pickerWindow;QuietWindow testTarget;readonly bool testMode;Rectangle canvas;int revision=0,cell=8;bool visible=false,paused=false,loaded=false,quitting=false,picking=false,announced=false;
-    Label status=new Label();readonly ToolTip attentionTip=new ToolTip();Mutex mutex;string attentionText=null;
+    TargetItem target;Form pickerWindow;QuietWindow testTarget;readonly bool testMode;Rectangle canvas;int revision=0,cell=8;bool visible=false,paused=false,loaded=false,quitting=false,picking=false,announced=false,barCollapsed=false;
+    Button barToggle;Label status=new Label();readonly ToolTip attentionTip=new ToolTip();Mutex mutex;string attentionText=null;
     internal Companion(Mutex single,bool diagnostic){
         mutex=single;testMode=diagnostic;bar.Text="Retrieviewer controls";bar.Size=new Size(538,40);bar.BackColor=Color.FromArgb(28,30,34);bar.ForeColor=Color.White;
         bar.Font=new Font("Segoe UI",9);bar.Controls.Add(MakeButton("Ball",8,()=>Interact("ball")));bar.Controls.Add(MakeButton("Treat",76,()=>Interact("treat")));
         bar.Controls.Add(MakeButton("Tug",144,()=>Interact("tug")));bar.Controls.Add(MakeButton("Window",212,ChooseTarget));bar.Controls.Add(MakeButton("Pause",280,TogglePause));bar.Controls.Add(MakeButton("Quit",348,Quit));
-        status.AutoSize=false;status.AutoEllipsis=true;status.UseMnemonic=false;status.Location=new Point(422,12);status.Size=new Size(112,22);status.Text="Loading...";bar.Controls.Add(status);
+        status.AutoSize=false;status.AutoEllipsis=true;status.UseMnemonic=false;status.Location=new Point(422,12);status.Size=new Size(112,22);status.Text="Loading...";bar.Controls.Add(status);barToggle=MakeButton("Hide",538,ToggleBar);bar.Controls.Add(barToggle);bar.Width=610;
         ContextMenuStrip menu=new ContextMenuStrip();menu.Items.Add("Choose window",null,(s,e)=>ChooseTarget());menu.Items.Add("Hide / resume",null,(s,e)=>TogglePause());menu.Items.Add("Quit",null,(s,e)=>Quit());
         tray.Icon=SystemIcons.Application;tray.Text="Retrieviewer · Choose window";tray.ContextMenuStrip=menu;tray.Visible=true;tray.DoubleClick+=(s,e)=>ChooseTarget();
         // Handles are created on the UI thread before the reader can signal EOF.
@@ -141,6 +141,7 @@ sealed class Companion : ApplicationContext {
         try{bar.BeginInvoke(new Action(Quit));}catch{}
     }
     void Interact(string kind){if(!loaded||paused)return;Program.Emit(new {type="interact",kind=kind});}
+    void ToggleBar(){barCollapsed=!barCollapsed;foreach(Control control in bar.Controls)if(control!=barToggle)control.Visible=!barCollapsed;barToggle.Text=barCollapsed?"Menu":"Hide";barToggle.Left=barCollapsed?8:538;bar.Width=barCollapsed?80:610;Track(false);}
     void TogglePause(){paused=!paused;Program.Emit(new {type="pause",paused=paused});Track(true);}
     void Tick(){
         if(quitting)return;

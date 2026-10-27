@@ -20,6 +20,9 @@ public static class NativePickerFixture {
  public static void Start(string title){thread=new Thread(()=>{target=new Form();target.Text=title;target.StartPosition=FormStartPosition.Manual;target.SetBounds(-12000,-12000,1280,800);target.Shown+=(s,e)=>{SetWindowPos(target.Handle,IntPtr.Zero,0,0,0,0,0x53);ready.Set();};Application.Run(target);});thread.IsBackground=true;thread.SetApartmentState(ApartmentState.STA);thread.Start();if(!ready.WaitOne(5000))throw new Exception("Fixture startup timeout");}
  static IntPtr Find(int pid,string name){IntPtr found=IntPtr.Zero;EnumWindows((w,p)=>{uint owner;GetWindowThreadProcessId(w,out owner);if(owner==(uint)pid&&Text(w)==name){found=w;return false;}return true;},IntPtr.Zero);if(found==IntPtr.Zero)throw new Exception("Owned native window not found: "+name);return found;}
  public static void Attach(int pid,string title){var picker=Find(pid,"Retrieviewer - choose an app window");if(!IsWindowVisible(picker))throw new Exception("Native picker is hidden");var list=GetDlgItem(picker,100);int n=(int)SendMessage(list,0x18b,IntPtr.Zero,IntPtr.Zero);int selected=-1;for(int i=0;i<n;i++){var b=new StringBuilder(1024);SendMessage(list,0x189,new IntPtr(i),b);if(b.ToString()==title){selected=i;break;}}if(selected<0)throw new Exception("Owned fixture absent from picker");SendMessage(list,0x186,new IntPtr(selected),IntPtr.Zero);SendMessage(picker,0x111,new IntPtr(101),IntPtr.Zero);}
+ [StructLayout(LayoutKind.Sequential)] struct RECT {public int Left,Top,Right,Bottom;}
+ [DllImport("user32.dll")] static extern bool GetWindowRect(IntPtr w,out RECT r);
+ public static string BarState(int pid,string action){SetThreadDpiAwarenessContext(new IntPtr(-4));var bar=Find(pid,"Retrieviewer controls");if(action=="toggle")SendMessage(bar,0x111,new IntPtr(10),IntPtr.Zero);else if(action=="pause")SendMessage(bar,0x111,new IntPtr(4),IntPtr.Zero);else if(action=="cat")SendMessage(bar,0x8001,new IntPtr(2),IntPtr.Zero);RECT r;if(!GetWindowRect(bar,out r))throw new Exception("Bar bounds unavailable");return "{\"ok\":true,\"width\":"+(r.Right-r.Left)+",\"right\":"+r.Right+",\"toggle\":\""+Text(GetDlgItem(bar,10))+"\",\"comboVisible\":"+(IsWindowVisible(GetDlgItem(bar,9))?"true":"false")+"}";}
  public static void PickAgain(int pid){var bar=Find(pid,"Retrieviewer controls");SendMessage(bar,0x111,new IntPtr(5),IntPtr.Zero);}
  public static void NativeResize(int pid,int width,int height){if(width<640||height<400||width>3840||height>2160)throw new Exception("Invalid owned resize");SetThreadDpiAwarenessContext(new IntPtr(-4));var window=Find(pid,"Retrieviewer diagnostic scene");if(!SetWindowPos(window,IntPtr.Zero,-12000,-12000,width,height,0x14))throw new Exception("Native resize failed");}
  public static void NativeMinimize(int pid,bool minimize){var window=Find(pid,"Retrieviewer diagnostic scene");ShowWindow(window,minimize?6:4);if(!minimize)SetWindowPos(window,IntPtr.Zero,-12000,-12000,0,0,0x55);}
@@ -39,6 +42,7 @@ try {
    switch ($request.op) {
     'attach' {[NativePickerFixture]::Attach([int]$request.pid,$Title)}
     'picker' {[NativePickerFixture]::PickAgain([int]$request.pid)}
+    'bar' {$fixtureResult = [NativePickerFixture]::BarState([int]$request.pid,[string]$request.action) | ConvertFrom-Json}
     'minimize' {[NativePickerFixture]::Minimize()}
     'restore' {[NativePickerFixture]::Restore()}
     'native-resize' {[NativePickerFixture]::NativeResize([int]$request.pid,[int]$request.width,[int]$request.height)}

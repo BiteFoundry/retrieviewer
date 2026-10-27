@@ -380,7 +380,7 @@ function registerClasses() {
     methods: {
       'onInput:': guarded('onInput'), 'onTick:': guarded('onTick'),
       'onBall:': guarded('onBall'), 'onTreat:': guarded('onTreat'), 'onTug:': guarded('onTug'), 'onPick:': guarded('onPick'),
-      'onPause:': guarded('onPause'), 'onQuit:': guarded('onQuit'),
+      'onPause:': guarded('onPause'), 'onQuit:': guarded('onQuit'), 'onToggleBar:': guarded('onToggleBar'),
       'onRefresh:': guarded('onRefresh'), 'onAttach:': guarded('onAttach'), 'onCancel:': guarded('onCancel'),
       'windowWillClose:': guarded('onWindowWillClose')
     }
@@ -408,7 +408,7 @@ function startCompanion(testMode) {
   bar.setOpaque(false);
   bar.setBackgroundColor($.NSColor.colorWithCalibratedRedGreenBlueAlpha(28 / 255, 30 / 255, 34 / 255, 0.94));
   bar.setFloatingPanel(true); bar.setBecomesKeyOnlyIfNeeded(true); bar.setLevel(FLOATING_LEVEL); bar.setCollectionBehavior(OVERLAY_SPACES);
-  var content = bar.contentView;
+  var content = bar.contentView, barCollapsed = false, barControls = [];
   ballButton = makeButton('Ball', { x: 8, y: 6, width: 64, height: 28 }, 'onBall:');
   content.addSubview(ballButton);
   content.addSubview(makeButton('Treat', { x: 76, y: 6, width: 64, height: 28 }, 'onTreat:'));
@@ -418,6 +418,10 @@ function startCompanion(testMode) {
   content.addSubview(makeButton('Quit', { x: 348, y: 6, width: 64, height: 28 }, 'onQuit:'));
   statusLabel = makeLabel(TEXT.preparing, { x: 422, y: 10, width: 112, height: 20 }, $.NSColor.whiteColor);
   content.addSubview(statusLabel);
+
+  for (var controlIndex = 0; controlIndex < content.subviews.count; controlIndex++) barControls.push(content.subviews.objectAtIndex(controlIndex));
+  var barToggle = makeButton('Hide', { x: 538, y: 6, width: 64, height: 28 }, 'onToggleBar:');
+  content.addSubview(barToggle);
 
   // Menu bar item: the macOS counterpart of the Windows tray icon.
   statusItem = $.NSStatusBar.systemStatusBar.statusItemWithLength(-1);
@@ -432,7 +436,8 @@ function startCompanion(testMode) {
   statusItem.setMenu(menu);
 
   function placeBar(canvas) {
-    var rect = { x: canvas.x + canvas.width - BAR_WIDTH - 10, y: canvas.y + 10, width: BAR_WIDTH, height: BAR_HEIGHT };
+    var width = barCollapsed ? 80 : BAR_WIDTH + 72;
+    var rect = { x: canvas.x + canvas.width - width - 10, y: canvas.y + 10, width: width, height: BAR_HEIGHT };
     bar.setFrameDisplay(nsRect(cgToCocoa(rect, primaryHeight())), true);
     if (!bar.isVisible) bar.orderFrontRegardless;
   }
@@ -538,6 +543,13 @@ function startCompanion(testMode) {
   shell.onTreat = function () { core.interact('treat'); };
   shell.onTug = function () { core.interact('tug'); };
   shell.onPick = function () { choose(); };
+  shell.onToggleBar = function () {
+    barCollapsed = !barCollapsed;
+    barControls.forEach(function (control) { control.setHidden(barCollapsed); });
+    barToggle.setTitle($(barCollapsed ? 'Menu' : 'Hide'));
+    barToggle.setFrame(nsRect({ x: barCollapsed ? 8 : 538, y: 6, width: 64, height: 28 }));
+    if (core.state.visible) placeBar(core.state.canvas);
+  };
   shell.onPause = function () { core.togglePause(); };
   shell.onQuit = function () { core.quit(); };
   shell.onRefresh = function () { if (picker) refreshPicker(); };

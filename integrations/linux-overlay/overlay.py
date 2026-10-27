@@ -466,7 +466,7 @@ def ascii_label(text, limit):
 
 class XDisplay(object):
     """Owned X11 resources: one ARGB pet window, one control strip, one picker."""
-    BAR_BUTTONS = (('ball', 'Ball'), ('treat', 'Treat'), ('tug', 'Tug'), ('window', 'Window'), ('pause', 'Pause'), ('quit', 'Quit'))
+    BAR_BUTTONS = (('ball', 'Ball'), ('treat', 'Treat'), ('tug', 'Tug'), ('window', 'Window'), ('pause', 'Pause'), ('quit', 'Quit'), ('toggle', 'Hide'))
 
     def __init__(self, display_name=None, require_compositor=True, x=None):
         self.x = x or load_libraries()
@@ -484,6 +484,7 @@ class XDisplay(object):
         self.pet_mapped = self.bar_mapped = self.picker_mapped = False
         self.last_image = None
         self.bar_canvas, self.bar_paused, self.status = None, False, 'starting'
+        self.bar_collapsed, self.bar_target_canvas = False, None
         self.picker_items, self.picker_index, self.last_raise, self.owned_target = [], 0, 0.0, False
         self.screen = self.x.XDefaultScreen(self.dpy)
         self.root = self.x.XRootWindow(self.dpy, self.screen)
@@ -641,9 +642,10 @@ class XDisplay(object):
 
     # -- control strip
     def show_bar(self, canvas, paused):
-        width, height = 6 + 58 * len(self.BAR_BUTTONS) + 120, 34
+        self.bar_target_canvas = canvas
+        width, height = (66 if self.bar_collapsed else 6 + 58 * len(self.BAR_BUTTONS) + 120), 34
         x = max(canvas[0], canvas[0] + canvas[2] - width - 10)
-        geometry = (x, canvas[1] + 10, paused)
+        geometry = (x, canvas[1] + 10, paused, width)
         if geometry != self.bar_canvas:
             self.bar_canvas, self.bar_paused = geometry, paused
             self.x.XMoveResizeWindow(self.dpy, self.bar, x, canvas[1] + 10, width, height)
@@ -669,24 +671,27 @@ class XDisplay(object):
             self.draw_bar()
 
     def draw_bar(self):
-        gc, width = self.bar_gc, 6 + 58 * len(self.BAR_BUTTONS) + 120
+        buttons = (('toggle', 'Menu'),) if self.bar_collapsed else self.BAR_BUTTONS
+        gc, width = self.bar_gc, (66 if self.bar_collapsed else 6 + 58 * len(buttons) + 120)
         self.x.XSetForeground(self.dpy, gc, 0xff1c1e22)
         self.x.XFillRectangle(self.dpy, self.bar, gc, 0, 0, width, 34)
-        for i, (name, label) in enumerate(self.BAR_BUTTONS):
+        for i, (name, label) in enumerate(buttons):
             if name == 'pause' and self.bar_paused:
                 label = 'Resume'
             self.x.XSetForeground(self.dpy, gc, 0xff30333a)
             self.x.XFillRectangle(self.dpy, self.bar, gc, 6 + 58 * i, 4, 54, 26)
             self.x.XSetForeground(self.dpy, gc, 0xffffffff)
             self.x.XDrawString(self.dpy, self.bar, gc, 12 + 58 * i, 21, label.encode(), len(label))
-        status = ascii_label(self.status, 18)
-        self.x.XDrawString(self.dpy, self.bar, gc, 8 + 58 * len(self.BAR_BUTTONS), 21, status.encode(), len(status))
+        if not self.bar_collapsed:
+            status = ascii_label(self.status, 18)
+            self.x.XDrawString(self.dpy, self.bar, gc, 8 + 58 * len(buttons), 21, status.encode(), len(status))
 
     def bar_hit(self, x, y):
         if 4 <= y <= 30 and x >= 6:
             index, offset = divmod(x - 6, 58)
-            if index < len(self.BAR_BUTTONS) and offset < 54:
-                return self.BAR_BUTTONS[index][0]
+            buttons = (('toggle', 'Menu'),) if self.bar_collapsed else self.BAR_BUTTONS
+            if index < len(buttons) and offset < 54:
+                return buttons[index][0]
         return None
 
     # -- explicit window picker (EWMH client list; titles/process names only)
@@ -851,7 +856,10 @@ class XDisplay(object):
             elif kind == ButtonPress and event.xbutton.button == 1:
                 if win == self.bar and self.companion:
                     name = self.bar_hit(event.xbutton.x, event.xbutton.y)
-                    if name:
+                    if name == 'toggle':
+                        self.bar_collapsed = not self.bar_collapsed
+                        self.show_bar(self.bar_target_canvas, self.bar_paused)
+                    elif name:
                         self.companion.press(name)
                 elif win == self.picker:
                     self.picker_click(event.xbutton.x, event.xbutton.y)

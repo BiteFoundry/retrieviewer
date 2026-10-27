@@ -7,7 +7,7 @@
 namespace NativePet {
 static JSContext* context;
 static HWND target=nullptr;
-static bool showing=false,paused=false,failed=false;
+static bool showing=false,paused=false,failed=false,barCollapsed=false;
 static ULONGLONG startTime=0,lastTick=0,durationMs=0;
 static int stage=0,painted=0;
 static std::string previous;
@@ -57,10 +57,11 @@ static void chooseWindow(){
  addPetCombo(picker);CreateWindow(L"STATIC",L"Choose the app window your companion should follow.",WS_CHILD|WS_VISIBLE,136,12,490,24,picker,nullptr,wc.hInstance,nullptr);windowList=CreateWindowEx(WS_EX_CLIENTEDGE,L"LISTBOX",L"",WS_CHILD|WS_VISIBLE|WS_VSCROLL|LBS_NOTIFY,12,44,610,310,picker,(HMENU)100,wc.hInstance,nullptr);CreateWindow(L"BUTTON",L"Attach",WS_CHILD|WS_VISIBLE|BS_DEFPUSHBUTTON,434,367,90,30,picker,(HMENU)101,wc.hInstance,nullptr);CreateWindow(L"BUTTON",L"Refresh",WS_CHILD|WS_VISIBLE,532,367,90,30,picker,(HMENU)102,wc.hInstance,nullptr);choices.clear();EnumWindows(enumerate,0);ShowWindow(picker,SW_SHOW);SetWindowPos(picker,HWND_TOP,0,0,0,0,SWP_NOMOVE|SWP_NOSIZE|SWP_SHOWWINDOW);SetForegroundWindow(picker);updateStatus();
 }
 static void layoutControls(){
- if(!production||diagnostic||!target)return;const std::vector<int> ids=petKind=="cat"?std::vector<int>{1,2,3,6,8,4,5,7}:std::vector<int>{1,2,3,4,5,7};
- for(int id:{1,2,3,4,5,6,7,8})ShowWindow(GetDlgItem(target,id),SW_HIDE);int x=128;
- for(int id:ids){const wchar_t* label=id==1?(petKind=="cat"?L"Greet":L"Ball"):id==2?L"Treat":id==3?(petKind=="cat"?L"Company":L"Tug"):id==4?(paused?L"Resume":L"Pause"):id==5?L"Window":id==6?L"Tower":id==8?L"Wheel":L"Quit";HWND button=GetDlgItem(target,id);SetWindowText(button,label);SetWindowPos(button,nullptr,x,6,64,28,SWP_NOACTIVATE|SWP_NOZORDER|SWP_SHOWWINDOW);x+=68;}
- SendMessage(GetDlgItem(target,9),CB_SETCURSEL,petKind=="cat"?1:0,0);SetWindowPos(target,nullptr,0,0,x+6,40,SWP_NOMOVE|SWP_NOACTIVATE|SWP_NOZORDER);previous.clear();
+ if(!production||(diagnostic&&!testPicker)||!target)return;const std::vector<int> ids=petKind=="cat"?std::vector<int>{1,2,3,6,8,4,5,7}:std::vector<int>{1,2,3,4,5,7};
+ for(int id:{1,2,3,4,5,6,7,8,9})ShowWindow(GetDlgItem(target,id),SW_HIDE);int x=128;
+ if(barCollapsed)x=8;else ShowWindow(GetDlgItem(target,9),SW_SHOWNOACTIVATE);
+ if(!barCollapsed)for(int id:ids){const wchar_t* label=id==1?(petKind=="cat"?L"Greet":L"Ball"):id==2?L"Treat":id==3?(petKind=="cat"?L"Company":L"Tug"):id==4?(paused?L"Resume":L"Pause"):id==5?L"Window":id==6?L"Tower":id==8?L"Wheel":L"Quit";HWND button=GetDlgItem(target,id);SetWindowText(button,label);SetWindowPos(button,nullptr,x,6,64,28,SWP_NOACTIVATE|SWP_NOZORDER|SWP_SHOWWINDOW);x+=68;}
+ SendMessage(GetDlgItem(target,9),CB_SETCURSEL,petKind=="cat"?1:0,0);HWND toggle=GetDlgItem(target,10);SetWindowText(toggle,barCollapsed?L"Menu":L"Hide");SetWindowPos(toggle,nullptr,x,6,64,28,SWP_NOACTIVATE|SWP_NOZORDER|SWP_SHOWWINDOW);x+=68;RECT bar;GetWindowRect(target,&bar);SetWindowPos(target,nullptr,bar.right-(x+6),bar.top,x+6,40,SWP_NOACTIVATE|SWP_NOZORDER);previous.clear();
 }
 static void tick(){
  const ULONGLONG now=GetTickCount64(),elapsed=now-startTime;if((durationMs&&elapsed>=durationMs)||(production&&!detached&&elapsed>12000)){DestroyWindow(target);return;}
@@ -82,7 +83,7 @@ static void tick(){
 static LRESULT CALLBACK procedure(HWND window,UINT message,WPARAM w,LPARAM l){
  if(message==WM_TIMER){try{tick();}catch(const std::exception& e){fprintf(stderr,"Native renderer: %s\n",e.what());failed=true;DestroyWindow(window);}return 0;}
  if(message==WM_APP+1){if(w==1||w==2)switchPet(w==2?"cat":"dog");return 0;}
- if(message==WM_COMMAND){int id=LOWORD(w);if(id==9&&HIWORD(w)==CBN_SELCHANGE)switchPet(SendMessage((HWND)l,CB_GETCURSEL,0,0)==1?"cat":"dog");else if(id==1)interact(petKind=="cat"?"greet":"ball");else if(id==2)interact("treat");else if(id==3)interact(petKind=="cat"?"company":"tug");else if(id==4){paused=!paused;previous.clear();layoutControls();updateStatus();}else if(id==5){if(production)chooseWindow();else interact("paw");}else if(id==6)interact(production?"tower":"wall");else if(id==8)interact("wheel");else if(id==7)DestroyWindow(window);return 0;}
+ if(message==WM_COMMAND){int id=LOWORD(w);if(id==9&&HIWORD(w)==CBN_SELCHANGE)switchPet(SendMessage((HWND)l,CB_GETCURSEL,0,0)==1?"cat":"dog");else if(id==1)interact(petKind=="cat"?"greet":"ball");else if(id==2)interact("treat");else if(id==3)interact(petKind=="cat"?"company":"tug");else if(id==4){paused=!paused;previous.clear();layoutControls();updateStatus();}else if(id==5){if(production)chooseWindow();else interact("paw");}else if(id==6)interact(production?"tower":"wall");else if(id==8)interact("wheel");else if(id==7)DestroyWindow(window);else if(id==10){barCollapsed=!barCollapsed;layoutControls();}return 0;}
  if(message==WM_SIZE||message==WM_MOVE){previous.clear();return 0;}
  if(message==WM_DESTROY){KillTimer(window,1);followed=nullptr;if(picker){HWND old=picker;picker=nullptr;SetWindowLongPtr(old,GWLP_WNDPROC,(LONG_PTR)DefWindowProc);DestroyWindow(old);}releasePanels();PostQuitMessage(0);return 0;}
  return DefWindowProc(window,message,w,l);
@@ -95,7 +96,7 @@ static int run(JSContext* ctx,int argc,char** argv){
  HINSTANCE instance=GetModuleHandle(nullptr);WNDCLASS wc{};wc.lpfnWndProc=procedure;wc.hInstance=instance;wc.lpszClassName=L"RetrieviewerNativeHost";wc.hbrBackground=(HBRUSH)GetStockObject(BLACK_BRUSH);RegisterClass(&wc);
  const bool attach=production&&(!diagnostic||testPicker);target=CreateWindowEx(WS_EX_TOOLWINDOW|(attach?WS_EX_NOACTIVATE:0),wc.lpszClassName,attach?L"Retrieviewer controls":L"Retrieviewer diagnostic scene",showing?WS_OVERLAPPEDWINDOW:WS_POPUP,showing?80:-12000,showing?80:-12000,attach?552:showing?1280:3840,attach?40:showing?800:2160,nullptr,nullptr,instance,nullptr);if(!target)throw std::runtime_error("Native host window");if(!attach)followed=target;
  WNDCLASS pet{};pet.lpfnWndProc=DefWindowProc;pet.hInstance=instance;pet.lpszClassName=L"RetrieviewerNativeDots";RegisterClass(&pet);
- if(attach){addPetCombo(target);for(int id=1;id<=8;id++)CreateWindow(L"BUTTON",L"",WS_CHILD|BS_PUSHBUTTON,0,0,1,1,target,(HMENU)(INT_PTR)id,instance,nullptr);layoutControls();chooseWindow();}
+ if(attach){addPetCombo(target);for(int id: {1,2,3,4,5,6,7,8,10})CreateWindow(L"BUTTON",L"",WS_CHILD|BS_PUSHBUTTON,0,0,1,1,target,(HMENU)(INT_PTR)id,instance,nullptr);layoutControls();chooseWindow();}
  else if(showing){const wchar_t* names[]={L"Ball",L"Treat",L"Tug",L"Pause",L"Paw",L"Wall",L"Quit"};for(int i=0;i<7;i++)CreateWindow(L"BUTTON",names[i],WS_CHILD|WS_VISIBLE|BS_PUSHBUTTON,8+i*70,8,66,28,target,(HMENU)(INT_PTR)(i+1),instance,nullptr);}
  if(!attach)ShowWindow(target,showing?SW_SHOW:SW_SHOWNOACTIVATE);startTime=GetTickCount64();lastTick=0;timings.reserve(1024);SetTimer(target,1,33,nullptr);
  if(production){updateStatus();control.start(propertyString(ctx,config,"pipe"),propertyString(ctx,config,"token"),propertyString(ctx,config,"sessionFile"),[](const std::string& command){PostMessage(target,command=="stop"?WM_CLOSE:WM_APP+1,command=="pet-cat"?2:command=="pet-dog"?1:0,0);});printf("{\"ready\":true,\"pid\":%lu}\n",GetCurrentProcessId());fflush(stdout);startupGuard=std::thread([]{std::string ack;bool ok=std::getline(std::cin,ack)&&ack=="DETACH";if(ok){detached=true;printf("{\"detached\":true}\n");fflush(stdout);}else{DWORD pid=0;GetWindowThreadProcessId(target,&pid);if(pid==GetCurrentProcessId())PostMessage(target,WM_CLOSE,0,0);}});}

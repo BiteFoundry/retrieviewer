@@ -51,6 +51,26 @@ print(json.dumps({'py36':ok,'mods':mods,'fstrings':any(isinstance(n,ast.JoinedSt
  assert.equal(out.fstrings,false);
 });
 
+test('control strip resizes its input window and preserves its right anchor',{skip},()=>{
+ const out=json(`import json, overlay as o
+class X(object):
+    def __init__(self): self.moves=[]
+    def XMoveResizeWindow(self,d,w,x,y,width,height): self.moves.append([x,y,width,height])
+    def __getattr__(self,name): return lambda *args: None
+ui=o.XDisplay.__new__(o.XDisplay); ui.x=X(); ui.dpy=1; ui.bar=2; ui.bar_gc=3
+ui.bar_collapsed=False; ui.bar_target_canvas=None; ui.bar_canvas=None; ui.bar_paused=False
+ui.bar_mapped=True; ui.pet_mapped=False; ui.last_raise=0; ui.status='playing'
+canvas=(100,200,1000,600); ui.show_bar(canvas,True)
+expanded=ui.x.moves[-1]; hide=ui.bar_hit(6+58*6,10)
+ui.bar_collapsed=True; ui.show_bar(canvas,True); collapsed=ui.x.moves[-1]
+menu=ui.bar_hit(6,10); outside=ui.bar_hit(64,10)
+ui.bar_collapsed=False; ui.show_bar(canvas,True); restored=ui.x.moves[-1]
+print(json.dumps(dict(expanded=expanded,hide=hide,collapsed=collapsed,menu=menu,outside=outside,restored=restored,paused=ui.bar_paused)))`);
+ assert.equal(out.hide,'toggle');assert.equal(out.menu,'toggle');assert.equal(out.outside,null);
+ assert.equal(out.collapsed[2],66);assert.equal(out.expanded[0]+out.expanded[2],out.collapsed[0]+out.collapsed[2]);
+ assert.deepEqual(out.restored,out.expanded);assert.equal(out.paused,true);
+});
+
 test('pure helpers: session refusal, grid caps and premultiplied dot tiles',{skip},()=>{
  const out=json(`import json, overlay as o
 r={}

@@ -11,12 +11,18 @@ const {startDesktop,desktopStatus,stopDesktop}=await import(pathToFileURL(join(r
 const fixture=spawn('powershell.exe',['-NoLogo','-NoProfile','-File',fileURLToPath(new URL('./native-picker-fixture.ps1',import.meta.url)),'-Title','Retrieviewer owned QA '+randomUUID()],{windowsHide:true,stdio:['pipe','pipe','pipe']});let pending=null,stderr='';fixture.stderr.on('data',b=>stderr+=b);
 const lines=createInterface({input:fixture.stdout});lines.on('line',line=>{const r=JSON.parse(line);pending?.(r);pending=null;});
 const receive=()=>new Promise((resolve,reject)=>{const timer=setTimeout(()=>reject(Error('Fixture timeout: '+stderr)),10000);pending=r=>{clearTimeout(timer);resolve(r);};});
-const command=async op=>{const result=receive();fixture.stdin.write(JSON.stringify(op)+'\n');const response=await result;assert.equal(response.ok,true,response.error);};
+const command=async op=>{const result=receive();fixture.stdin.write(JSON.stringify(op)+'\n');const response=await result;assert.equal(response.ok,true,response.error);return response;};
 const options={stateDir:await mkdtemp(join(tmpdir(),'pet-picker-')),nativeDiagnostic:true,nativePickerTest:true};let started;
 const poll=async test=>{for(let i=0;i<50;i++){const s=await desktopStatus(options);if(test(s))return s;await new Promise(r=>setTimeout(r,50));}throw Error('Native picker state did not settle');};
 try{
  assert.equal((await receive()).ready,true);started=await startDesktop(options);assert.equal(started.pickerVisible,true);
- await command({op:'attach',pid:started.pid});const attached=await poll(s=>s.selected&&!s.pickerVisible);
+ await command({op:'attach',pid:started.pid});const attached=await poll(s=>s.selected&&!s.pickerVisible&&s.visible);
+ const expanded=await command({op:'bar',pid:started.pid});
+ await command({op:'bar',pid:started.pid,action:'pause'});const hidden=await command({op:'bar',pid:started.pid,action:'toggle'});
+ assert.equal(hidden.width,82);assert.equal(hidden.right,expanded.right);assert.equal(hidden.toggle,'Menu');assert.equal(hidden.comboVisible,false);
+ await command({op:'bar',pid:started.pid,action:'cat'});const stillHidden=await command({op:'bar',pid:started.pid});assert.equal(stillHidden.width,82);assert.equal(stillHidden.toggle,'Menu');
+ const restored=await command({op:'bar',pid:started.pid,action:'toggle'});assert.equal(restored.right,hidden.right);assert.ok(restored.width>expanded.width);assert.equal(restored.toggle,'Hide');assert.equal(restored.comboVisible,true);
+ const preserved=await poll(s=>s.pet==='cat'&&s.paused);assert.equal(preserved.selected,true);
  await command({op:'minimize'});const minimized=await poll(s=>s.selected&&!s.visible);
  await command({op:'restore'});await command({op:'picker',pid:started.pid});await poll(s=>s.pickerVisible);
  await command({op:'attach',pid:started.pid});await poll(s=>s.selected&&!s.pickerVisible);
