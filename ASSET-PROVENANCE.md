@@ -133,7 +133,7 @@ not generation inputs or bundled runtime assets. Original source sheets,
 research media and the unused tuxedo prototype are excluded. Alternative RVZ5
 encoding preserves every decoded Q5 pixel. See the cat ASSETS-LICENSE.md.
 
-## Standing-turn repair ¡¤ 2026-10-27
+## Standing-turn repair (2026-10-27)
 
 The three generated whole-body turn sheets extend the existing CC BY-SA 4.0
 puppy artwork. The front and rear sheets, corrected half-turn sheet, and side
