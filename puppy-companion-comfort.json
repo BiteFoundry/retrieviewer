@@ -13,11 +13,11 @@
     "attention-paw",
     "attention-wall"
   ],
-  "gzipBytes": 617303,
-  "residentPixelBytes": 1667677,
+  "gzipBytes": 616513,
+  "residentPixelBytes": 1657508,
   "sourceSheetSha256": "10fde9dacca5cb45acd68f387e7ed3bcf88cd72cf0f9c4220d31d819db91731e",
   "neutralSha256": "19f89a8bcb5a937e528593a8f36db846a0d45a5ee398f1b0873c056e5be2fa0a",
-  "encodedSha256": "5f598c2ba15212a73e88c02f0d189b20a74e46f2346f7dfbc3bca8c2d26fc66b",
+  "encodedSha256": "93bdb68996d10998f62cf30bdfc47c95f92c59cfa70822fc67158e043f282a68",
   "method": "Approved momentum poses, single depth pursuit, exact source endpoints; one common scale per authored batch, no runtime image warp or expanded film.",
   "registration": {
     "sheetSize": [

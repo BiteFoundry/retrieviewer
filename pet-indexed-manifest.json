@@ -93,14 +93,14 @@
     },
     {
       "file": "puppy-companion-comfort-q5.rvz",
-      "bytes": 624885,
+      "bytes": 624100,
       "indexBytes": 1628,
       "frames": 60,
       "uniqueFrames": 57,
-      "sha256": "9df13e0e4c5cd854e42aee595ee675eea716293e392d6e587145ffbaa74c5870",
+      "sha256": "89fdb6ba55d4c8db110d67ea1d00cd4f4a5a6de87da74d9fa1424ca2baa4dd77",
       "source": "puppy-companion-comfort-q5.bin.gz",
-      "sourceSha256": "57942c55e9c467d973a08f1e23804b0f756eaed46dddfe3aba7e7c3621996236",
-      "restoredRvq5Sha256": "5f598c2ba15212a73e88c02f0d189b20a74e46f2346f7dfbc3bca8c2d26fc66b"
+      "sourceSha256": "dae8f7c0f3e22b9de2378ed1b7884bfefde00e44cd245cbf7028fa48862da99d",
+      "restoredRvq5Sha256": "93bdb68996d10998f62cf30bdfc47c95f92c59cfa70822fc67158e043f282a68"
     }
   ]
 }

@@ -4,6 +4,7 @@ No ML libraries, downloads, optical-flow model or runtime Python dependency.
 Extract eight equal sheet cells at one fixed scale; register ground/center using
 translation only. Quantization/packing is performed by prepare-comfort-art.mjs.
 """
+import hashlib
 import json
 import sys
 from pathlib import Path
@@ -16,6 +17,16 @@ neutral = Image.frombytes('L', (320, 320), neutral_bytes)
 target = neutral.point(lambda v: 255 if v > 12 else 0).getbbox()
 cw, ch = sheet.width // 4, sheet.height // 2
 cells = [sheet.crop((i % 4 * cw, i // 4 * ch, (i % 4 + 1) * cw, (i // 4 + 1) * ch)) for i in range(8)]
+# Only the known sheet has verified neighboring-cell spill.  Restrict removal
+# to its left-edge remnants; the body and rope occupy other areas.  Keep the
+# untouched cells for registration so cleanup cannot move the whole pose.
+known_sheet = '10fde9dacca5cb45acd68f387e7ed3bcf88cd72cf0f9c4220d31d819db91731e'
+render_cells = [im.copy() for im in cells]
+if hashlib.sha256(sheet_path.read_bytes()).hexdigest() == known_sheet:
+    for i, box in {1: (0, 180, 28, 250), 2: (0, 200, 28, 230),
+                   5: (0, 155, 28, 190), 6: (0, 140, 28, 220)}.items():
+        render_cells[i].paste(0, box)
+
 boxes = [im.point(lambda v: 255 if v > 12 else 0).getbbox() for im in cells]
 # Ignore the rope on the right when locating the body center, not for rendering.
 body_boxes = [im.crop((0, 0, round(cw * .77), ch)).point(lambda v: 255 if v > 12 else 0).getbbox() for im in cells]
@@ -24,7 +35,7 @@ resampling = getattr(Image, 'Resampling', Image).LANCZOS
 target_center = (target[0] + target[2]) / 2
 raw = bytearray(neutral_bytes)
 registration = []
-for i, (im, box, body) in enumerate(zip(cells, boxes, body_boxes)):
+for i, (im, box, body) in enumerate(zip(render_cells, boxes, body_boxes)):
     sized = im.resize((round(cw * scale), round(ch * scale)), resampling)
     dx = round(target_center - (body[0] + body[2]) / 2 * scale)
     dy = round(target[3] - box[3] * scale)
