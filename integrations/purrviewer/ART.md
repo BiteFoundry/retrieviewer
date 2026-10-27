@@ -310,3 +310,20 @@ Preparation: tools/prepare-motion-repairs.py and tools/rebuild-motion-repairs.mj
 Metadata includes source hashes and registration. Final aesthetic approval is
 separate from pixel-preservation and physical checks. Artwork remains under
 CC BY-SA4.0; raw source sheets are not included in the public package.
+
+## 2026-10-27 habitat contact material
+
+Twelve appended keys use the accepted grayscale cat as generation references.
+All77 preceding reconstructed drawings are unchanged. Wheel preparation uses
+a whole-frame rigid transform to place measured toe proxies on the tread; it
+does not reshape a leg. Four upward-contact poses keep the forepaws planted
+while the hindquarters join the ledge. Magenta registration props are removed
+through their zero green coverage before grayscale packing.
+
+ginger-wheel-contact-v2.png: `e1edc8c9cb11a531118113e1b23edcf97028193386c1be26573a804fb58d423c`.
+
+ginger-tower-low-contact-v2.png: `27db3d2a79d9185c0969b2f0718663a0b55889b291fd44983efcddf311273d20`.
+
+Preparation: tools/prepare-habitat-draft.py, tools/prepare-wheel-contact.py,
+tools/prepare-perch-contact.py, then tools/rebuild-habitat-contact.mjs.
+Code remains MIT and artwork CC BY-SA 4.0. Raw sheets stay local.

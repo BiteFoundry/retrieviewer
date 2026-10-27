@@ -3612,12 +3612,27 @@ function travel(length2, speed, acceleration) {
     return { distance: length2 - DECELERATION * remaining * remaining / 2, speed: DECELERATION * remaining };
   } };
 }
+function wheelTravel(duration, peak) {
+  const ramp = Math.min(2, duration * 0.2), cruise = duration - 2 * ramp;
+  const integral = (u) => u * u * u - u * u * u * u / 2;
+  return { at(t) {
+    if (t < ramp) {
+      const u2 = t / ramp;
+      return { speed: peak * u2 * u2 * (3 - 2 * u2), distance: peak * ramp * integral(u2), stage: "push" };
+    }
+    if (t < ramp + cruise)
+      return { speed: peak, distance: peak * (ramp / 2 + t - ramp), stage: "cruise" };
+    const u = Math.min(1, (t - ramp - cruise) / ramp);
+    return { speed: peak * (1 - u * u * (3 - 2 * u)), distance: peak * (ramp / 2 + cruise + ramp * (u - integral(u))), stage: "brake" };
+  } };
+}
 function createCatMotion(config = {}) {
   options(config);
   let { x = 0, z = 0 } = config;
   point(x, z);
   let y = 0, speed = 0, distance = 0, phase = 0, heading = 0, currentGait = "walk";
   let active = null, pending = null, supportY = 0, beltSpeed = 0, beltDistance = 0, wheelRadius = 0.6, wheelPhase = 0;
+  let wheelGait = "push", wheelGaitPhase = 0, wheelStage = "rest", wheelElapsed = 0;
   function advance(ds) {
     distance += ds;
     phase += ds / CAT_GAITS[currentGait].stride;
@@ -3626,7 +3641,10 @@ function createCatMotion(config = {}) {
     if (command.kind === "wheel") {
       wheelRadius = command.radius;
       wheelPhase = 0;
-      active = { ...command, elapsed: 0, covered: 0 };
+      wheelGaitPhase = 0;
+      wheelGait = "push";
+      wheelElapsed = 0;
+      active = { ...command, elapsed: 0, covered: 0, plan: wheelTravel(command.duration, command.peakSpeed) };
       return;
     }
     const dx = command.x - x, dz2 = command.z - z, length2 = Math.hypot(dx, dz2);
@@ -3658,6 +3676,21 @@ function createCatMotion(config = {}) {
         };
       })() : { plan: travel(length2, CAT_GAITS[currentGait].speed, ACCELERATION[currentGait]) }
     };
+    if (command.kind === "pounce" && command.perch && command.landingY > y) {
+      const anchors = command.perch.anchors, sign = Math.sign(dx) || 1, last = anchors.at(-1), factor = 0.6 / 320;
+      const foreX = command.x + sign * (last.x - 160) * factor;
+      const points = anchors.map((p) => ({ x: foreX - sign * (p.x - 160) * factor, y: command.landingY + (p.y - 290) * factor, z: command.z }));
+      const catchPoint = points[0], apex = Math.max(y, catchPoint.y) + 0.012, vy = Math.sqrt(2 * GRAVITY * (apex - y));
+      const flightTime = (vy + Math.sqrt(2 * GRAVITY * (apex - catchPoint.y))) / GRAVITY;
+      Object.assign(active, {
+        perchData: { points, foreX, landingY: command.landingY },
+        flightTime,
+        pullTime: 0.24,
+        duration: flightTime + 0.24,
+        vy,
+        startY: y
+      });
+    }
     if (command.kind === "pounce")
       speed = length2 / active.duration;
   }
@@ -3716,13 +3749,13 @@ function createCatMotion(config = {}) {
     },
     pounce(targetX, targetZ, config2 = {}) {
       options(config2);
-      const { height = 0.18, landingY = 0 } = config2;
+      const { height = 0.18, landingY = 0, perch = null } = config2;
       point(targetX, targetZ);
       if (!Number.isFinite(height) || height <= 0 || height > 1)
         throw new RangeError("Invalid pounce height");
       if (!Number.isFinite(landingY) || landingY < 0 || landingY > 1)
         throw RangeError("Invalid landing support");
-      request({ kind: "pounce", x: targetX, z: targetZ, height, landingY });
+      request({ kind: "pounce", x: targetX, z: targetZ, height, landingY, perch });
     },
     wheel(config2 = {}) {
       options(config2);
@@ -3746,15 +3779,33 @@ function createCatMotion(config = {}) {
         let covered;
         if (["wheel", "wheel-brake"].includes(a.kind)) {
           if (a.kind === "wheel") {
-            beltSpeed = a.peakSpeed * Math.sin(Math.PI * a.elapsed / duration) ** 2;
-            covered = a.peakSpeed * (a.elapsed / 2 - duration * Math.sin(2 * Math.PI * a.elapsed / duration) / (4 * Math.PI));
+            const state = a.plan.at(a.elapsed);
+            beltSpeed = state.speed;
+            covered = state.distance;
+            wheelStage = state.stage;
           } else {
             beltSpeed = Math.max(0, a.initialSpeed - a.deceleration * a.elapsed);
             covered = a.initialSpeed * a.elapsed - a.deceleration * a.elapsed * a.elapsed / 2;
+            wheelStage = "brake";
           }
           const ds = covered - a.covered;
           beltDistance += ds;
           wheelPhase += ds / a.stride;
+          wheelElapsed += used;
+          const previous = Math.floor(wheelGaitPhase);
+          wheelGaitPhase += ds / a.stride;
+          const boundary = Math.floor(wheelGaitPhase) !== previous;
+          if (wheelGait === "push" && beltSpeed >= 0.16) {
+            wheelGait = "walk";
+            wheelGaitPhase = 0;
+          } else if (boundary && wheelGait === "walk" && beltSpeed >= 0.65) {
+            wheelGait = "run";
+            wheelGaitPhase = Math.floor(wheelGaitPhase);
+          } else if (wheelGait === "run" && wheelStage === "brake" && wheelGaitPhase % 1 < 0.5) {
+            wheelGait = "walk";
+          }
+          if (beltSpeed < 0.1 && wheelStage === "brake")
+            wheelGait = "push";
           a.covered = covered;
           if (done) {
             beltSpeed = 0;
@@ -3769,6 +3820,33 @@ function createCatMotion(config = {}) {
           }
           continue;
         } else if (a.kind === "pounce") {
+          if (a.perchData) {
+            const points = a.perchData.points;
+            if (a.elapsed < a.flightTime) {
+              const u = a.elapsed / a.flightTime;
+              x = a.x + (points[0].x - a.x) * u;
+              z = a.z + (points[0].z - a.z) * u;
+              y = a.startY + a.vy * a.elapsed - GRAVITY * a.elapsed * a.elapsed / 2;
+            } else {
+              const phase2 = Math.min(1, (a.elapsed - a.flightTime) / a.pullTime) * (points.length - 1), i = Math.min(points.length - 2, Math.floor(phase2)), u = phase2 - i;
+              x = points[i].x + (points[i + 1].x - points[i].x) * u;
+              y = points[i].y + (points[i + 1].y - points[i].y) * u;
+              z = a.targetZ;
+            }
+            speed = done ? 0 : Math.hypot(x - a.x, z - a.z) / Math.max(a.elapsed, 0.000000001);
+            if (done) {
+              x = a.targetX;
+              z = a.targetZ;
+              y = supportY = a.targetY;
+              active = null;
+              if (pending) {
+                const command = pending;
+                pending = null;
+                launch(command);
+              }
+            }
+            continue;
+          }
           covered = a.length * (a.elapsed / duration);
           speed = a.length / duration;
           y = a.startY + a.vy * a.elapsed - GRAVITY * a.elapsed * a.elapsed / 2;
@@ -3803,6 +3881,8 @@ function createCatMotion(config = {}) {
       }
     },
     sample() {
+      const climbing = !!active?.perchData && active.elapsed >= active.flightTime;
+      const perchContact = climbing ? { x: active.perchData.foreX, y: active.perchData.landingY, z: active.targetZ } : null;
       return {
         x,
         y,
@@ -3814,13 +3894,20 @@ function createCatMotion(config = {}) {
         moving: active !== null,
         heading,
         supportY,
-        airborne: active?.kind === "pounce",
-        flightProgress: active?.kind === "pounce" ? active.elapsed / active.duration : 0,
+        airborne: active?.kind === "pounce" && !climbing,
+        flightProgress: active?.kind === "pounce" && !climbing ? active.elapsed / (active.flightTime ?? active.duration) : 0,
+        climbing,
+        climbProgress: climbing ? (active.elapsed - active.flightTime) / active.pullTime : 0,
+        perchContact,
         exercising: ["wheel", "wheel-brake"].includes(active?.kind),
         beltSpeed,
         beltDistance,
         wheelPhase,
-        wheelAngle: beltDistance / wheelRadius
+        wheelAngle: beltDistance / wheelRadius,
+        wheelGait,
+        wheelGaitPhase,
+        wheelStage,
+        wheelElapsed
       };
     }
   };
@@ -3865,6 +3952,41 @@ function unprojectCatGround(u, v, { width, height } = {}) {
 }
 
 // integrations/purrviewer/src/habitat.mjs
+function clipWheelPaws(pixels, width, height, p) {
+  const w = CAT_HABITAT.wheel, c3 = Math.cos(Math.PI / 20), s3 = Math.sin(Math.PI / 20);
+  const diagonal3 = 0.0254 * 32, sw = diagonal3 * 16 / Math.hypot(16, 9), sh = diagonal3 * 9 / Math.hypot(16, 9), f = 0.7 * Math.min(width / sw, height / sh);
+  const x0 = Math.max(0, Math.floor(p.x - p.size / 2)), x1 = Math.min(width, Math.ceil(p.x + p.size / 2));
+  for (let v = Math.max(0, Math.floor(p.y - p.size * 0.35));v < Math.min(height, Math.ceil(p.y + p.size * 0.1)); v++) {
+    const q = (height / 2 - v - 0.5) / f, dy2 = (s3 - q * c3) * (w.z - 1.65) / (q * s3 + c3), y = dy2 + 0.45;
+    if (y > 0.18)
+      continue;
+    const depth = -s3 * dy2 - c3 * (w.z - 1.65), radius = Math.sqrt(Math.max(0, w.radius * w.radius - (y - w.radius) ** 2));
+    const left = width / 2 + f * (w.x - radius) / depth, right = width / 2 + f * (w.x + radius) / depth;
+    for (let u = x0;u < x1; u++)
+      if (y < 0 || u + 0.5 < left || u + 0.5 > right) {
+        const at = (v * width + u) * 4;
+        pixels[at] = pixels[at + 1] = pixels[at + 2] = 0;
+      }
+  }
+}
+function paintWheelFront(pixels, width, height) {
+  const w = CAT_HABITAT.wheel;
+  let previous;
+  for (let i = 0;i <= 96; i++) {
+    const angle = Math.PI + i * Math.PI / 96, q = projectCat(w.x + w.radius * Math.cos(angle), w.radius + w.radius * Math.sin(angle), w.z, { width, height });
+    if (previous) {
+      const n = Math.max(1, Math.ceil(Math.hypot(q.x - previous.x, q.y - previous.y)));
+      for (let j = 0;j <= n; j++) {
+        const x = Math.round(previous.x + (q.x - previous.x) * j / n), y = Math.round(previous.y + (q.y - previous.y) * j / n);
+        if (x < 0 || y < 0 || x >= width || y >= height)
+          continue;
+        const at = (y * width + x) * 4;
+        pixels[at] = pixels[at + 1] = pixels[at + 2] = 155;
+      }
+    }
+    previous = q;
+  }
+}
 var CAT_HABITAT = Object.freeze({
   tower: Object.freeze({ x: -0.61, z: -1.9, lowX: -0.43, lowY: 0.21, highX: -0.65, highY: 0.42, approachX: -0.12 }),
   wheel: Object.freeze({ x: 0.57, z: -1.9, radius: 0.42, catX: 0.53, stride: 0.32 })
@@ -4021,8 +4143,8 @@ function createCatLife({ seed = 731 } = {}) {
     if (kind === "wheel")
       return [
         travel2("walk", { kind: "go", x: w.catX, z: w.z, gait: "walk" }),
-        hold("wheel-enter", 0.65),
-        travel2("wheel-run", { kind: "wheel", duration: 10, speed: 2 * 10 * w.stride / 10, radius: w.radius, stride: w.stride }),
+        hold("wheel-enter", 0.35),
+        travel2("wheel-run", { kind: "wheel", duration: 10, speed: 1.2, radius: w.radius, stride: w.stride }),
         hold("wheel-leave", 0.7),
         travel2("walk", { kind: "go", x: w.catX - 0.3, z: w.z + 0.14, gait: "walk" }),
         hold("sit", 3)
@@ -4030,11 +4152,11 @@ function createCatLife({ seed = 731 } = {}) {
     return [
       travel2("walk", { kind: "go", x: t.approachX, z: t.z, gait: "walk" }),
       towerLoad(0.55, -1),
-      travel2("tower-up", { kind: "pounce", x: t.lowX, z: t.z, height: 0.07, landingY: t.lowY }),
-      hold("tower-land", 0.35),
-      towerLoad(0.4, -1),
-      travel2("tower-up", { kind: "pounce", x: t.highX, z: t.z, height: 0.065, landingY: t.highY }),
-      hold("tower-land", 0.35),
+      travel2("tower-up", { kind: "pounce", x: t.lowX, z: t.z, height: 0.07, landingY: t.lowY, perch: true }),
+      hold("tower-settle", 0.18),
+      towerLoad(0.25, -1),
+      travel2("tower-up", { kind: "pounce", x: t.highX, z: t.z, height: 0.065, landingY: t.highY, perch: true }),
+      hold("tower-settle", 0.18),
       hold("sit", 2),
       hold("eye-greeting", 3.4),
       hold("loaf-enter", 0.9),
@@ -4214,7 +4336,7 @@ function createCatLife({ seed = 731 } = {}) {
     }
     if (!settled(sample))
       return null;
-    if (pending && !["land", "tower-land"].includes(phase.clip)) {
+    if (pending && !["land", "tower-land", "tower-settle"].includes(phase.clip)) {
       phase.exitStart ??= phase.progress;
       phase.exitElapsed = (phase.exitElapsed ?? 0) + dt;
       phase.progress = phase.exitStart + (1 - phase.exitStart) * Math.min(1, phase.exitElapsed / 0.2);
@@ -4262,6 +4384,64 @@ function createCatLife({ seed = 731 } = {}) {
 
 // integrations/purrviewer/src/contact.mjs
 var viewport = { width: 320, height: 180 };
+function createWheelContacts(tracks, wheel) {
+  const anchors = new Map;
+  let row = [], pose = 0, current = null;
+  const target = (sample, anchor) => {
+    const a = anchor.angle - (sample.wheelAngle - anchor.startAngle);
+    return { x: wheel.x + wheel.radius * Math.sin(a), y: wheel.radius - wheel.radius * Math.cos(a), z: wheel.z };
+  };
+  return {
+    reset() {
+      anchors.clear();
+      row = [];
+      current = null;
+    },
+    update(sample, clip, progress) {
+      const track = tracks?.[clip];
+      if (!track) {
+        this.reset();
+        return;
+      }
+      if (current !== clip) {
+        anchors.clear();
+        current = clip;
+      }
+      pose = Math.min(track.feet.length - 1, Math.floor(progress * track.feet.length));
+      row = track.feet[pose];
+      const cycle = Math.floor(sample.wheelGaitPhase), active = new Set;
+      for (const foot of row) {
+        if (!foot.stance)
+          continue;
+        active.add(foot.id);
+        const start = track.starts[foot.id][pose], episode = clip + "/" + (cycle - (start > pose ? 1 : 0)) + "/" + start;
+        let anchor = anchors.get(foot.id);
+        if (!anchor || anchor.episode !== episode) {
+          const x = sample.x + (foot.x - 160) * 0.6 / 320;
+          anchor = { episode, angle: Math.asin(Math.max(-0.95, Math.min(0.95, (x - wheel.x) / wheel.radius))), startAngle: sample.wheelAngle };
+          anchors.set(foot.id, anchor);
+        }
+      }
+      for (const id of anchors.keys())
+        if (!active.has(id))
+          anchors.delete(id);
+    },
+    pins(sample) {
+      const p = projectCat(sample.x, sample.y, sample.z, viewport), scale = p.size / 320, pins = [];
+      for (const foot of row) {
+        const anchor = anchors.get(foot.id);
+        if (!foot.stance || !anchor)
+          continue;
+        const world = target(sample, anchor), q = projectCat(world.x, world.y, world.z, viewport);
+        const to = { x: 160 + (q.x - p.x) / scale, y: 290 + (q.y - p.y) / scale };
+        if (Math.hypot(to.x - foot.x, to.y - foot.y) > 5 || Math.abs(to.y - foot.y) > 3)
+          continue;
+        pins.push({ id: foot.id, radius: 24, source: { x: foot.x, y: foot.y }, target: to, world, episode: anchor.episode });
+      }
+      return pins;
+    }
+  };
+}
 function createCatContacts(track) {
   const radii = track.feet.map((row) => row.map((foot) => Math.min(28, ...row.filter((other) => other.id !== foot.id).map((other) => 0.44 * Math.hypot(other.x - foot.x, other.y - foot.y)))));
   const anchors = new Map;
@@ -4365,6 +4545,8 @@ function createCatFromAssets({ seed = 731 } = {}, lease, kernel = null) {
     throw TypeError("Invalid cat seed");
   let asset = lease.data;
   const release = lease.release, motion = createCatMotion(), life = createCatLife({ seed }), contacts = createCatContacts(asset.meta.walk), sourcePoint = { x: 0, y: 0 };
+  const wheelContacts = createWheelContacts(asset.meta.wheel, CAT_HABITAT.wheel);
+  const wheelPose = (s3) => s3.wheelGait === "push" ? { clip: "wheel-push", progress: s3.wheelStage === "brake" ? Math.min(1, s3.beltSpeed / 0.1) : Math.min(1, s3.wheelElapsed / 0.5) } : { clip: s3.wheelGait === "run" ? "wheel-run" : "wheel-walk", progress: (s3.wheelGaitPhase % 1 + 1) % 1 };
   let pixels = null, disposed = false, lastClip = "sit", lastFrame = null, prep = null, view = "front", mirror = false, standing = false, settle = null, lastMoving = false, lastLifeClip = "sit", lastPaintKey = "", lastText = "", rasterizations = 0, heldHits = 0;
   const alive = () => {
     if (disposed)
@@ -4374,7 +4556,7 @@ function createCatFromAssets({ seed = 731 } = {}, lease, kernel = null) {
     if (command.kind === "go")
       motion.go(command.x, command.z, { gait: command.gait });
     else if (command.kind === "pounce")
-      motion.pounce(command.x, command.z, { height: command.height, landingY: command.landingY ?? 0 });
+      motion.pounce(command.x, command.z, { height: command.height, landingY: command.landingY ?? 0, perch: command.perch ? asset.meta.perch : null });
     else if (command.kind === "wheel") {
       view = "side";
       mirror = false;
@@ -4461,7 +4643,7 @@ function createCatFromAssets({ seed = 731 } = {}, lease, kernel = null) {
             prepare("front", false, { seated: true });
           if (["tower-load", "crouch", "wheel-enter"].includes(clip))
             prepare("side", clip === "tower-load" ? report.facing < 0 : clip === "wheel-enter" ? false : mirror);
-          if (["tower-land", "wheel-leave"].includes(clip)) {
+          if (["tower-land", "tower-settle", "wheel-leave"].includes(clip)) {
             view = "side";
             standing = true;
             settle = null;
@@ -4491,10 +4673,15 @@ function createCatFromAssets({ seed = 731 } = {}, lease, kernel = null) {
         if (!s3.moving && !prep && quiet && standing)
           prepare("front", false, { seated: true });
         lastMoving = s3.moving;
-        if (s3.moving && !s3.airborne && !s3.exercising && s3.supportY === 0 && !prep && view === "side")
+        if (s3.moving && !s3.airborne && !s3.climbing && !s3.exercising && s3.supportY === 0 && !prep && view === "side")
           contacts.update(s3, mirror);
         else
           contacts.reset();
+        if (s3.exercising && !prep) {
+          const pose = wheelPose(s3);
+          wheelContacts.update(s3, pose.clip, pose.progress);
+        } else
+          wheelContacts.reset();
       }
     },
     frame({ columns = 160, rows = 72 } = {}) {
@@ -4514,12 +4701,20 @@ function createCatFromAssets({ seed = 731 } = {}, lease, kernel = null) {
         progress = (s3.phase % 1 + 1) % 1;
       }
       if (s3.airborne) {
-        clip = r.clip === "tower-up" ? "tower-flight" : r.clip === "tower-down" ? "tower-fall" : "pounce";
+        clip = r.clip === "tower-up" ? "tower-rise" : r.clip === "tower-down" ? "tower-fall" : "pounce";
         progress = s3.flightProgress;
       }
-      if (s3.exercising || r.clip === "wheel-run") {
-        clip = "wheel-run";
-        progress = (s3.wheelPhase % 1 + 1) % 1;
+      if (s3.climbing) {
+        clip = "tower-pull";
+        progress = s3.climbProgress;
+      }
+      if (s3.exercising) {
+        const pose = wheelPose(s3);
+        clip = pose.clip;
+        progress = pose.progress;
+      } else if (r.clip === "wheel-run") {
+        clip = "wheel-push";
+        progress = 0;
       }
       if (!s3.moving && ["walk", "creep"].includes(clip)) {
         clip = view === "rear" ? "stand-rear" : view === "front" ? "rise-front" : "stand";
@@ -4548,11 +4743,17 @@ function createCatFromAssets({ seed = 731 } = {}, lease, kernel = null) {
         keys = [Math.floor(t) % 23 === 17 ? asset.meta.clips.sleep[3] : phase > 1.4 && phase < 3.5 ? asset.meta.clips.sleep[1] : asset.meta.clips.sleep[0]];
         progress = 0;
       }
-      const pins = clip === "walk" ? contacts.pins(s3) : [];
+      const pins = clip === "walk" ? contacts.pins(s3) : clip.startsWith("wheel-") ? wheelContacts.pins(s3) : [];
       const key = keys[Math.min(keys.length - 1, Math.floor(Math.max(0, Math.min(1, progress)) * keys.length))];
       const food = r.food ? Math.ceil(r.food.remaining * 16) / 16 : null;
       const wheelAngle = Math.round(s3.wheelAngle * 120) / 120;
-      const p = projectCat(s3.x, s3.y, s3.z, { width, height, canvasMeters: 0.6 }), paintKey = [width, height, key, mirror, p.x, p.y, p.size, food, r.mat, wheelAngle].join("/");
+      const p = projectCat(s3.x, s3.y, s3.z, { width, height, canvasMeters: 0.6 });
+      if (s3.climbing) {
+        const anchor = asset.meta.perch.anchors[keys.indexOf(key)], q = projectCat(s3.perchContact.x, s3.perchContact.y, s3.perchContact.z, { width, height });
+        p.x = q.x - (mirror ? -1 : 1) * (anchor.x - 160) * p.size / 320;
+        p.y = q.y - (anchor.y - 290) * p.size / 320;
+      }
+      const paintKey = [width, height, key, mirror, p.x, p.y, p.size, food, r.mat, wheelAngle].join("/");
       const dish = p && food !== null ? {
         x: p.x + p.size * (269 / 320 - 0.5),
         y: p.y + p.size * (288 - 290) / 320,
@@ -4623,7 +4824,12 @@ function createCatFromAssets({ seed = 731 } = {}, lease, kernel = null) {
             }
         }
       }
+      const onWheel = clip.startsWith("wheel-") && Math.abs(s3.x - CAT_HABITAT.wheel.catX) < 0.02;
+      if (onWheel)
+        clipWheelPaws(pixels, width, height, p);
       paintHabitat(pixels, width, height, wheelAngle);
+      if (onWheel)
+        paintWheelFront(pixels, width, height);
       rasterizations++;
       lastPaintKey = paintKey;
       lastText = ((kernel?.braille) ? kernel.braille(pixels, width, height, 1.22, 1.08) : rgbaToBraille2(pixels, width, height, { method: "stable", brightness: 1.22, contrast: 1.08 })).text;
@@ -4653,6 +4859,7 @@ function createCatFromAssets({ seed = 731 } = {}, lease, kernel = null) {
       pixels = null;
       prep = null;
       contacts.reset();
+      wheelContacts.reset();
       asset = null;
       lastText = lastPaintKey = "";
       release();

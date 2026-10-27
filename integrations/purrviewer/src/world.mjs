@@ -37,12 +37,26 @@ function travel(length, speed, acceleration) {
   }};
 }
 
+// Accelerate a loaded tread, hold a cruise, then unload it. Both the rim and
+// paws consume this exact distance integral (no second animation clock).
+function wheelTravel(duration,peak){
+  const ramp=Math.min(2,duration*.2),cruise=duration-2*ramp;
+  const integral=u=>u*u*u-u*u*u*u/2;
+  return {at(t){
+    if(t<ramp){const u=t/ramp;return {speed:peak*u*u*(3-2*u),distance:peak*ramp*integral(u),stage:'push'};}
+    if(t<ramp+cruise)return {speed:peak,distance:peak*(ramp/2+t-ramp),stage:'cruise'};
+    const u=Math.min(1,(t-ramp-cruise)/ramp);
+    return {speed:peak*(1-u*u*(3-2*u)),distance:peak*(ramp/2+cruise+ramp*(u-integral(u))),stage:'brake'};
+  }};
+}
+
 export function createCatMotion(config = {}) {
   options(config);
   let {x = 0, z = 0} = config;
   point(x, z);
   let y = 0, speed = 0, distance = 0, phase = 0, heading = 0, currentGait = 'walk';
   let active = null, pending = null, supportY=0, beltSpeed=0, beltDistance=0, wheelRadius=.6,wheelPhase=0;
+  let wheelGait='push',wheelGaitPhase=0,wheelStage='rest',wheelElapsed=0;
 
   function advance(ds) {
     distance += ds;
@@ -50,8 +64,8 @@ export function createCatMotion(config = {}) {
   }
   function launch(command) {
     if(command.kind==='wheel'){
-      wheelRadius=command.radius;wheelPhase=0;
-      active={...command,elapsed:0,covered:0};return;
+      wheelRadius=command.radius;wheelPhase=0;wheelGaitPhase=0;wheelGait='push';wheelElapsed=0;
+      active={...command,elapsed:0,covered:0,plan:wheelTravel(command.duration,command.peakSpeed)};return;
     }
     const dx = command.x - x, dz = command.z - z, length = Math.hypot(dx, dz);
     if (command.kind === 'go') currentGait = command.gait;
@@ -68,6 +82,15 @@ export function createCatMotion(config = {}) {
               duration:(vy+Math.sqrt(2*GRAVITY*(apex-command.landingY)))/GRAVITY};})()
         : {plan: travel(length, CAT_GAITS[currentGait].speed, ACCELERATION[currentGait])}),
     };
+    if(command.kind==='pounce'&&command.perch&&command.landingY>y){
+      const anchors=command.perch.anchors,sign=Math.sign(dx)||1,last=anchors.at(-1),factor=.6/320;
+      const foreX=command.x+sign*(last.x-160)*factor;
+      const points=anchors.map(p=>({x:foreX-sign*(p.x-160)*factor,y:command.landingY+(p.y-290)*factor,z:command.z}));
+      const catchPoint=points[0],apex=Math.max(y,catchPoint.y)+.012,vy=Math.sqrt(2*GRAVITY*(apex-y));
+      const flightTime=(vy+Math.sqrt(2*GRAVITY*(apex-catchPoint.y)))/GRAVITY;
+      Object.assign(active,{perchData:{points,foreX,landingY:command.landingY},flightTime,
+        pullTime:.24,duration:flightTime+.24,vy,startY:y});
+    }
     if (command.kind === 'pounce') speed = length / active.duration;
   }
   function brake() {
@@ -110,11 +133,11 @@ export function createCatMotion(config = {}) {
     },
     pounce(targetX, targetZ, config = {}) {
       options(config);
-      const {height = .18,landingY=0} = config;
+      const {height = .18,landingY=0,perch=null} = config;
       point(targetX, targetZ);
       if (!Number.isFinite(height) || height <= 0 || height > 1) throw new RangeError('Invalid pounce height');
       if(!Number.isFinite(landingY)||landingY<0||landingY>1)throw RangeError('Invalid landing support');
-      request({kind: 'pounce', x: targetX, z: targetZ, height,landingY});
+      request({kind: 'pounce', x: targetX, z: targetZ, height,landingY,perch});
     },
     wheel(config={}){
       options(config);const {duration=10,speed=.65,radius=.6,stride=.32}=config;
@@ -135,17 +158,37 @@ export function createCatMotion(config = {}) {
         let covered;
         if(['wheel','wheel-brake'].includes(a.kind)){
           if(a.kind==='wheel'){
-            beltSpeed=a.peakSpeed*Math.sin(Math.PI*a.elapsed/duration)**2;
-            covered=a.peakSpeed*(a.elapsed/2-duration*Math.sin(2*Math.PI*a.elapsed/duration)/(4*Math.PI));
+            const state=a.plan.at(a.elapsed);beltSpeed=state.speed;covered=state.distance;wheelStage=state.stage;
           }else{
             beltSpeed=Math.max(0,a.initialSpeed-a.deceleration*a.elapsed);
-            covered=a.initialSpeed*a.elapsed-a.deceleration*a.elapsed*a.elapsed/2;
+            covered=a.initialSpeed*a.elapsed-a.deceleration*a.elapsed*a.elapsed/2;wheelStage='brake';
           }
-          const ds=covered-a.covered;beltDistance+=ds;wheelPhase+=ds/a.stride;a.covered=covered;
+          const ds=covered-a.covered;beltDistance+=ds;wheelPhase+=ds/a.stride;wheelElapsed+=used;
+          const previous=Math.floor(wheelGaitPhase);
+          wheelGaitPhase+=ds/a.stride;
+          const boundary=Math.floor(wheelGaitPhase)!==previous;
+          if(wheelGait==='push'&&beltSpeed>=.16){wheelGait='walk';wheelGaitPhase=0;}
+          else if(boundary&&wheelGait==='walk'&&beltSpeed>=.65){wheelGait='run';wheelGaitPhase=Math.floor(wheelGaitPhase);}
+          else if(wheelGait==='run'&&wheelStage==='brake'&&wheelGaitPhase%1<.5){wheelGait='walk';}
+          if(beltSpeed<.1&&wheelStage==='brake')wheelGait='push';
+          a.covered=covered;
           if(done){beltSpeed=0;if(Math.abs(wheelPhase-Math.round(wheelPhase))<1e-9)wheelPhase=Math.round(wheelPhase);
             active=null;if(pending){const command=pending;pending=null;launch(command);}}
           continue;
         }else if (a.kind === 'pounce') {
+          if(a.perchData){
+            const points=a.perchData.points;
+            if(a.elapsed<a.flightTime){const u=a.elapsed/a.flightTime;
+              x=a.x+(points[0].x-a.x)*u;z=a.z+(points[0].z-a.z)*u;
+              y=a.startY+a.vy*a.elapsed-GRAVITY*a.elapsed*a.elapsed/2;
+            }else{
+              const phase=Math.min(1,(a.elapsed-a.flightTime)/a.pullTime)*(points.length-1),i=Math.min(points.length-2,Math.floor(phase)),u=phase-i;
+              x=points[i].x+(points[i+1].x-points[i].x)*u;y=points[i].y+(points[i+1].y-points[i].y)*u;z=a.targetZ;
+            }
+            speed=done?0:Math.hypot(x-a.x,z-a.z)/Math.max(a.elapsed,1e-9);
+            if(done){x=a.targetX;z=a.targetZ;y=supportY=a.targetY;active=null;if(pending){const command=pending;pending=null;launch(command);}}
+            continue;
+          }
           covered = a.length * (a.elapsed / duration);
           speed = a.length / duration;
           y = a.startY+a.vy*a.elapsed-GRAVITY*a.elapsed*a.elapsed/2;
@@ -177,9 +220,13 @@ export function createCatMotion(config = {}) {
       }
     },
     sample() {
+      const climbing=!!active?.perchData&&active.elapsed>=active.flightTime;
+      const perchContact=climbing?{x:active.perchData.foreX,y:active.perchData.landingY,z:active.targetZ}:null;
       return {x, y, z, speed, distance, phase, gait: currentGait, moving: active !== null, heading,
-        supportY,airborne:active?.kind==='pounce',flightProgress:active?.kind==='pounce'?active.elapsed/active.duration:0,
-        exercising:['wheel','wheel-brake'].includes(active?.kind),beltSpeed,beltDistance,wheelPhase,wheelAngle:beltDistance/wheelRadius};
+        supportY,airborne:active?.kind==='pounce'&&!climbing,flightProgress:active?.kind==='pounce'&&!climbing?active.elapsed/(active.flightTime??active.duration):0,
+        climbing,climbProgress:climbing?(active.elapsed-active.flightTime)/active.pullTime:0,perchContact,
+        exercising:['wheel','wheel-brake'].includes(active?.kind),beltSpeed,beltDistance,wheelPhase,wheelAngle:beltDistance/wheelRadius,
+        wheelGait,wheelGaitPhase,wheelStage,wheelElapsed};
     },
   };
 }

@@ -81,12 +81,12 @@ export function createCatLife({seed = 731} = {}) {
     habitatAfter=clock+range(160,260);
     const t=CAT_HABITAT.tower,w=CAT_HABITAT.wheel;
     if(kind==='wheel')return [travel('walk',{kind:'go',x:w.catX,z:w.z,gait:'walk'}),
-      hold('wheel-enter',.65),travel('wheel-run',{kind:'wheel',duration:10,speed:2*10*w.stride/10,radius:w.radius,stride:w.stride}),
+      hold('wheel-enter',.35),travel('wheel-run',{kind:'wheel',duration:10,speed:1.2,radius:w.radius,stride:w.stride}),
       hold('wheel-leave',.7),travel('walk',{kind:'go',x:w.catX-.3,z:w.z+.14,gait:'walk'}),hold('sit',3)];
     return [travel('walk',{kind:'go',x:t.approachX,z:t.z,gait:'walk'}),towerLoad(.55,-1),
-      travel('tower-up',{kind:'pounce',x:t.lowX,z:t.z,height:.07,landingY:t.lowY}),hold('tower-land',.35),
-      towerLoad(.4,-1),travel('tower-up',{kind:'pounce',x:t.highX,z:t.z,height:.065,landingY:t.highY}),
-      hold('tower-land',.35),hold('sit',2),hold('eye-greeting',3.4),hold('loaf-enter',.9),
+      travel('tower-up',{kind:'pounce',x:t.lowX,z:t.z,height:.07,landingY:t.lowY,perch:true}),hold('tower-settle',.18),
+      towerLoad(.25,-1),travel('tower-up',{kind:'pounce',x:t.highX,z:t.z,height:.065,landingY:t.highY,perch:true}),
+      hold('tower-settle',.18),hold('sit',2),hold('eye-greeting',3.4),hold('loaf-enter',.9),
       hold('loaf-rest',range(15,25)),hold('loaf-leave',.9),towerLoad(.4,1),
       travel('tower-down',{kind:'pounce',x:t.lowX,z:t.z,height:.04,landingY:t.lowY}),hold('tower-land',.35),
       ...descent({supportY:t.lowY})];
@@ -241,7 +241,7 @@ export function createCatLife({seed = 731} = {}) {
     if (!settled(sample)) return null;
     // Complete source endpoints before changing pose. Quiet holds yield in .2s;
     // landing retains its authored recovery duration. No per-behavior timer.
-    if (pending && !['land','tower-land'].includes(phase.clip)) {
+    if (pending && !['land','tower-land','tower-settle'].includes(phase.clip)) {
       phase.exitStart ??= phase.progress;
       phase.exitElapsed = (phase.exitElapsed ?? 0) + dt;
       phase.progress = phase.exitStart + (1 - phase.exitStart) * Math.min(1, phase.exitElapsed / .2);

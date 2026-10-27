@@ -181,6 +181,13 @@ the complete package is **not MIT-only**.
 The puppy artwork was developed with AI-generated imagery and programmatic pose,
 grounding and frame processing.
 
+## 0.0.23
+
+The cat starts the wheel on supported paws, builds into a gallop, then walks it
+down. Curved tread contacts keep its paws inside the rim. Tower ascents plant
+the front paws before bringing up the hindquarters; the descent stays intact.
+Twelve drawings are added, preserving the previous 77 and the two-frame cache.
+
 ## 0.0.22
 
 Dog turns now connect through grounded whole-body steps, with aligned paws and

@@ -1,6 +1,32 @@
 // Small code-native furniture shares the cat's meter space and fixed camera.
 // No textures, canvas, retained bitmap or per-object simulation/timer.
 import {projectCat} from './world.mjs';
+
+// Invert the fixed camera on the wheel's vertical plane once per raster row.
+// The lower tread is a contact boundary; only toe-height pixels are clipped.
+export function clipWheelPaws(pixels,width,height,p){
+ const w=CAT_HABITAT.wheel,c=Math.cos(Math.PI/20),s=Math.sin(Math.PI/20);
+ const diagonal=.0254*32,sw=diagonal*16/Math.hypot(16,9),sh=diagonal*9/Math.hypot(16,9),f=.70*Math.min(width/sw,height/sh);
+ const x0=Math.max(0,Math.floor(p.x-p.size/2)),x1=Math.min(width,Math.ceil(p.x+p.size/2));
+ for(let v=Math.max(0,Math.floor(p.y-p.size*.35));v<Math.min(height,Math.ceil(p.y+p.size*.1));v++){
+  const q=(height/2-v-.5)/f,dy=(s-q*c)*(w.z-1.65)/(q*s+c),y=dy+.45;
+  if(y>.18)continue;
+  const depth=-s*dy-c*(w.z-1.65),radius=Math.sqrt(Math.max(0,w.radius*w.radius-(y-w.radius)**2));
+  const left=width/2+f*(w.x-radius)/depth,right=width/2+f*(w.x+radius)/depth;
+  for(let u=x0;u<x1;u++)if(y<0||u+.5<left||u+.5>right){const at=(v*width+u)*4;pixels[at]=pixels[at+1]=pixels[at+2]=0;}
+ }
+}
+
+export function paintWheelFront(pixels,width,height){
+ const w=CAT_HABITAT.wheel;let previous;
+ for(let i=0;i<=96;i++){
+  const angle=Math.PI+i*Math.PI/96,q=projectCat(w.x+w.radius*Math.cos(angle),w.radius+w.radius*Math.sin(angle),w.z,{width,height});
+  if(previous){const n=Math.max(1,Math.ceil(Math.hypot(q.x-previous.x,q.y-previous.y)));for(let j=0;j<=n;j++){
+   const x=Math.round(previous.x+(q.x-previous.x)*j/n),y=Math.round(previous.y+(q.y-previous.y)*j/n);if(x<0||y<0||x>=width||y>=height)continue;
+   const at=(y*width+x)*4;pixels[at]=pixels[at+1]=pixels[at+2]=155;
+  }}previous=q;
+ }
+}
 export const CAT_HABITAT=Object.freeze({
  tower:Object.freeze({x:-.61,z:-1.9,lowX:-.43,lowY:.21,highX:-.65,highY:.42,approachX:-.12}),
  wheel:Object.freeze({x:.57,z:-1.9,radius:.42,catX:.53,stride:.32})

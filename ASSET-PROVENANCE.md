@@ -152,3 +152,12 @@ whole-body source keys were registered at one scale and translated to the
 existing floor/root; the input sheet SHA-256 is
 `bf0c10dc568c7ba0026c781bbae182d3e5142772c23641d24bbc6e5b837b2312`.
 All other decoded frames remain exact. The sheet is excluded from npm.
+
+## Cat habitat contact repair (2026-10-27)
+
+The owner accepted the revised wheel and upward tower motion and authorized
+npm/website publication. Twelve appended keys extend the existing CC BY-SA4.0
+cat artwork; all77 previous decoded drawings remain exact. The inputs are the
+accepted cat drawings, with no new photographic references. The shipped cat
+ART.md records both generated source hashes and offline registration. Source
+sheets and unused generation candidates remain outside the package and site.

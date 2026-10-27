@@ -1,3 +1,23 @@
+# Retrieviewer 0.0.23 release process
+
+Current target: `@bitefoundry/retrieviewer@0.0.23`, public `latest`.
+The owner accepted the cat wheel/tower candidate and requested npm and website
+release. Ship supported wheel startup/walk/gallop/braking, circular tread
+contacts and the foreground rim, plus forepaw-supported tower ascents.
+The 89-key cat atlas preserves all77 earlier drawings. Downward jumps, dog
+artwork and the two-frame reconstruction cache stay intact. Reviewed cat source:
+`27337abb29b58f16c604ae188f61f98c1bf43974`.
+
+Run the suite and release/package checks, install and compare the exact tarball,
+and exercise the installed Windows adapter. Push and wait for Windows/Linux CI,
+publish that artifact, then verify registry integrity and a fresh consumer.
+Deploy the matching bilingual website and verify its pinned cat runtime/art.
+Code remains MIT; both pets' artwork is CC BY-SA4.0. Existing RAM measurements
+keep their version and test scope; this release adds about93KiB to each cat art
+encoding while retaining two decoded frames. Raw source sheets stay local.
+
+## Previous 0.0.22 scope (historical)
+
 # Retrieviewer 0.0.22 release process
 
 Current target: `@bitefoundry/retrieviewer@0.0.22`, public `latest`.

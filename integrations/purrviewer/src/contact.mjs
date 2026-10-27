@@ -3,6 +3,41 @@
 // is retained at vendor/retrieviewer/LICENSE-CODE. No dog dimensions/art used.
 import {projectCat,unprojectCatGround} from './world.mjs';
 const viewport={width:320,height:180};
+
+// Wheel anchors are material points on the moving tread, not world-ground pins.
+// Source coordinates are offline paw proxies on the registered whole-body keys.
+export function createWheelContacts(tracks,wheel){
+ const anchors=new Map();let row=[],pose=0,current=null;
+ const target=(sample,anchor)=>{const a=anchor.angle-(sample.wheelAngle-anchor.startAngle);
+  return {x:wheel.x+wheel.radius*Math.sin(a),y:wheel.radius-wheel.radius*Math.cos(a),z:wheel.z};};
+ return {
+  reset(){anchors.clear();row=[];current=null;},
+  update(sample,clip,progress){
+   const track=tracks?.[clip];if(!track){this.reset();return;}
+   if(current!==clip){anchors.clear();current=clip;}
+   pose=Math.min(track.feet.length-1,Math.floor(progress*track.feet.length));row=track.feet[pose];
+   const cycle=Math.floor(sample.wheelGaitPhase),active=new Set();
+   for(const foot of row){if(!foot.stance)continue;active.add(foot.id);
+    const start=track.starts[foot.id][pose],episode=clip+'/'+(cycle-(start>pose?1:0))+'/'+start;
+    let anchor=anchors.get(foot.id);
+    if(!anchor||anchor.episode!==episode){
+     const x=sample.x+(foot.x-160)*.6/320;
+     anchor={episode,angle:Math.asin(Math.max(-.95,Math.min(.95,(x-wheel.x)/wheel.radius))),startAngle:sample.wheelAngle};anchors.set(foot.id,anchor);
+    }
+   }
+   for(const id of anchors.keys())if(!active.has(id))anchors.delete(id);
+  },
+  pins(sample){
+   const p=projectCat(sample.x,sample.y,sample.z,viewport),scale=p.size/320,pins=[];
+   for(const foot of row){const anchor=anchors.get(foot.id);if(!foot.stance||!anchor)continue;
+    const world=target(sample,anchor),q=projectCat(world.x,world.y,world.z,viewport);
+    const to={x:160+(q.x-p.x)/scale,y:290+(q.y-p.y)/scale};
+    if(Math.hypot(to.x-foot.x,to.y-foot.y)>5||Math.abs(to.y-foot.y)>3)continue;
+    pins.push({id:foot.id,radius:24,source:{x:foot.x,y:foot.y},target:to,world,episode:anchor.episode});
+   }return pins;
+  }
+ };
+}
 export function createCatContacts(track){
  // Disjoint ownership disks include swing paws, so a planted toe cannot pull
  // its neighbour. Bake their sizes once from this immutable source schedule.
